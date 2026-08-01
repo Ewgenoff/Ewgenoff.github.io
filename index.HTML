@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Главная</title>
+    <style>
+        :root {
+            /* Светлая тема (по умолчанию) */
+            --bg-color: #F2F2F7;
+            --gradient-tl: radial-gradient(at 0% 0%, rgba(0, 122, 255, 0.05) 0px, transparent 50%);
+            --gradient-br: radial-gradient(at 100% 100%, rgba(255, 45, 85, 0.04) 0px, transparent 50%);
+            
+            --text-primary: #1C1C1E;
+            --text-secondary: #8E8E93;
+            
+            --card-bg-glass: rgba(255, 255, 255, 0.75);
+            --card-active-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(255, 255, 255, 0.8);
+            
+            --color-default: #007AFF;
+            --ios-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            --ios-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            
+            --radius-card: 12px;
+            --radius-control: 10px;
+        }
+
+        /* Тёмная тема */
+        [data-theme="dark"] {
+            --bg-color: #000000;
+            --gradient-tl: radial-gradient(at 0% 0%, rgba(10, 132, 255, 0.12) 0px, transparent 50%);
+            --gradient-br: radial-gradient(at 100% 100%, rgba(255, 55, 95, 0.08) 0px, transparent 50%);
+            
+            --text-primary: #F2F2F7;
+            --text-secondary: #98989D;
+            
+            --card-bg-glass: rgba(28, 28, 30, 0.75);
+            --card-active-bg: rgba(44, 44, 46, 0.85);
+            --card-border: rgba(255, 255, 255, 0.12);
+            
+            --ios-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Автоматическое переключение темы по системным настройкам */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme="light"]) {
+                --bg-color: #000000;
+                --gradient-tl: radial-gradient(at 0% 0%, rgba(10, 132, 255, 0.12) 0px, transparent 50%);
+                --gradient-br: radial-gradient(at 100% 100%, rgba(255, 55, 95, 0.08) 0px, transparent 50%);
+                
+                --text-primary: #F2F2F7;
+                --text-secondary: #98989D;
+                
+                --card-bg-glass: rgba(28, 28, 30, 0.75);
+                --card-active-bg: rgba(44, 44, 46, 0.85);
+                --card-border: rgba(255, 255, 255, 0.12);
+                
+                --ios-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--ios-font);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: var(--gradient-tl), var(--gradient-br);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 32px 16px 20px 16px;
+        }
+
+        .main-container {
+            width: 100%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Шапка */
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.4px;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+        }
+
+        /* Плашки даты и времени */
+        .datetime-chips {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .chip {
+            background: var(--card-bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-control);
+            padding: 8px 14px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            box-shadow: var(--ios-shadow);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chip-time {
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+        }
+
+        /* Список карточек-кнопок */
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        /* Карточка-кнопка с эффектом стекла */
+        .card {
+            background: var(--card-bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-card);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            box-shadow: var(--ios-shadow);
+            transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .card:active {
+            background-color: var(--card-active-bg);
+            transform: scale(0.98);
+        }
+
+        /* Иконка */
+        .row-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: var(--radius-control);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 14px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid var(--card-border);
+        }
+
+        /* Контент и цвет текста */
+        .row-content {
+            flex-grow: 1;
+        }
+
+        .row-content h2 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+            color: var(--color-default);
+        }
+
+        /* Шеврон */
+        .chevron {
+            color: var(--color-default);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-left: 8px;
+            opacity: 0.8;
+        }
+
+        /* Подвал */
+        .footer {
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-top: 24px;
+            font-weight: 400;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- Шапка -->
+        <div class="header">
+            <h1 id="greeting">Добро пожаловать!</h1>
+            
+            <!-- Плашки даты и времени -->
+            <div class="datetime-chips">
+                <div class="chip" id="chip-weekday">...</div>
+                <div class="chip" id="chip-date">...</div>
+                <div class="chip chip-time" id="chip-time">...</div>
+            </div>
+        </div>
+
+        <!-- Кнопки-ссылки -->
+        <div class="list-container">
+            <a href="MyTimeline.html" class="card">
+                <div class="row-icon">⏳</div>
+                <div class="row-content">
+                    <h2>Мой таймлайн</h2>
+                </div>
+                <div class="chevron">›</div>
+            </a>
+
+            <a href="MyFamily.html" class="card">
+                <div class="row-icon">👨‍👩‍👧‍👦</div>
+                <div class="row-content">
+                    <h2>Мои родственники</h2>
+                </div>
+                <div class="chevron">›</div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Подвал -->
+    <div class="footer">
+        Версия 1.0 (by Ewgenoff 31.07.2026)
+    </div>
+
+    <script>
+        function updateWidget() {
+            const now = new Date();
+            const month = now.getMonth(); // 0-11 (Июль = 6)
+            const day = now.getDate();
+            const hours = now.getHours();
+
+            // 1. Проверка Дня рождения (06 июля) и времени суток
+            const greetingEl = document.getElementById('greeting');
+            if (month === 6 && day === 6) {
+                greetingEl.textContent = "С Днем рождения, Евгений!";
+            } else {
+                if (hours >= 4 && hours < 12) {
+                    greetingEl.textContent = "Доброе утро, Евгений!";
+                } else if (hours >= 12 && hours < 17) {
+                    greetingEl.textContent = "Добрый день, Евгений!";
+                } else if (hours >= 17 && hours < 23) {
+                    greetingEl.textContent = "Добрый вечер, Евгений!";
+                } else {
+                    greetingEl.textContent = "Доброй ночи, Евгений!";
+                }
+            }
+
+            // 2. День недели
+            const weekday = now.toLocaleDateString('ru-RU', { weekday: 'long' });
+            document.getElementById('chip-weekday').textContent = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+
+            // 3. Дата
+            const dateStr = now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('chip-date').textContent = dateStr;
+
+            // 4. Время (без буквы "в")
+            const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            document.getElementById('chip-time').textContent = timeStr;
+        }
+
+        updateWidget();
+        setInterval(updateWidget, 1000);
+    </script>
+</body>
+</html>
