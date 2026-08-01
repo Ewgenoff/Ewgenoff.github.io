@@ -72,6 +72,8 @@
             background-color: var(--bg-color);
             background-image: var(--gradient-tl), var(--gradient-br);
             background-attachment: fixed;
+            background-size: cover;
+            background-repeat: no-repeat;
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
@@ -241,12 +243,20 @@
                 </div>
                 <div class="chevron">›</div>
             </a>
+
+            <a href="medications.html" class="card">
+                <div class="row-icon">💊</div>
+                <div class="row-content">
+                    <h2>Лекарства</h2>
+                </div>
+                <div class="chevron">›</div>
+            </a>
         </div>
     </div>
 
     <!-- Подвал -->
     <div class="footer">
-        Версия 1.0 (by Ewgenoff 31.07.2026)
+        Версия 1.1 (by Ewgenoff 1.08.2026)
     </div>
 
     <script>
@@ -256,19 +266,19 @@
             const day = now.getDate();
             const hours = now.getHours();
 
-            // 1. Проверка Дня рождения (06 июля) и времени суток
+            // 1. Проверка Дня рождения (06 июля) и времени суток (без имени)
             const greetingEl = document.getElementById('greeting');
             if (month === 6 && day === 6) {
-                greetingEl.textContent = "С Днем рождения, Евгений!";
+                greetingEl.textContent = "С Днем рождения!";
             } else {
                 if (hours >= 4 && hours < 12) {
-                    greetingEl.textContent = "Доброе утро, Евгений!";
+                    greetingEl.textContent = "Доброе утро!";
                 } else if (hours >= 12 && hours < 17) {
-                    greetingEl.textContent = "Добрый день, Евгений!";
+                    greetingEl.textContent = "Добрый день!";
                 } else if (hours >= 17 && hours < 23) {
-                    greetingEl.textContent = "Добрый вечер, Евгений!";
+                    greetingEl.textContent = "Добрый вечер!";
                 } else {
-                    greetingEl.textContent = "Доброй ночи, Евгений!";
+                    greetingEl.textContent = "Доброй ночи!";
                 }
             }
 
