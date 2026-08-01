@@ -52,7 +52,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 24px 16px 20px 16px;
+            padding: 12px 16px 20px 16px;
         }
 
         .main-container {
@@ -63,26 +63,26 @@
             align-items: center;
         }
 
-        /* Шапка и Статистика */
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
+        /* Закреплённый блок сверху */
+        .sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 100;
             width: 100%;
-        }
-
-        .header h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            letter-spacing: -0.4px;
-            color: var(--text-primary);
+            background: rgba(242, 242, 247, 0.85);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding-top: 12px;
+            padding-bottom: 8px;
             margin-bottom: 8px;
         }
 
+        /* Статистика */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 8px;
-            margin-top: 10px;
+            margin-bottom: 10px;
         }
 
         .stat-badge {
@@ -155,7 +155,6 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            margin-bottom: 16px;
         }
 
         /* Две строки поиска рядом */
@@ -289,6 +288,12 @@
         .med-card.grayed {
             background: var(--color-gray-card);
             opacity: 0.7;
+        }
+
+        /* Зачеркивание лекарства при "нет" в столбце B */
+        .med-card.strikethrough .med-name {
+            text-decoration: line-through;
+            color: var(--text-secondary);
         }
 
         .med-card.expired {
@@ -512,9 +517,9 @@
 <body>
 
     <div class="main-container">
-        <!-- Шапка -->
-        <div class="header">
-            <h1>Аптечка</h1>
+        <!-- Закрепленный верхний блок -->
+        <div class="sticky-top">
+            <!-- Статистика -->
             <div class="stats-grid">
                 <div class="stat-badge" id="btn-stat-valid" onclick="toggleStatFilter('valid')">
                     <span id="stat-valid" class="stat-value text-success">0</span>
@@ -529,33 +534,32 @@
                     <span class="stat-label">≤ 3 мес.</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Поиск и Сортировки -->
-        <div class="controls-container">
-            <!-- Две строки поиска -->
-            <div class="search-row">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="searchNameInput" class="search-input" placeholder="Поиск по названию" oninput="handleSearchInput('searchNameInput', 'clearNameBtn')">
-                    <span id="clearNameBtn" class="clear-icon" onclick="clearSearch('searchNameInput', 'clearNameBtn')">✕</span>
+            <!-- Поиск и Сортировки -->
+            <div class="controls-container">
+                <div class="search-row">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchNameInput" class="search-input" placeholder="Поиск по названию" oninput="handleSearchInput('searchNameInput', 'clearNameBtn')">
+                        <span id="clearNameBtn" class="clear-icon" onclick="clearSearch('searchNameInput', 'clearNameBtn')">✕</span>
+                    </div>
+                    <div class="search-box">
+                        <span class="search-icon">🔎</span>
+                        <input type="text" id="searchGlobalInput" class="search-input" placeholder="Поиск везде" oninput="handleSearchInput('searchGlobalInput', 'clearGlobalBtn')">
+                        <span id="clearGlobalBtn" class="clear-icon" onclick="clearSearch('searchGlobalInput', 'clearGlobalBtn')">✕</span>
+                    </div>
                 </div>
-                <div class="search-box">
-                    <span class="search-icon">🔎</span>
-                    <input type="text" id="searchGlobalInput" class="search-input" placeholder="Поиск везде" oninput="handleSearchInput('searchGlobalInput', 'clearGlobalBtn')">
-                    <span id="clearGlobalBtn" class="clear-icon" onclick="clearSearch('searchGlobalInput', 'clearGlobalBtn')">✕</span>
+                
+                <div class="sort-box">
+                    <span class="sort-label">Сортировка:</span>
+                    <select id="sortSelect" class="sort-select" onchange="onSelectSortChange()">
+                        <option value="name">По названию (А - Я)</option>
+                        <option value="locationFridge">Лежат в холодильнике 🧊</option>
+                        <option value="locationCabinet">Лежат в шкафу &#128452;</option>
+                        <option value="under6">Нельзя детям до 6 лет 👶🚫</option>
+                        <option value="tempCold">Хранение (&lt;24 C) ❄️</option>
+                    </select>
                 </div>
-            </div>
-            
-            <div class="sort-box">
-                <span class="sort-label">Сортировка:</span>
-                <select id="sortSelect" class="sort-select" onchange="onSelectSortChange()">
-                    <option value="name">По названию (А - Я)</option>
-                    <option value="locationFridge">Лежат в холодильнике</option>
-                    <option value="locationCabinet">Лежат в шкафу</option>
-                    <option value="under6">Нельзя детям до 6 лет 👶🚫</option>
-                    <option value="tempCold">Со снежинкой (&lt; 24°C)</option>
-                </select>
             </div>
         </div>
 
@@ -567,7 +571,7 @@
 
     <!-- Подвал -->
     <div class="footer">
-        Версия 2.0 (by Ewgenoff 31.07.2026)
+        Версия 1.0 от 1.08.2026
     </div>
 
     <!-- Модальное окно (iOS Style) -->
@@ -843,14 +847,14 @@
 
             container.innerHTML = filtered.map(item => {
                 let classList = ['med-card'];
-                if (item.isNo) classList.push('grayed');
+                if (item.isNo) classList.push('grayed', 'strikethrough');
                 if (item.isExpired) classList.push('expired');
                 else if (item.isExpiringSoon) classList.push('expiring-soon');
 
-                // Иконка холодильника &#128452; (🗄️)
+                // Иконка холодильника 🧊 и шкафа &#128452;
                 let iconsHtml = '';
-                if (item.isFridge) iconsHtml += '<span title="Холодильник">&#128452;</span>';
-                if (item.isCabinet) iconsHtml += '<span title="Шкаф">🚪</span>';
+                if (item.isFridge) iconsHtml += '<span title="Холодильник">🧊</span>';
+                if (item.isCabinet) iconsHtml += '<span title="Шкаф">&#128452;</span>';
                 if (item.isSnowflake) iconsHtml += '<span title="Хранение ниже 24°C">❄️</span>';
                 if (item.isNoChild) iconsHtml += '<span class="badge-no-child" title="Нельзя детям до 6 лет">👶🚫</span>';
 
@@ -864,7 +868,7 @@
                 }
 
                 return `
-                    <div class="${classList.join(' ')}" ondblclick="openModal(${item.id})">
+                    <div class="${classList.join(' ')}" onclick="openModal(${item.id})">
                         <div class="med-info">
                             <div class="med-name">${escapeHtml(item.name)}</div>
                             ${iconsHtml ? `<div class="med-icons">${iconsHtml}</div>` : ''}
