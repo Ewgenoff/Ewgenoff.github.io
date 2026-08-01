@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карточки Родственников</title>
+    <style>
+        :root {
+            --bg-page: #f2f2f7;
+            --text-main: #1c1c1e;
+            --controls-bg: #ffffff;
+            --input-bg: #f2f2f7;
+            --input-border: #e5e5ea;
+            
+            --bg-male: #e8f2ff;
+            --border-male: rgba(0, 122, 255, 0.35);
+            
+            --bg-female: #ffeef2;
+            --border-female: rgba(255, 45, 85, 0.3);
+            
+            --bg-birthday: #fff9e6;
+            --border-birthday: #ffcc00;
+            --gold-glow: rgba(255, 204, 0, 0.6);
+
+            --card-border-inner: rgba(0, 0, 0, 0.1);
+            --modal-bg: #ffffff;
+            --ios-group-bg: #f2f2f7;
+            --badge-bg: rgba(120, 120, 128, 0.16);
+            --text-sub: #48484a;
+        }
+
+        /* Тёмная тема */
+        body.dark-theme {
+            --bg-page: #000000;
+            --text-main: #f2f2f7;
+            --controls-bg: #1c1c1e;
+            --input-bg: #2c2c2e;
+            --input-border: #3a3a3c;
+
+            --bg-male: #102a45;
+            --border-male: rgba(10, 132, 255, 0.5);
+
+            --bg-female: #3b1722;
+            --border-female: rgba(255, 55, 95, 0.5);
+
+            --bg-birthday: #3a3000;
+            --border-birthday: #ffd60a;
+
+            --card-border-inner: rgba(255, 255, 255, 0.15);
+            --modal-bg: #1c1c1e;
+            --ios-group-bg: #2c2c2e;
+            --badge-bg: rgba(255, 255, 255, 0.2);
+            --text-sub: #aeaeb2;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-page);
+            margin: 0;
+            padding: 0 6px 10px 6px;
+            color: var(--text-main);
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        /* Sticky Control Panel */
+        .controls-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--bg-page);
+            padding: 8px 0;
+        }
+
+        .controls {
+            max-width: 650px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            background: var(--controls-bg);
+            padding: 8px 10px;
+            border-radius: 14px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            flex-wrap: nowrap;
+        }
+
+        /* Search Box with Clear Button */
+        .search-container {
+            position: relative;
+            flex: 1 1 auto;
+            min-width: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            font-family: inherit;
+            font-size: 12px;
+            padding: 6px 24px 6px 8px;
+            border-radius: 8px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            outline: none;
+            color: var(--text-main);
+            text-overflow: ellipsis;
+        }
+
+        .search-input::placeholder {
+            font-style: italic;
+            color: #a0a0a5;
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background: #8e8e93;
+            color: var(--controls-bg);
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            cursor: pointer;
+            user-select: none;
+            line-height: 1;
+            font-weight: bold;
+        }
+
+        .search-input:not(:placeholder-shown) + .clear-btn {
+            display: flex;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            padding: 5px 8px;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            user-select: none;
+            line-height: 1;
+        }
+
+        /* Sort Group iOS Style */
+        .sort-group {
+            display: flex;
+            align-items: center;
+            flex: 0 1 auto;
+            min-width: 0;
+            max-width: 45%;
+        }
+
+        .controls select {
+            width: 100%;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            color: #007aff;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            padding: 6px 6px;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            text-align: center;
+        }
+
+        .controls select option {
+            background: var(--modal-bg);
+            color: #007aff;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 650px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        /* Card Layout */
+        .card {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            border-radius: 12px;
+            border: 1.5px solid;
+            background-color: var(--controls-bg);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+            overflow: hidden;
+            padding: 4px 10px;
+            min-height: 48px;
+            width: 100%;
+            cursor: pointer;
+            transition: border 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+            user-select: none;
+        }
+
+        .card.selected {
+            border: 3px solid #007aff !important;
+            box-shadow: 0 0 8px rgba(0, 122, 255, 0.35) !important;
+        }
+
+        .card.male {
+            background-color: var(--bg-male);
+            border-color: var(--border-male);
+        }
+
+        .card.female {
+            background-color: var(--bg-female);
+            border-color: var(--border-female);
+        }
+
+        .card.is-birthday {
+            background-color: var(--bg-birthday) !important;
+            border-color: var(--border-birthday) !important;
+            animation: pulse-gold 2s infinite alternate;
+        }
+
+        @keyframes pulse-gold {
+            0% { box-shadow: 0 0 4px rgba(255, 204, 0, 0.4); }
+            100% { box-shadow: 0 0 10px rgba(255, 204, 0, 0.85); }
+        }
+
+        .card-section-left {
+            flex: 1.5;
+            min-width: 0;
+            padding-right: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 3px;
+            border-right: 1px solid var(--card-border-inner);
+        }
+
+        .name-row {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            width: 100%;
+            min-width: 0;
+        }
+
+        .person-name {
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 1;
+            color: var(--text-main);
+            text-decoration: none;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .age-badge {
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--text-main);
+            background-color: var(--badge-bg);
+            padding: 1px 5px;
+            border-radius: 6px;
+            white-space: nowrap;
+            flex-shrink: 0;
+            line-height: 1.2;
+        }
+
+        .status-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            border: 1px solid #007aff;
+            color: #007aff;
+            font-size: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 1px 5px;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.85);
+            white-space: nowrap;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        body.dark-theme .status-badge {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .status-badge.status-detail {
+            border-color: rgba(120, 120, 128, 0.4);
+            color: var(--text-sub);
+            background-color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            text-transform: none;
+            cursor: default;
+        }
+
+        body.dark-theme .status-badge.status-detail {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .card-section-middle {
+            flex: 1;
+            min-width: 0;
+            padding: 0 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 2px;
+            border-right: 1px solid var(--card-border-inner);
+            text-align: center;
+        }
+
+        .dob-text {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-main);
+            white-space: nowrap;
+            line-height: 1;
+        }
+
+        .age-text {
+            font-size: 9.5px;
+            font-weight: 500;
+            color: var(--text-sub);
+            white-space: nowrap;
+            line-height: 1;
+        }
+
+        .age-bar-container {
+            width: 100%;
+            max-width: 85px;
+            height: 3px;
+            background-color: var(--card-border-inner);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 2px;
+        }
+
+        .age-bar-fill {
+            height: 100%;
+            background-color: #007aff;
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .card-section-right {
+            flex: 0.5;
+            min-width: 52px;
+            padding-left: 4px;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .zodiac-icon {
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.1s ease;
+        }
+
+        .zodiac-icon:active {
+            transform: scale(1.3);
+        }
+
+        /* Modal Overlays */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 12px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-card {
+            background: var(--modal-bg);
+            color: var(--text-main);
+            padding: 18px 20px;
+            border-radius: 20px;
+            max-width: 290px;
+            width: 85%;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0.88); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* iOS Modal Card for Detailed Info */
+        .ios-modal-card {
+            background: var(--modal-bg);
+            color: var(--text-main);
+            border-radius: 20px;
+            max-width: 440px;
+            width: 92%;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+            animation: popIn 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+            overflow: hidden;
+            cursor: default;
+        }
+
+        .modal-header-ios {
+            position: sticky;
+            top: 0;
+            background: var(--modal-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--card-border-inner);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+        }
+
+        .modal-header-title {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-width: 0;
+            padding-right: 8px;
+        }
+
+        .modal-header-title h2 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            letter-spacing: -0.4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .modal-header-title span {
+            font-size: 11.5px;
+            color: var(--text-sub);
+            font-weight: 500;
+        }
+
+        .ios-close-btn {
+            background: var(--ios-group-bg);
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-sub);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s;
+            flex-shrink: 0;
+        }
+
+        .ios-close-btn:active {
+            background: #d1d1d6;
+        }
+
+        .modal-body-ios {
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .ios-info-group {
+            background: var(--ios-group-bg);
+            border-radius: 12px;
+            padding: 9px 11px;
+        }
+
+        .ios-info-label {
+            font-size: 10.5px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #007aff;
+            letter-spacing: 0.2px;
+            margin-bottom: 2px;
+        }
+
+        .ios-info-value {
+            font-size: 12.5px;
+            color: var(--text-main);
+            line-height: 1.4;
+            font-weight: 400;
+        }
+
+        .ios-list {
+            margin: 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .ios-list li {
+            margin-bottom: 3px;
+        }
+
+        .ios-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 400px) {
+            body { padding: 0 4px 6px 4px; }
+            .card { padding: 4px 6px; min-height: 46px; }
+            .person-name { font-size: 11.5px; }
+            .age-badge { font-size: 9px; padding: 1px 4px; }
+            .status-badge { font-size: 7.5px; padding: 0 4px; }
+            .dob-text { font-size: 10px; }
+            .age-text { font-size: 9px; }
+            .zodiac-icon { font-size: 18px; }
+            .controls { padding: 6px 8px; gap: 4px; }
+            .search-input { font-size: 11.5px; padding: 5px 20px 5px 6px; }
+            .controls select { font-size: 11.5px; padding: 5px 4px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Fixed/Sticky Control Panel -->
+    <div class="controls-wrapper">
+        <div class="controls">
+            <!-- Search with Clear Button -->
+            <div class="search-container">
+                <input type="text" id="search-input" class="search-input" placeholder="Поиск..." oninput="renderCards()">
+                <span class="clear-btn" id="clear-btn" onclick="clearSearch()">×</span>
+            </div>
+
+            <!-- Dark/Light Theme Button -->
+            <button class="theme-toggle-btn" id="theme-btn" onclick="toggleTheme()" title="Переключить тему">🌙</button>
+
+            <!-- iOS Style Sort Select -->
+            <div class="sort-group">
+                <select id="sort-select" onchange="renderCards()">
+                    <option value="kinship">Степень родства</option>
+                    <option value="name">По алфавиту</option>
+                    <option value="next_bday">Ближайший ДР</option>
+                    <option value="age_desc">Старше → Младше</option>
+                    <option value="age_asc">Младше → Старше</option>
+                    <option value="zodiac_west">Знак зодиака</option>
+                    <option value="zodiac_east">Восточный знак</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="cards-container"></div>
+
+    <!-- Eastern Zodiac Modal Popup (iOS Style) -->
+    <div class="modal-overlay" id="zodiac-modal" onclick="hideModal()">
+        <div class="ios-modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header-ios">
+                <div class="modal-header-title">
+                    <h2 id="ez-modal-title">Собака 🐕</h2>
+                    <span id="ez-modal-subtitle">11-й знак восточного календаря</span>
+                </div>
+                <button class="ios-close-btn" onclick="hideModal()">✕</button>
+            </div>
+            <div class="modal-body-ios">
+                <div class="ios-info-group">
+                    <div class="ios-info-label">Годы рождения (до 2040 г.)</div>
+                    <div class="ios-info-value" id="ez-modal-years">-</div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">Краткая характеристика</div>
+                    <div class="ios-info-value">
+                        <ul class="ios-list" id="ez-modal-traits"></ul>
+                    </div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">Сильные стороны</div>
+                    <div class="ios-info-value" id="ez-modal-strengths">-</div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">Слабые стороны</div>
+                    <div class="ios-info-value" id="ez-modal-weaknesses">-</div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">Главная ценность</div>
+                    <div class="ios-info-value" id="ez-modal-value">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Western Zodiac Modal Popup (iOS Style) -->
+    <div class="modal-overlay" id="western-zodiac-modal" onclick="hideWesternZodiacModal()">
+        <div class="ios-modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header-ios">
+                <div class="modal-header-title">
+                    <h2 id="wz-modal-title">Рак ♋</h2>
+                    <span id="wz-modal-subtitle">21 июня — 22 июля</span>
+                </div>
+                <button class="ios-close-btn" onclick="hideWesternZodiacModal()">✕</button>
+            </div>
+            <div class="modal-body-ios">
+                <div class="ios-info-group">
+                    <div class="ios-info-label">Общая характеристика</div>
+                    <div class="ios-info-value" id="wz-modal-desc">-</div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">Краткая характеристика</div>
+                    <div class="ios-info-value">
+                        <ul class="ios-list" id="wz-modal-traits"></ul>
+                    </div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">Сильные стороны</div>
+                    <div class="ios-info-value" id="wz-modal-strengths">-</div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">Слабые стороны</div>
+                    <div class="ios-info-value" id="wz-modal-weaknesses">-</div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">Главная ценность</div>
+                    <div class="ios-info-value" id="wz-modal-value">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Popup for Kinship Meaning -->
+    <div class="modal-overlay" id="kinship-modal" onclick="hideKinshipModal()">
+        <div class="modal-card" onclick="event.stopPropagation()">
+            <div class="modal-title" id="kinship-modal-title" style="font-weight: 700; font-size: 15px;">Термин родства</div>
+            <div class="ios-info-value" id="kinship-modal-desc" style="margin-top: 8px; font-size: 13px;"></div>
+        </div>
+    </div>
+
+    <!-- Modal Popup for Name Details (iOS Style) -->
+    <div class="modal-overlay" id="name-modal" onclick="hideNameModal()">
+        <div class="ios-modal-card" onclick="event.stopPropagation()">
+            <div class="modal-header-ios">
+                <div class="modal-header-title">
+                    <h2 id="name-modal-person-name">Имя Фамилия</h2>
+                    <span id="name-modal-subtitle">Имя: Александр</span>
+                </div>
+                <button class="ios-close-btn" onclick="hideNameModal()">✕</button>
+            </div>
+            <div class="modal-body-ios">
+                <div class="ios-info-group">
+                    <div class="ios-info-label">1. Происхождение</div>
+                    <div class="ios-info-value" id="name-origin">-</div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">2. Значение</div>
+                    <div class="ios-info-value" id="name-meaning">-</div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">3. Краткие и ласкательные формы</div>
+                    <div class="ios-info-value" id="name-short-forms">-</div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">4. Иностранные аналоги</div>
+                    <div class="ios-info-value" id="name-foreign-analogs">-</div>
+                </div>
+                <div class="ios-info-group">
+                    <div class="ios-info-label">5. Культурно-исторический контекст</div>
+                    <div class="ios-info-value" id="name-context">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Theme Toggle Functionality
+        function toggleTheme() {
+            document.body.classList.toggle("dark-theme");
+            const btn = document.getElementById("theme-btn");
+            if (document.body.classList.contains("dark-theme")) {
+                btn.innerText = "☀️";
+            } else {
+                btn.innerText = "🌙";
+            }
+        }
+
+        // Search Clear Function
+        function clearSearch() {
+            const searchInput = document.getElementById("search-input");
+            searchInput.value = "";
+            renderCards();
+        }
+
+        // Full Descriptions for Eastern Zodiac Signs
+        const easternZodiacDetails = {
+            "Крыса": {
+                name: "Крыса",
+                emoji: "🐀",
+                subtitle: "Первый знак восточного календаря",
+                years: [1924, 1936, 1948, 1960, 1972, 1984, 1996, 2008, 2020, 2032],
+                traits: [
+                    "🐀 Умный, находчивый и быстро адаптируется к любым условиям.",
+                    "🧠 Обладает аналитическим складом ума и хорошей памятью.",
+                    "💼 Предприимчивый, умеет находить возможности для успеха.",
+                    "🤝 Общительный, легко заводит полезные знакомства.",
+                    "💰 Ценит материальную стабильность и умеет распоряжаться деньгами.",
+                    "🎯 Настойчиво добивается поставленных целей.",
+                    "⚡ Энергичный и деятельный, не любит безделье."
+                ],
+                strengths: "Интеллект, сообразительность, предприимчивость, общительность, практичность.",
+                weaknesses: "Хитрость, расчетливость, тревожность, склонность к манипуляциям.",
+                value: "Успех, безопасность, благополучие и семья."
+            },
+            "Бык": {
+                name: "Бык",
+                emoji: "🐂",
+                subtitle: "Второй знак восточного календаря",
+                years: [1925, 1937, 1949, 1961, 1973, 1985, 1997, 2009, 2021, 2033],
+                traits: [
+                    "🐂 Спокойный, надежный и невероятно трудолюбивый.",
+                    "🛠️ Терпеливо идет к цели, не рассчитывая на удачу.",
+                    "🤝 Верен своим принципам и близким людям.",
+                    "🧠 Практичен, рассудителен и не любит суету.",
+                    "🏡 Предпочитает стабильность и порядок.",
+                    "💪 Отличается большой силой воли и выдержкой.",
+                    "🎯 Всегда доводит начатое до конца."
+                ],
+                strengths: "Трудолюбие, терпение, ответственность, надежность, честность.",
+                weaknesses: "Упрямство, консерватизм, медлительность, неуступчивость.",
+                value: "Стабильность, семья, труд и достаток."
+            },
+            "Тигр": {
+                name: "Тигр",
+                emoji: "🐅",
+                subtitle: "Третий знак восточного календаря",
+                years: [1926, 1938, 1950, 1962, 1974, 1986, 1998, 2010, 2022, 2034],
+                traits: [
+                    "🐅 Смелый, энергичный и независимый.",
+                    "🔥 Любит свободу, движение и новые вызовы.",
+                    "👑 Стремится быть лидером и вдохновлять других.",
+                    "⚡ Быстро принимает решения и любит риск.",
+                    "💪 Уверен в себе и не боится трудностей.",
+                    "🎯 Целеустремленный и амбициозный.",
+                    "🌍 Не терпит ограничений и рутины."
+                ],
+                strengths: "Храбрость, харизма, решительность, лидерство, энергия.",
+                weaknesses: "Импульсивность, вспыльчивость, нетерпеливость, упрямство.",
+                value: "Свобода, победа, признание и самореализация."
+            },
+            "Кролик": {
+                name: "Кролик (Кот)",
+                emoji: "🐇",
+                subtitle: "Четвертый знак восточного календаря",
+                years: [1927, 1939, 1951, 1963, 1975, 1987, 1999, 2011, 2023, 2035],
+                traits: [
+                    "🐇 Добрый, дипломатичный и миролюбивый.",
+                    "🌸 Любит уют, гармонию и спокойствие.",
+                    "🤝 Тактичен, умеет избегать конфликтов.",
+                    "🎨 Обладает хорошим вкусом и творческими способностями.",
+                    "🧠 Рассудительный и осторожный.",
+                    "❤️ Заботится о близких и ценит доверие.",
+                    "🏡 Предпочитает стабильную и комфортную жизнь."
+                ],
+                strengths: "Доброжелательность, дипломатичность, терпение, интеллигентность.",
+                weaknesses: "Нерешительность, осторожность, зависимость от мнения окружающих.",
+                value: "Гармония, семья, уют и душевное спокойствие."
+            },
+            "Дракон": {
+                name: "Дракон",
+                emoji: "🐉",
+                subtitle: "Пятый знак восточного календаря",
+                years: [1928, 1940, 1952, 1964, 1976, 1988, 2000, 2012, 2024, 2036],
+                traits: [
+                    "🐉 Яркий, сильный и харизматичный.",
+                    "👑 Любит быть в центре внимания.",
+                    "🔥 Амбициозный, уверенный и энергичный.",
+                    "🚀 Не боится больших целей и сложных задач.",
+                    "💡 Генерирует новые идеи и вдохновляет окружающих.",
+                    "🎯 Стремится к успеху и признанию.",
+                    "⚡ Обладает сильной внутренней энергией."
+                ],
+                strengths: "Харизма, уверенность, смелость, лидерство, энтузиазм.",
+                weaknesses: "Высокомерие, требовательность, вспыльчивость, нетерпеливость.",
+                value: "Успех, власть, достижения и уважение."
+            },
+            "Змея": {
+                name: "Змея",
+                emoji: "🐍",
+                subtitle: "Шестой знак восточного календаря",
+                years: [1929, 1941, 1953, 1965, 1977, 1989, 2001, 2013, 2025, 2037],
+                traits: [
+                    "🐍 Мудрый, спокойный и наблюдательный.",
+                    "🧠 Любит анализировать и принимать взвешенные решения.",
+                    "📚 Постоянно стремится к знаниям и развитию.",
+                    "🤫 Не раскрывает свои планы раньше времени.",
+                    "💎 Ценит качество, комфорт и красоту.",
+                    "🎯 Терпеливо добивается желаемого.",
+                    "🌙 Обладает развитой интуицией."
+                ],
+                strengths: "Мудрость, терпение, интеллект, интуиция, самообладание.",
+                weaknesses: "Скрытность, подозрительность, ревнивость, замкнутость.",
+                value: "Знания, безопасность, независимость и внутреннее равновесие."
+            },
+            "Лошадь": {
+                name: "Лошадь",
+                emoji: "🐎",
+                subtitle: "Седьмой знак восточного календаря",
+                years: [1930, 1942, 1954, 1966, 1978, 1990, 2002, 2014, 2026, 2038],
+                traits: [
+                    "🐎 Активный, энергичный и свободолюбивый.",
+                    "🌍 Любит путешествия, движение и новые впечатления.",
+                    "🤝 Легко находит общий язык с людьми.",
+                    "⚡ Быстро принимает решения и действует.",
+                    "💪 Самостоятельный и уверенный в себе.",
+                    "🎯 Предпочитает добиваться всего своими силами.",
+                    "🔥 Не любит однообразие и ограничения."
+                ],
+                strengths: "Энергичность, оптимизм, независимость, коммуникабельность.",
+                weaknesses: "Нетерпеливость, импульсивность, непостоянство, прямолинейность.",
+                value: "Свобода, движение, независимость и развитие."
+            },
+            "Коза": {
+                name: "Коза (Овца)",
+                emoji: "🐐",
+                subtitle: "Восьмой знак восточного календаря",
+                years: [1931, 1943, 1955, 1967, 1979, 1991, 2003, 2015, 2027, 2039],
+                traits: [
+                    "🐐 Добрый, мягкий и творческий человек.",
+                    "🎨 Обладает развитым воображением и чувством прекрасного.",
+                    "❤️ Заботливый, отзывчивый и эмоциональный.",
+                    "🌸 Стремится к гармонии и избегает конфликтов.",
+                    "🤝 Ценит дружбу и поддержку близких.",
+                    "🧠 Хорошо чувствует настроение окружающих.",
+                    "🏡 Любит уют и спокойную атмосферу."
+                ],
+                strengths: "Доброта, творчество, эмпатия, отзывчивость, терпение.",
+                weaknesses: "Нерешительность, чувствительность, зависимость от поддержки.",
+                value: "Любовь, гармония, семья и душевный комфорт."
+            },
+            "Обезьяна": {
+                name: "Обезьяна",
+                emoji: "🐒",
+                subtitle: "Девятый знак восточного календаря",
+                years: [1932, 1944, 1956, 1968, 1980, 1992, 2004, 2016, 2028, 2040],
+                traits: [
+                    "🐒 Изобретательный, любознательный и остроумный.",
+                    "🧠 Быстро учится и легко решает сложные задачи.",
+                    "⚡ Находчивый, любит нестандартные решения.",
+                    "🎭 Обладает отличным чувством юмора.",
+                    "🤝 Легко адаптируется к новым условиям.",
+                    "🚀 Любит перемены и интеллектуальные вызовы.",
+                    "🎯 Стремится быть первым во всем."
+                ],
+                strengths: "Интеллект, изобретательность, гибкость, коммуникабельность.",
+                weaknesses: "Хитрость, непостоянство, самоуверенность, склонность к авантюрам.",
+                value: "Знания, успех, свобода и новые возможности."
+            },
+            "Петух": {
+                name: "Петух",
+                emoji: "🐓",
+                subtitle: "Десятый знак восточного календаря",
+                years: [1933, 1945, 1957, 1969, 1981, 1993, 2005, 2017, 2029],
+                traits: [
+                    "🐓 Организованный, честный и дисциплинированный.",
+                    "🎯 Любит порядок, точность и четкие правила.",
+                    "💬 Прямолинейный, открыто выражает свое мнение.",
+                    "✨ Следит за своим внешним видом и репутацией.",
+                    "🧠 Внимателен к деталям и ответственен.",
+                    "💪 Не боится тяжелой работы.",
+                    "🏆 Стремится к признанию своих заслуг."
+                ],
+                strengths: "Ответственность, честность, трудолюбие, организованность.",
+                weaknesses: "Критичность, самоуверенность, резкость, упрямство.",
+                value: "Порядок, уважение, достижения и честность."
+            },
+            "Собака": {
+                name: "Собака",
+                emoji: "🐕",
+                subtitle: "Одиннадцатый знак восточного календаря",
+                years: [1934, 1946, 1958, 1970, 1982, 1994, 2006, 2018, 2030],
+                traits: [
+                    "🐕 Верный, надежный и преданный своим близким.",
+                    "⚖️ Обладает сильным чувством справедливости и не терпит обмана.",
+                    "🤝 Ответственный, честный и всегда готов прийти на помощь.",
+                    "🛡️ Защищает тех, кто ему дорог, и умеет хранить доверие.",
+                    "🧠 Рассудительный, наблюдательный и хорошо разбирается в людях.",
+                    "💬 Прямолинейный, не любит лицемерие и пустые обещания.",
+                    "🌿 Предпочитает стабильность, порядок и спокойную жизнь.",
+                    "🎯 Настойчиво идет к цели и доводит начатое до конца."
+                ],
+                strengths: "Честность, преданность, ответственность, справедливость, надежность, трудолюбие.",
+                weaknesses: "Недоверчивость, упрямство, тревожность, критичность, склонность долго помнить обиды.",
+                value: "Доверие, семья, дружба, справедливость и чувство долга."
+            },
+            "Свинья": {
+                name: "Кабан (Свинья)",
+                emoji: "🐖",
+                subtitle: "Двенадцатый знак восточного календаря",
+                years: [1935, 1947, 1959, 1971, 1983, 1995, 2007, 2019, 2031],
+                traits: [
+                    "🐖 Добрый, искренний и великодушный.",
+                    "❤️ Всегда готов помочь и поддержать близких.",
+                    "🤝 Ценит честность и доверительные отношения.",
+                    "🌿 Любит спокойную, комфортную и обеспеченную жизнь.",
+                    "🧠 Терпеливый, рассудительный и доброжелательный.",
+                    "💼 Добросовестно относится к работе и обязанностям.",
+                    "🎯 Предпочитает мирное решение любых конфликтов."
+                ],
+                strengths: "Доброта, честность, щедрость, терпение, надежность.",
+                weaknesses: "Доверчивость, наивность, медлительность, склонность к излишествам.",
+                value: "Семья, благополучие, честность и душевное спокойствие."
+            }
+        };
+
+        // Full Descriptions for Western Zodiac Signs
+        const westernZodiacDetails = {
+            "Овен": {
+                symbol: "♈",
+                period: "21 марта — 19 апреля",
+                desc: "Овен — огненный знак зодиака, управляемый Марсом.",
+                traits: [
+                    "🔥 Энергичный, смелый и инициативный.",
+                    "🎯 Любит быть первым и принимать вызовы.",
+                    "⚡ Быстро принимает решения и действует.",
+                    "💪 Уверенный в себе, независимый и прямолинейный.",
+                    "🚀 Не боится риска и перемен.",
+                    "😤 Может быть вспыльчивым и нетерпеливым.",
+                    "🏆 Стремится к победам и лидерству.",
+                    "🌟 Заряжает окружающих своей энергией."
+                ],
+                strengths: "Смелость, решительность, честность, инициативность, оптимизм.",
+                weaknesses: "Импульсивность, упрямство, нетерпение, вспыльчивость.",
+                value: "Свобода, достижения и возможность быть лидером."
+            },
+            "Телец": {
+                symbol: "♉",
+                period: "20 апреля — 20 мая",
+                desc: "Телец — земной знак зодиака, управляемый Венерой.",
+                traits: [
+                    "🌿 Спокойный, надежный и практичный.",
+                    "🏡 Любит комфорт, уют и стабильность.",
+                    "💰 Умеет разумно распоряжаться деньгами.",
+                    "🤝 Верный друг и преданный партнер.",
+                    "🍷 Ценит красоту, вкусную еду и удовольствия.",
+                    "🛠 Терпеливо идет к своим целям.",
+                    "🐂 Не любит спешку и перемены.",
+                    "💎 Предпочитает качество количеству."
+                ],
+                strengths: "Надежность, терпение, трудолюбие, ответственность.",
+                weaknesses: "Упрямство, медлительность, ревность, консерватизм.",
+                value: "Стабильность, достаток и спокойная жизнь."
+            },
+            "Близнецы": {
+                symbol: "♊",
+                period: "21 мая — 20 июня",
+                desc: "Близнецы — воздушный знак зодиака, управляемый Меркурием.",
+                traits: [
+                    "🌬 Любознательный, общительный и остроумный.",
+                    "📚 Быстро усваивает новую информацию.",
+                    "🗣 Любит общение и знакомства.",
+                    "💡 Легко адаптируется к изменениям.",
+                    "✈ Предпочитает разнообразие и движение.",
+                    "🎭 Обладает разносторонними интересами.",
+                    "⚡ Быстро принимает решения.",
+                    "🔄 Может часто менять мнение."
+                ],
+                strengths: "Интеллект, коммуникабельность, гибкость, любознательность.",
+                weaknesses: "Непостоянство, рассеянность, поверхностность.",
+                value: "Знания, свобода общения и новые впечатления."
+            },
+            "Рак": {
+                symbol: "♋",
+                period: "21 июня — 22 июля",
+                desc: "Рак — водный знак зодиака, управляемый Луной.",
+                traits: [
+                    "🦀 Эмоциональный, чувствительный и интуитивный.",
+                    "❤️ Высоко ценит семью, дом и близкие отношения.",
+                    "🤝 Заботливый, верный и надежный друг, всегда готов поддержать.",
+                    "🧠 Обладает хорошей памятью и часто живет воспоминаниями.",
+                    "🎨 Имеет развитое воображение и творческие способности.",
+                    "🛡️ Осторожен, не любит рисковать и долго привыкает к новым людям.",
+                    "🌊 Настроение может часто меняться под влиянием эмоций.",
+                    "🎯 Предпочитает стабильность, безопасность и комфорт."
+                ],
+                strengths: "Доброта, преданность, эмпатия, терпение, ответственность.",
+                weaknesses: "Обидчивость, ранимость, скрытность, склонность к переживаниям и излишней осторожности.",
+                value: "Семья, любовь, чувство защищенности и эмоциональная близость."
+            },
+            "Лев": {
+                symbol: "♌",
+                period: "23 июля — 22 августа",
+                desc: "Лев — огненный знак зодиака, управляемый Солнцем.",
+                traits: [
+                    "☀️ Яркий, уверенный и харизматичный.",
+                    "👑 Любит внимание и признание.",
+                    "❤️ Щедрый и великодушный.",
+                    "🎭 Обладает творческими способностями.",
+                    "💪 Умеет вдохновлять окружающих.",
+                    "🦁 Смело берет ответственность.",
+                    "🎯 Стремится к успеху и уважению.",
+                    "✨ Любит роскошь и красивые вещи."
+                ],
+                strengths: "Лидерство, благородство, уверенность, щедрость.",
+                weaknesses: "Гордость, тщеславие, упрямство, желание быть в центре внимания.",
+                value: "Признание, уважение и самореализация."
+            },
+            "Дева": {
+                symbol: "♍",
+                period: "23 августа — 22 сентября",
+                desc: "Дева — земной знак зодиака, управляемый Меркурием.",
+                traits: [
+                    "📖 Внимательная, аккуратная и аналитичная.",
+                    "🔍 Любит порядок и системность.",
+                    "🛠 Практична и трудолюбива.",
+                    "📊 Хорошо замечает детали.",
+                    "🤝 Всегда готова помочь.",
+                    "🧠 Склонна тщательно все анализировать.",
+                    "📅 Предпочитает планирование.",
+                    "🎯 Стремится к совершенству."
+                ],
+                strengths: "Ответственность, дисциплина, аккуратность, логика.",
+                weaknesses: "Критичность, тревожность, перфекционизм.",
+                value: "Порядок, польза и профессионализм."
+            },
+            "Весы": {
+                symbol: "♎",
+                period: "23 сентября — 22 октября",
+                desc: "Весы — воздушный знак зодиака, управляемый Венерой.",
+                traits: [
+                    "⚖ Дипломатичный, доброжелательный и справедливый.",
+                    "🤝 Легко находит общий язык с людьми.",
+                    "🎨 Любит красоту и гармонию.",
+                    "💬 Избегает конфликтов.",
+                    "❤️ Ценит партнерство и дружбу.",
+                    "🧠 Рассматривает ситуацию с разных сторон.",
+                    "😊 Создает приятную атмосферу вокруг себя.",
+                    "🤔 Иногда долго принимает решения."
+                ],
+                strengths: "Дипломатичность, тактичность, чувство справедливости.",
+                weaknesses: "Нерешительность, зависимость от чужого мнения, стремление всем угодить.",
+                value: "Гармония, отношения и справедливость."
+            },
+            "Скорпион": {
+                symbol: "♏",
+                period: "23 октября — 21 ноября",
+                desc: "Скорпион — водный знак зодиака, управляемый Плутоном (традиционно также Марсом).",
+                traits: [
+                    "🌊 Сильный, решительный и проницательный.",
+                    "🧠 Хорошо чувствует мотивы людей.",
+                    "🎯 Всегда идет к своей цели.",
+                    "❤️ Очень предан близким.",
+                    "🔥 Обладает сильной волей.",
+                    "🤫 Предпочитает не раскрывать свои чувства.",
+                    "💪 Не боится трудностей.",
+                    "🔍 Любит докапываться до сути."
+                ],
+                strengths: "Сила воли, преданность, смелость, интуиция.",
+                weaknesses: "Ревнивость, скрытность, мстительность, подозрительность.",
+                value: "Доверие, искренность и внутренняя сила."
+            },
+            "Стрелец": {
+                symbol: "♐",
+                period: "22 ноября — 21 декабря",
+                desc: "Стрелец — огненный знак зодиака, управляемый Юпитером.",
+                traits: [
+                    "🏹 Оптимистичный, честный и свободолюбивый.",
+                    "🌍 Любит путешествия и новые знания.",
+                    "📚 Постоянно стремится к развитию.",
+                    "😄 Легко заводит друзей.",
+                    "🎯 Видит большие перспективы.",
+                    "🚀 Не любит ограничения.",
+                    "💬 Говорит прямо и открыто.",
+                    "✨ Любит приключения."
+                ],
+                strengths: "Оптимизм, честность, энтузиазм, широкий кругозор.",
+                weaknesses: "Прямолинейность, нетерпеливость, непостоянство.",
+                value: "Свобода, развитие и новые горизонты."
+            },
+            "Козерог": {
+                symbol: "♑",
+                period: "22 декабря — 19 января",
+                desc: "Козерог — земной знак зодиака, управляемый Сатурном.",
+                traits: [
+                    "🏔 Целеустремленный, дисциплинированный и ответственный.",
+                    "📈 Последовательно идет к успеху.",
+                    "💼 Любит порядок и четкие планы.",
+                    "🧱 Надежен и выдержан.",
+                    "🎯 Ставит долгосрочные цели.",
+                    "🧠 Предпочитает практичные решения.",
+                    "🤝 Заслуживает доверие.",
+                    "⏳ Терпеливо преодолевает трудности."
+                ],
+                strengths: "Ответственность, упорство, надежность, самообладание.",
+                weaknesses: "Чрезмерная серьезность, замкнутость, консерватизм.",
+                value: "Успех, стабильность и уважение."
+            },
+            "Водолей": {
+                symbol: "♒",
+                period: "20 января — 18 февраля",
+                desc: "Водолей — воздушный знак зодиака, управляемый Ураном (традиционно также Сатурном).",
+                traits: [
+                    "💡 Независимый, оригинальный и изобретательный.",
+                    "🚀 Любит новые идеи и технологии.",
+                    "🌍 Мыслит нестандартно.",
+                    "🤝 Легко находит друзей.",
+                    "🎨 Ценит свободу самовыражения.",
+                    "🔬 Интересуется будущим и открытиями.",
+                    "🧠 Любит интеллектуальные беседы.",
+                    "🕊 Не терпит ограничений."
+                ],
+                strengths: "Оригинальность, независимость, гуманизм, креативность.",
+                weaknesses: "Непредсказуемость, упрямство, эмоциональная отстраненность.",
+                value: "Свобода, прогресс и индивидуальность."
+            },
+            "Рыбы": {
+                symbol: "♓",
+                period: "19 февраля — 20 марта",
+                desc: "Рыбы — водный знак зодиака, управляемый Нептуном (традиционно также Юпитером).",
+                traits: [
+                    "🌊 Добрый, мечтательный и чувствительный.",
+                    "❤️ Легко сопереживает другим людям.",
+                    "🎨 Обладает богатым воображением.",
+                    "🎼 Часто имеет творческие способности.",
+                    "🌙 Доверяет своей интуиции.",
+                    "🤝 Стремится помогать окружающим.",
+                    "🕊 Любит спокойную атмосферу.",
+                    "💭 Иногда уходит в мир фантазий."
+                ],
+                strengths: "Эмпатия, доброта, интуиция, творческое мышление.",
+                weaknesses: "Впечатлительность, нерешительность, склонность идеализировать людей.",
+                value: "Любовь, духовная гармония и внутренний мир."
+            }
+        };
+
+        // Dictionary for Kinship Terms
+        const kinshipDefinitions = {
+            "Деверь": "Деверь — это брат мужа.",
+            "Золовка": "Золовка — это сестра мужа.",
+            "Шурин": "Шурин — это брат жены.",
+            "Свояченица": "Свояченица — это сестра жены.",
+            "Свояк": "Свояк — это муж сестры жены (мужья сестёр между собой).",
+            "Тесть": "Тесть — это отец жены.",
+            "Тёща": "Тёща — это мать жены.",
+            "Свёкор": "Свёкор — это отец мужа.",
+            "Свекровь": "Свекровь — это мать мужа.",
+            "Зять": "Зять — это муж дочери, муж сестры или муж золовки.",
+            "Невестка": "Невестка (сноха) — это жена сына, жена брата или жена деверя.",
+            "Сноха": "Сноха — это жена сына по отношению к его отцу (свекру).",
+            "Сват": "Сват — это отец одного из супругов по отношению к родителям другого супруга.",
+            "Сватья": "Сватья — это мать одного из супругов по отношению к родителям другого супруга.",
+            "Пасынок": "Пасынок — это родной сын одного из супругов по отношению к другому (неродной сын).",
+            "Падчерица": "Падчерица — это родная дочь одного из супругов по отношению к другому (неродная дочь).",
+            "Племянник": "Племянник — это сын брата или сестры.",
+            "Племянница": "Племянница — это дочь брата или сестры.",
+            "Дв. брат": "Двоюродный брат — это сын дяди или тёти.",
+            "Дв. сестра": "Двоюродная сестра — это дочь дяди или тёти.",
+            "Дв. племянник": "Двоюродный племянник — это сын двоюродного брата или сестры.",
+            "Дв. племянница": "Двоюродная племянница — это дочь двоюродного брата или сестры.",
+            "Бывший муж": "Бывший муж — это мужчина, с которым брак расторгнут.",
+            "Бывшая жена": "Бывшая жена — это женщина, с которой брак расторгнут."
+        };
+
+        const nameData = {
+            "Александр": {
+                origin: "Древнегреческое (от Alexandros: alexein — «защищать» + aner/andros — «мужчина / человек»).",
+                meaning: "«Защитник людей», «мужественный защитник».",
+                shortForms: "Саша, Сашенька, Шура, Шурочка, Алекс, Саня.",
+                foreignAnalogs: "Алекс (англ.), Алессандро (ит.), Алехандро (исп.), Искандер (восточные языки).",
+                context: "Одно из самых популярных имён в мировой истории. Ассоциируется с великим полководцем Александром Македонским и святым благоверным князем Александром Невским."
+            },
+            "Анастасия": {
+                origin: "Древнегреческое (от Anastasia).",
+                meaning: "«Воскресшая», «возвращённая к жизни», «бессмертная».",
+                shortForms: "Настя, Настенька, Настюша, Тася, Ася.",
+                foreignAnalogs: "Стейси (англ.), Анастаси (фр.), Настасья (славянские страны).",
+                context: "В русской традиции и фольклоре имя ассоциируется со сказочной Настенькой — символом доброты, скромности и трудолюбия."
+            },
+            "Анна": {
+                origin: "Древнееврейское (от Channah).",
+                meaning: "«Благодать», «благосклонность», «милость Божия».",
+                shortForms: "Аня, Анечка, Анюта, Нюра, Нюша.",
+                foreignAnalogs: "Энн, Анна (англ.), Анн, Аннетт (фр.), Ханна (нем.), Ана (исп.).",
+                context: "Библейское имя (мать Девы Марии). Одно из самых распространенных женских имён в мире, носимое множеством королевских особ и героинь мировой литературы (Анна Каренина)."
+            },
+            "Валерий": {
+                origin: "Латинское (от родового имени Valerius, происходящего от valere — «быть сильным»).",
+                meaning: "«Крепкий», «здоровый», «сильный», «бодрый».",
+                shortForms: "Валера, Валерочка, Валерик, Валера.",
+                foreignAnalogs: "Валери (фр.), Валерио (ит./исп.), Валериус (нем.).",
+                context: "Восходит к древнеримскому патрицианскому роду Валериев. Имеет парное женское имя — Валерия."
+            },
+            "Виктория": {
+                origin: "Латинское (от Victoria).",
+                meaning: "«Победа».",
+                shortForms: "Вика, Викуля, Викуся, Вичка.",
+                foreignAnalogs: "Виктория (англ./нем.), Виктория, Виктуар (фр.), Виттория (ит.).",
+                context: "В римской мифологии — богиня победы (соответствует греческой Нике). Имя обрело колоссальную мировую популярность благодаря эпохе правления британской королевы Виктории."
+            },
+            "Дарья": {
+                origin: "Имеет две версии: древнеперсидская (от царя Dārayavahuš: dāra — «владеющий» + vahu — «добро») и праславянская (от слова Дар / Дарованная).",
+                meaning: "«Обладающая добром», «сильная», «победительница» (по персидской версии) или «дарованная» (по славянской).",
+                shortForms: "Даша, Дашенька, Дашуля, Дарина, Дарьюшка.",
+                foreignAnalogs: "Дарья (чеш./пол.), Дария (рум.), Дариан (англ. версия).",
+                context: "Имя древнего происхождения, ставшее классическим в русской культуре и поэзии."
+            },
+            "Денис": {
+                origin: "Древнегреческое (народная форма от церковного Дионисий, от Dionysios).",
+                meaning: "«Посвящённый Дионису» (богу виноделия, вдохновения и плодородия).",
+                shortForms: "Дэн, Дениска, Деня, Денисонька.",
+                foreignAnalogs: "Деннис (англ.), Дени (фр.), Дионисио (исп./ит.).",
+                context: "Ранее считалось разговорной формой имени Дионисий, но со временем стало самостоятельным и очень популярным светским именем."
+            },
+            "Дмитрий": {
+                origin: "Древнегреческое (от Demetrios).",
+                meaning: "«Посвящённый богине Деметре» (богине земледелия и плодородия), «земледелец».",
+                shortForms: "Дима, Димочка, Митя, Митяй.",
+                foreignAnalogs: "Деметриус (англ.), Димитри (фр.), Деметрио (ит.), Димитар (болг.).",
+                context: "Исторически значимое имя для России, ассоциирующееся с великим князем Дмитрием Донским и святым Дмитрием Солунским."
+            },
+            "Евгений": {
+                origin: "Древнегреческое (от Eugenios: eu — «хороший» + genos — «род»).",
+                meaning: "«Благородный», «высокорождённый», «знатного происхождения».",
+                shortForms: "Женя, Женечка, Жека, Женюра.",
+                foreignAnalogs: "Юджин (англ.), Эжен (фр.), Еугениуш (пол.), Эухенио (исп.), Эудженио (ит.).",
+                context: "Классическое имя русской дворянской литературы, увековеченное А. С. Пушкиным в романе «Евгений Онегин»."
+            },
+            "Елена": {
+                origin: "Древнегреческое (от Helene, возможно связано с helene — «факел» или helios — «солнце»).",
+                meaning: "«Светлая», «сияющая», «солнечная», «факел».",
+                shortForms: "Лена, Леночка, Ленуся, Алёна (исторически народная форма, ставшая отдельным именем), Еля.",
+                foreignAnalogs: "Хелен (англ.), Елен (фр.), Елена, Хелена (нем.), Элена (исп.).",
+                context: "Восходит к Елене Троянской — прекраснейшей женщине античных мифов, а также к святой равноапостольной императрице Елене. В русских сказках фигурирует как Елена Прекрасная и Елена Премудрая."
+            },
+            "Елизавета": {
+                origin: "Древнееврейское (от Elisheva).",
+                meaning: "«Бог — моя клятва», «почитающая Бога».",
+                shortForms: "Лиза, Лизонька, Лизуня, Вета, Лизавета.",
+                foreignAnalogs: "Элизабет (англ.), Изабелла (исп./ит.), Элиза (нем.), Элизабет (фр.).",
+                context: "Библейское имя (мать Иоанна Крестителя). Одно из самых монарших имён в истории Европы (королевы Великобритании, России, Австрии)."
+            },
+            "Иван": {
+                origin: "Древнееврейское (от Yohanan через греческое Ioannes).",
+                meaning: "«Бог милостив», «Яхве одарил».",
+                shortForms: "Ваня, Ванечка, Ванюша, Иванушка.",
+                foreignAnalogs: "Джон (англ.), Жан (фр.), Хуан (исп.), Джованни (ит.), Йоханнес/Ханс (нем.), Янаш (венг.).",
+                context: "Настоящий архетип русского имени. Его носили правители (Иван Грозный), сказочные герои (Иван-царевич, Иван-дурак), и оно стало международным символом русского человека."
+            },
+            "Людмила": {
+                origin: "Старославянское (двухосновное: люд + мила).",
+                meaning: "«Милая людям», «любимая народом».",
+                shortForms: "Люда, Людочка, Мила, Люся, Людася.",
+                foreignAnalogs: "Людмила (чеш./пол./болг.), Лудмила (серб.).",
+                context: "Одно из немногих исконно славянских имён, вошедших в православный календарь (благодаря святой мученице Людмиле Чешской). В России обрело вторую жизнь после поэмы А. С. Пушкина «Руслан и Людмила»."
+            },
+            "Максим": {
+                origin: "Латинское (от Maximus).",
+                meaning: "«Величайший», «самый большой».",
+                shortForms: "Макс, Максик, Максюша, Мака.",
+                foreignAnalogs: "Максимилиан (нем./англ.), Массимо (ит.), Максимилиан (фр.), Максимо (исп.).",
+                context: "Первоначально римское когномен (прозвище), вручавшееся за выдающиеся заслуги. В христианской традиции известно благодаря святому Максиму Греку и Максиму Исповеднику."
+            },
+            "Марина": {
+                origin: "Латинское (женская форма от Marinus, от mare — «море»).",
+                meaning: "«Морская».",
+                shortForms: "Маришка, Мариночка, Мариша, Мара.",
+                foreignAnalogs: "Марина (ит./исп./нем.), Марин (фр. мужская форма).",
+                context: "В древнеримской традиции связывалось с Венерой (Venus Marina — «Венера Морская»). У православных имя ассоциируется со святой великомученицей Мариной Антиохийской."
+            },
+            "Мария": {
+                origin: "Древнееврейское (от Miryam).",
+                meaning: "Многогранное имя: «желанная», «любимая», «безмятежная», а также «госпожа» или «горькая/восставшая».",
+                shortForms: "Маша, Машенька, Машуля, Маня, Маруся.",
+                foreignAnalogs: "Мэри (англ.), Мари (фр.), Мария (исп./ит./нем.), Марыся (пол.).",
+                context: "Центральное женское имя в христианском мире благодаря Богородице (Деве Марии). Одно из самых распространенных имён на планете."
+            },
+            "Надежда": {
+                origin: "Старославянское (калька с древнегреческого имени Elpis).",
+                meaning: "«Надежда».",
+                shortForms: "Надя, Надюша, Наденька, Надюха.",
+                foreignAnalogs: "Надин (фр.), Надина (ит.), Надя (используется на Западе как самостоятельное имя).",
+                context: "Появилось на Руси при переводе греческих литургических книг вместе со сестрами Верой (Pistis), Любовью (Agape) и их матерью Софией (Sophia)."
+            },
+            "Роман": {
+                origin: "Латинское (от Romanus).",
+                meaning: "«Римлянин», «римский», «из Рима».",
+                shortForms: "Рома, Ромочка, Ромашка, Романчик.",
+                foreignAnalogs: "Ромен (фр.), Романо (ит.), Роман (нем./англ.), Роман (пол.).",
+                context: "Первоначально обозначало принадлежность к Римской империи или городу Риму. Стало очень популярным в восточнославянских землях со времён Древней Руси."
+            },
+            "Светлана": {
+                origin: "Славянское искусственное имя, созданное поэтами XVIII–XIX веков.",
+                meaning: "«Светлая», «чистая», «душой светлая».",
+                shortForms: "Света, Светик, Светочка, Лана, Светланка.",
+                foreignAnalogs: "Светлана (используется в других славянских странах), смысловые аналоги — Кэтрин/Клара (англ./лат. «светлая»).",
+                context: "Уникальный пример имени, придуманного поэтом А. Хвостовым и популяризованного В. Жуковским в балладе «Светлана». В XX веке вошло в официальный церковный календарь (как аналог греческого имени Фотиния)."
+            },
+            "Сергей": {
+                origin: "Латинское (от римского родового имени Sergius, восходящего к этрускам).",
+                meaning: "«Высокочтимый», «знатный», «страж» (в христианской традиции также трактуется как «слуга Божий»).",
+                shortForms: "Серёжа, Серёженька, Серёга, Серж.",
+                foreignAnalogs: "Серж (фр.), Серхио (исп.), Серджо (ит.), Сергиуш (пол.).",
+                context: "Одно из самых почитаемых мужских имён в России, тесно связанное с фигурой духовного покровителя Руси — преподобного Сергия Радонежского."
+            },
+            "Татьяна": {
+                origin: "Латинское (от сабинско-римского имени царя Татия — Titus Tatius, имя рода Tatianus).",
+                meaning: "«Принадлежащая роду Татиев», «устроительница», «учредительница».",
+                shortForms: "Таня, Танечка, Танюша, Тата.",
+                foreignAnalogs: "Татьяна (широко используется в мире без изменений), Таня (англ./нем. как самостоятельное имя).",
+                context: "В России имя стало символом женского идеала после романа А. С. Пушкина «Евгений Онегин». День святой Татьяны (25 января) традиционно отмечается как День российского студенчества."
+            }
+        };
+
+        const relativesData = [
+            { id: "me", name: "Евгений Говоров", gender: "M", dob: "1982-07-06", father: "valeriy", mother: "nadezhda", spouse: "elena", ex_spouses: ["anna_y"] },
+            { id: "aleksandr", name: "Александр Белугин", gender: "M", dob: "1961-06-25", spouse: "lyudmila" },
+            { id: "anastasia", name: "Анастасия Клыгач", gender: "F", dob: "1992-06-27", father: "aleksandr", mother: "lyudmila", spouse: "denis" },
+            { id: "anna_k", name: "Анна Клыгач", gender: "F", dob: "2018-09-25", father: "denis", mother: "anastasia" },
+            { id: "anna_y", name: "Анна Язовцева", gender: "F", dob: "1984-01-19", ex_spouses: ["me"] },
+            { id: "anton", name: "Антон Попов", gender: "M", dob: "1995-08-05", mother: "maria" },
+            { id: "valeriy", name: "Валерий Говоров", gender: "M", dob: "1957-12-02", father: "ivan", spouse: "nadezhda" },
+            { id: "viktoria", name: "Виктория Говорова", gender: "F", dob: "2008-01-16", father: "me", mother: "anna_y" },
+            { id: "daria", name: "Дарья Говорова", gender: "F", dob: "2016-10-10", father: "sergey", mother: "marina" },
+            { id: "denis", name: "Денис Клыгач", gender: "M", dob: "1986-09-15", spouse: "anastasia" },
+            { id: "dmitriy_g", name: "Дмитрий Говоров", gender: "M", dob: "2021-08-26", father: "me", mother: "elena" },
+            { id: "dmitriy_d", name: "Дмитрий Догаев", gender: "M", dob: "1992-10-08", mother: "svetlana" },
+            { id: "elena", name: "Елена Говорова", gender: "F", dob: "1988-11-27", father: "aleksandr", mother: "lyudmila", spouse: "me" },
+            { id: "elizaveta", name: "Елизавета Попова", gender: "F", dob: "2001-01-29", mother: "maria" },
+            { id: "ivan", name: "Иван Говоров", gender: "M", dob: "1932-04-04" },
+            { id: "lyudmila", name: "Людмила Белугина", gender: "F", dob: "1962-05-25", spouse: "aleksandr" },
+            { id: "maksim", name: "Максим Догаев", gender: "M", dob: "1995-08-25", mother: "svetlana" },
+            { id: "marina", name: "Марина Говорова", gender: "F", dob: "1982-10-17", spouse: "sergey" },
+            { id: "maria", name: "Мария Попова", gender: "F", dob: "1975-06-07", mother: "tatiana" },
+            { id: "nadezhda", name: "Надежда Говорова", gender: "F", dob: "1961-10-30", mother: "tatiana", spouse: "valeriy" },
+            { id: "roman", name: "Роман Говоров", gender: "M", dob: "2021-08-26", father: "me", mother: "elena" },
+            { id: "svetlana", name: "Светлана Догаева", gender: "F", dob: "1973-02-20", mother: "tatiana" },
+            { id: "sergey", name: "Сергей Говоров", gender: "M", dob: "1987-07-15", father: "valeriy", mother: "nadezhda", spouse: "marina" },
+            { id: "tatiana", name: "Татьяна Князева", gender: "F", dob: "1939-01-25" }
+        ];
+
+        let selectedPersonId = "me";
+        const personMap = {};
+        relativesData.forEach(p => personMap[p.id] = p);
+
+        const kinshipRankMap = {
+            "Я": 0, "Муж": 1, "Жена": 1, "Сын": 2, "Дочь": 2, "Отец": 3, "Мать": 3,
+            "Брат": 4, "Сестра": 4, "Дедушка": 5, "Бабушка": 5, "Внук": 6, "Внучка": 6,
+            "Племянник": 7, "Племянница": 7, "Дядя": 8, "Тётя": 8, "Дв. брат": 9, "Дв. сестра": 9,
+            "Прадедушка": 10, "Прабабушка": 10, "Правнук": 10, "Правнучка": 10, "Дв. племянник": 11,
+            "Дв. племянница": 11, "Тесть": 12, "Тёща": 12, "Свёкор": 12, "Свекровь": 12, "Зять": 13,
+            "Невестка": 13, "Шурин": 14, "Свояченица": 14, "Деверь": 14, "Золовка": 14, "Свояк": 15,
+            "Сват": 15, "Сватья": 15, "Пасынок": 16, "Падчерица": 16, "Бывший муж": 17, "Бывшая жена": 17,
+            "Родственник": 50, "Свойственник": 60
+        };
+
+        const genitiveMap = {
+            "Муж": "мужа", "Жена": "жены", "Сын": "сына", "Дочь": "дочери", "Отец": "отца",
+            "Мать": "матери", "Брат": "брата", "Сестра": "сестры", "Дедушка": "дедушки", "Бабушка": "бабушки",
+            "Внук": "внука", "Внучка": "внучки", "Дядя": "дяди", "Тётя": "тёти", "Дв. брат": "двоюродного брата",
+            "Дв. сестра": "двоюродной сестры", "Тесть": "тестя", "Тёща": "тёщи", "Свёкор": "свекра",
+            "Свекровь": "свекрови", "Зять": "зятя", "Невестка": "невестки", "Шурин": "шурина",
+            "Свояченица": "свояченицы", "Деверь": "деверя", "Золовка": "золовки", "Свояк": "свояка",
+            "Сват": "свата", "Сватья": "сватьи", "Пасынок": "пасынка", "Падчерица": "падчерицы",
+            "Племянник": "племянника", "Племянница": "племянницы", "Бывший муж": "бывшего мужа", "Бывшая жена": "бывшей жены"
+        };
+
+        const fullNominativeMap = {
+            "Дв. брат": "двоюродный брат", "Дв. сестра": "двоюродная сестра",
+            "Дв. племянник": "двоюродный племянник", "Дв. племянница": "двоюродная племянница"
+        };
+
+        function getParents(id) {
+            const p = personMap[id];
+            if (!p) return [];
+            return [p.father, p.mother].filter(Boolean);
+        }
+
+        function getChildren(id) {
+            return relativesData.filter(p => p.father === id || p.mother === id).map(p => p.id);
+        }
+
+        function getSiblings(id) {
+            const parents = getParents(id);
+            if (parents.length === 0) return [];
+            return relativesData
+                .filter(p => p.id !== id && getParents(p.id).some(parent => parents.includes(parent)))
+                .map(p => p.id);
+        }
+
+        function getSpouse(id) {
+            const p = personMap[id];
+            if (!p) return null;
+            if (p.spouse) return p.spouse;
+            const sp = relativesData.find(other => other.spouse === id);
+            return sp ? sp.id : null;
+        }
+
+        function getAllAncestors(id) {
+            const set = new Set();
+            const queue = [id];
+            while (queue.length > 0) {
+                const current = queue.shift();
+                const parents = getParents(current);
+                for (let parentId of parents) {
+                    if (!set.has(parentId)) {
+                        set.add(parentId);
+                        queue.push(parentId);
+                    }
+                }
+            }
+            return set;
+        }
+
+        function isBloodRelated(id1, id2) {
+            const a1 = getAllAncestors(id1);
+            a1.add(id1);
+            const a2 = getAllAncestors(id2);
+            a2.add(id2);
+
+            for (let ancestor of a1) {
+                if (a2.has(ancestor)) return true;
+            }
+            return false;
+        }
+
+        function getKinshipTerm(egoId, targetId) {
+            if (egoId === targetId) return "Я";
+
+            const ego = personMap[egoId];
+            const target = personMap[targetId];
+            if (!ego || !target) return "Родственник";
+
+            const isMale = target.gender === "M";
+
+            if (getSpouse(egoId) === targetId) return isMale ? "Муж" : "Жена";
+            if ((ego.ex_spouses && ego.ex_spouses.includes(targetId)) ||
+                (target.ex_spouses && target.ex_spouses.includes(targetId))) {
+                return isMale ? "Бывший муж" : "Бывшая жена";
+            }
+
+            const egoParents = getParents(egoId);
+            if (egoParents.includes(targetId)) return isMale ? "Отец" : "Мать";
+
+            const egoChildren = getChildren(egoId);
+            if (egoChildren.includes(targetId)) return isMale ? "Сын" : "Дочь";
+
+            const egoSiblings = getSiblings(egoId);
+            if (egoSiblings.includes(targetId)) return isMale ? "Брат" : "Сестра";
+
+            const egoGrandparents = egoParents.flatMap(p => getParents(p));
+            if (egoGrandparents.includes(targetId)) return isMale ? "Дедушка" : "Бабушка";
+
+            const egoGrandchildren = egoChildren.flatMap(c => getChildren(c));
+            if (egoGrandchildren.includes(targetId)) return isMale ? "Внук" : "Внучка";
+
+            const egoUnclesAunts = egoParents.flatMap(p => getSiblings(p));
+            if (egoUnclesAunts.includes(targetId)) return isMale ? "Дядя" : "Тётя";
+
+            const egoNephewsNieces = egoSiblings.flatMap(s => getChildren(s));
+            if (egoNephewsNieces.includes(targetId)) return isMale ? "Племянник" : "Племянница";
+
+            const egoCousins = egoUnclesAunts.flatMap(u => getChildren(u));
+            if (egoCousins.includes(targetId)) return isMale ? "Дв. брат" : "Дв. сестра";
+
+            const egoGreatGrandparents = egoGrandparents.flatMap(g => getParents(g));
+            if (egoGreatGrandparents.includes(targetId)) return isMale ? "Прадедушка" : "Прабабушка";
+
+            const egoGreatGrandchildren = egoGrandchildren.flatMap(gc => getChildren(gc));
+            if (egoGreatGrandchildren.includes(targetId)) return isMale ? "Правнук" : "Правнучка";
+
+            const egoCousinChildren = egoCousins.flatMap(c => getChildren(c));
+            if (egoCousinChildren.includes(targetId)) return isMale ? "Дв. племянник" : "Дв. племянница";
+
+            const egoSpouse = getSpouse(egoId);
+
+            if (egoSpouse) {
+                const spouseParents = getParents(egoSpouse);
+                if (spouseParents.includes(targetId)) {
+                    return ego.gender === "M" ? (isMale ? "Тесть" : "Тёща") : (isMale ? "Свёкор" : "Свекровь");
+                }
+            }
+
+            const childrenSpouses = egoChildren.map(c => getSpouse(c)).filter(Boolean);
+            if (childrenSpouses.includes(targetId)) return isMale ? "Зять" : "Невестка";
+
+            if (egoSpouse) {
+                const spouseSiblings = getSiblings(egoSpouse);
+                if (spouseSiblings.includes(targetId)) {
+                    return ego.gender === "M" ? (isMale ? "Шурин" : "Свояченица") : (isMale ? "Деверь" : "Золовка");
+                }
+            }
+
+            const siblingSpouses = egoSiblings.map(s => getSpouse(s)).filter(Boolean);
+            if (siblingSpouses.includes(targetId)) return isMale ? "Зять" : "Невестка";
+
+            if (egoSpouse) {
+                const spouseSiblings = getSiblings(egoSpouse);
+                const spouseSiblingSpouses = spouseSiblings.map(ss => getSpouse(ss)).filter(Boolean);
+                if (spouseSiblingSpouses.includes(targetId) && ego.gender === "M" && isMale) return "Свояк";
+            }
+
+            for (const childId of egoChildren) {
+                const childSpouseId = getSpouse(childId);
+                if (childSpouseId) {
+                    const childSpouseParents = getParents(childSpouseId);
+                    if (childSpouseParents.includes(targetId)) return isMale ? "Сват" : "Сватья";
+                }
+            }
+
+            if (egoSpouse) {
+                const spouseSiblings = getSiblings(egoSpouse);
+                const spouseNephewsNieces = spouseSiblings.flatMap(ss => getChildren(ss));
+                if (spouseNephewsNieces.includes(targetId)) return isMale ? "Племянник" : "Племянница";
+            }
+
+            if (egoSpouse) {
+                const spouseChildren = getChildren(egoSpouse);
+                if (spouseChildren.includes(targetId) && !egoChildren.includes(targetId)) return isMale ? "Пасынок" : "Падчерица";
+            }
+
+            const unclesAuntsSpouses = egoUnclesAunts.map(u => getSpouse(u)).filter(Boolean);
+            if (unclesAuntsSpouses.includes(targetId)) return isMale ? "Дядя" : "Тётя";
+
+            return isBloodRelated(egoId, targetId) ? "Родственник" : "Свойственник";
+        }
+
+        function getDetailedKinshipDesc(egoId, targetId) {
+            let bestDesc = "";
+            let minRank = Infinity;
+
+            for (let p1 of relativesData) {
+                if (p1.id === egoId || p1.id === targetId) continue;
+                const t1 = getKinshipTerm(egoId, p1.id);
+                const t2 = getKinshipTerm(p1.id, targetId);
+
+                if (t1 && t2 && t1 !== "Родственник" && t1 !== "Свойственник" && t1 !== "Я" && genitiveMap[t1] &&
+                    t2 !== "Родственник" && t2 !== "Свойственник" && t2 !== "Я") {
+                    const rank = (kinshipRankMap[t1] || 50) + (kinshipRankMap[t2] || 50);
+                    if (rank < minRank) {
+                        minRank = rank;
+                        bestDesc = `${(fullNominativeMap[t2] || t2).toLowerCase()} ${genitiveMap[t1]}`;
+                    }
+                }
+            }
+
+            if (!bestDesc) {
+                for (let p1 of relativesData) {
+                    if (p1.id === egoId || p1.id === targetId) continue;
+                    const t1 = getKinshipTerm(egoId, p1.id);
+                    if (!t1 || t1 === "Родственник" || t1 === "Свойственник" || t1 === "Я" || !genitiveMap[t1]) continue;
+
+                    for (let p2 of relativesData) {
+                        if (p2.id === egoId || p2.id === targetId || p2.id === p1.id) continue;
+                        const t2 = getKinshipTerm(p1.id, p2.id);
+                        const t3 = getKinshipTerm(p2.id, targetId);
+
+                        if (t2 && t3 && t2 !== "Родственник" && t2 !== "Свойственник" && t2 !== "Я" && genitiveMap[t2] &&
+                            t3 !== "Родственник" && t3 !== "Свойственник" && t3 !== "Я") {
+                            const rank = (kinshipRankMap[t1] || 50) + (kinshipRankMap[t2] || 50) + (kinshipRankMap[t3] || 50);
+                            if (rank < minRank) {
+                                minRank = rank;
+                                bestDesc = `${(fullNominativeMap[t3] || t3).toLowerCase()} ${genitiveMap[t2]} ${genitiveMap[t1]}`;
+                            }
+                        }
+                    }
+                }
+            }
+            return bestDesc;
+        }
+
+        function parseDOB(dobStr) {
+            const [year, month, day] = dobStr.split("-").map(Number);
+            return { year, month, day };
+        }
+
+        function getWesternZodiacInfo(day, month) {
+            const zodiacs = [
+                { limit: 19, name: "Козерог", symbol: "♑", period: "22 декабря — 19 января", order: 10 },
+                { limit: 18, name: "Водолей", symbol: "♒", period: "20 января — 18 февраля", order: 11 },
+                { limit: 20, name: "Рыбы", symbol: "♓", period: "19 февраля — 20 марта", order: 12 },
+                { limit: 19, name: "Овен", symbol: "♈", period: "21 марта — 19 апреля", order: 1 },
+                { limit: 20, name: "Телец", symbol: "♉", period: "20 апреля — 20 мая", order: 2 },
+                { limit: 20, name: "Близнецы", symbol: "♊", period: "21 мая — 20 июня", order: 3 },
+                { limit: 22, name: "Рак", symbol: "♋", period: "21 июня — 22 июля", order: 4 },
+                { limit: 22, name: "Лев", symbol: "♌", period: "23 июля — 22 августа", order: 5 },
+                { limit: 22, name: "Дева", symbol: "♍", period: "23 августа — 22 сентября", order: 6 },
+                { limit: 22, name: "Весы", symbol: "♎", period: "23 сентября — 22 октября", order: 7 },
+                { limit: 21, name: "Скорпион", symbol: "♏", period: "23 октября — 21 ноября", order: 8 },
+                { limit: 21, name: "Стрелец", symbol: "♐", period: "22 ноября — 21 декабря", order: 9 },
+                { limit: 31, name: "Козерог", symbol: "♑", period: "22 декабря — 19 января", order: 10 }
+            ];
+            return day > zodiacs[month - 1].limit ? zodiacs[month] : zodiacs[month - 1];
+        }
+
+        function getEasternZodiacSignName(year) {
+            const signs = ["Обезьяна", "Петух", "Собака", "Свинья", "Крыса", "Бык", "Тигр", "Кролик", "Дракон", "Змея", "Лошадь", "Коза"];
+            return signs[year % 12];
+        }
+
+        function getEasternZodiacInfo(year) {
+            const signName = getEasternZodiacSignName(year);
+            const data = easternZodiacDetails[signName];
+            const orderMap = { "Крыса": 1, "Бык": 2, "Тигр": 3, "Кролик": 4, "Дракон": 5, "Змея": 6, "Лошадь": 7, "Коза": 8, "Обезьяна": 9, "Петух": 10, "Собака": 11, "Свинья": 12 };
+            return { ...data, order: orderMap[signName] || 1 };
+        }
+
+        function getAgeYears(dobStr) {
+            const { year, month, day } = parseDOB(dobStr);
+            const now = new Date();
+            let years = now.getFullYear() - year;
+            let months = now.getMonth() + 1 - month;
+            let days = now.getDate() - day;
+
+            if (days < 0) months--;
+            if (months < 0) years--;
+
+            return Math.max(0, years);
+        }
+
+        function calculateAgeFormatted(dobStr) {
+            const { year, month, day } = parseDOB(dobStr);
+            const now = new Date();
+
+            let years = now.getFullYear() - year;
+            let months = now.getMonth() + 1 - month;
+            let days = now.getDate() - day;
+
+            if (days < 0) {
+                months--;
+                const lastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+                days += lastMonth.getDate();
+            }
+
+            if (months < 0) {
+                years--;
+                months += 12;
+            }
+
+            let yearSuffix = "л";
+            const lastDigit = years % 10;
+            const lastTwoDigits = years % 100;
+
+            if (lastTwoDigits >= 11 && lastTwoDigits <= 14) yearSuffix = "л";
+            else if (lastDigit === 1) yearSuffix = "г";
+            else if (lastDigit >= 2 && lastDigit <= 4) yearSuffix = "г";
+            else yearSuffix = "л";
+
+            return `${years}${yearSuffix} ${months}м ${days}д`;
+        }
+
+        function getDaysUntilNextBirthday(dobStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const { month, day } = parseDOB(dobStr);
+            let nextBday = new Date(today.getFullYear(), month - 1, day);
+
+            if (nextBday < today) nextBday.setFullYear(today.getFullYear() + 1);
+
+            return Math.ceil((nextBday - today) / (1000 * 60 * 60 * 24));
+        }
+
+        function formatDate(dobStr) {
+            const { year, month, day } = parseDOB(dobStr);
+            return `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
+        }
+
+        function isTodayBirthday(dobStr) {
+            const { month, day } = parseDOB(dobStr);
+            const today = new Date();
+            return day === today.getDate() && (month - 1) === today.getMonth();
+        }
+
+        function selectPerson(id) {
+            selectedPersonId = id;
+            renderCards();
+        }
+
+        // Long press handling
+        let pressTimer = null;
+        let isLongPress = false;
+
+        function handleTouchStart(fullName) {
+            isLongPress = false;
+            pressTimer = setTimeout(() => {
+                isLongPress = true;
+                showNameMeaningModal(fullName);
+            }, 500);
+        }
+
+        function handleTouchEnd() {
+            clearTimeout(pressTimer);
+        }
+
+        function showNameMeaningModal(fullName) {
+            const firstName = fullName.split(" ")[0];
+            const info = nameData[firstName];
+
+            document.getElementById("name-modal-person-name").innerText = fullName;
+            document.getElementById("name-modal-subtitle").innerText = `Значение имени: ${firstName}`;
+
+            if (info) {
+                document.getElementById("name-origin").innerText = info.origin;
+                document.getElementById("name-meaning").innerText = info.meaning;
+                document.getElementById("name-short-forms").innerText = info.shortForms;
+                document.getElementById("name-foreign-analogs").innerText = info.foreignAnalogs;
+                document.getElementById("name-context").innerText = info.context;
+            } else {
+                document.getElementById("name-origin").innerText = "Описание отсутствует";
+                document.getElementById("name-meaning").innerText = "Информация об этом имени пока не добавлена в базу.";
+                document.getElementById("name-short-forms").innerText = "-";
+                document.getElementById("name-foreign-analogs").innerText = "-";
+                document.getElementById("name-context").innerText = "-";
+            }
+
+            document.getElementById("name-modal").classList.add("active");
+        }
+
+        function hideNameModal() {
+            document.getElementById("name-modal").classList.remove("active");
+        }
+
+        function showKinshipModal(term, event) {
+            if (event) event.stopPropagation();
+            if (kinshipDefinitions[term]) {
+                document.getElementById("kinship-modal-title").innerText = term;
+                document.getElementById("kinship-modal-desc").innerText = kinshipDefinitions[term];
+                document.getElementById("kinship-modal").classList.add("active");
+            }
+        }
+
+        function hideKinshipModal() {
+            document.getElementById("kinship-modal").classList.remove("active");
+        }
+
+        // Show Western Zodiac Details (iOS Modal)
+        function showWesternZodiacModal(signName) {
+            const data = westernZodiacDetails[signName];
+            if (!data) return;
+
+            document.getElementById("wz-modal-title").innerText = `${signName} ${data.symbol}`;
+            document.getElementById("wz-modal-subtitle").innerText = data.period;
+            document.getElementById("wz-modal-desc").innerText = data.desc;
+            
+            const traitsList = document.getElementById("wz-modal-traits");
+            traitsList.innerHTML = "";
+            data.traits.forEach(trait => {
+                const li = document.createElement("li");
+                li.innerText = trait;
+                traitsList.appendChild(li);
+            });
+
+            document.getElementById("wz-modal-strengths").innerText = data.strengths;
+            document.getElementById("wz-modal-weaknesses").innerText = data.weaknesses;
+            document.getElementById("wz-modal-value").innerText = data.value;
+
+            document.getElementById("western-zodiac-modal").classList.add("active");
+        }
+
+        function hideWesternZodiacModal() {
+            document.getElementById("western-zodiac-modal").classList.remove("active");
+        }
+
+        // Show Eastern Zodiac Details (iOS Modal)
+        function showEasternZodiacModal(signName) {
+            const data = easternZodiacDetails[signName];
+            if (!data) return;
+
+            document.getElementById("ez-modal-title").innerText = `${data.name} ${data.emoji}`;
+            document.getElementById("ez-modal-subtitle").innerText = data.subtitle;
+            document.getElementById("ez-modal-years").innerText = data.years.join(", ") + "...";
+            
+            const traitsList = document.getElementById("ez-modal-traits");
+            traitsList.innerHTML = "";
+            data.traits.forEach(trait => {
+                const li = document.createElement("li");
+                li.innerText = trait;
+                traitsList.appendChild(li);
+            });
+
+            document.getElementById("ez-modal-strengths").innerText = data.strengths;
+            document.getElementById("ez-modal-weaknesses").innerText = data.weaknesses;
+            document.getElementById("ez-modal-value").innerText = data.value;
+
+            document.getElementById("zodiac-modal").classList.add("active");
+        }
+
+        function hideModal() {
+            document.getElementById("zodiac-modal").classList.remove("active");
+        }
+
+        function renderCards() {
+            const container = document.getElementById("cards-container");
+            const sortCriterion = document.getElementById("sort-select").value;
+            const searchQuery = document.getElementById("search-input").value.trim().toLowerCase();
+            
+            container.innerHTML = "";
+
+            let filteredData = relativesData.filter(person => {
+                if (!searchQuery) return true;
+                return person.name.toLowerCase().includes(searchQuery);
+            });
+
+            filteredData.sort((a, b) => {
+                if (sortCriterion === "kinship") {
+                    const termA = getKinshipTerm(selectedPersonId, a.id);
+                    const termB = getKinshipTerm(selectedPersonId, b.id);
+                    const rankA = kinshipRankMap[termA] ?? 99;
+                    const rankB = kinshipRankMap[termB] ?? 99;
+                    if (rankA !== rankB) return rankA - rankB;
+                    return a.name.localeCompare(b.name, 'ru');
+                } else if (sortCriterion === "name") {
+                    return a.name.localeCompare(b.name, 'ru');
+                } else if (sortCriterion === "next_bday") {
+                    return getDaysUntilNextBirthday(a.dob) - getDaysUntilNextBirthday(b.dob);
+                } else if (sortCriterion === "age_desc") {
+                    return new Date(a.dob) - new Date(b.dob);
+                } else if (sortCriterion === "age_asc") {
+                    return new Date(b.dob) - new Date(a.dob);
+                } else if (sortCriterion === "zodiac_west") {
+                    const { day: dayA, month: monthA } = parseDOB(a.dob);
+                    const { day: dayB, month: monthB } = parseDOB(b.dob);
+                    return getWesternZodiacInfo(dayA, monthA).order - getWesternZodiacInfo(dayB, monthB).order;
+                } else if (sortCriterion === "zodiac_east") {
+                    const { year: yearA } = parseDOB(a.dob);
+                    const { year: yearB } = parseDOB(b.dob);
+                    return getEasternZodiacInfo(yearA).order - getEasternZodiacInfo(yearB).order;
+                }
+                return 0;
+            });
+
+            filteredData.forEach(person => {
+                const { day, month, year } = parseDOB(person.dob);
+                const zodiacObj = getWesternZodiacInfo(day, month);
+                const easternObj = getEasternZodiacInfo(year);
+                const ageText = calculateAgeFormatted(person.dob);
+                const formattedDob = formatDate(person.dob);
+                
+                const yearsCount = getAgeYears(person.dob);
+                const agePercent = Math.min(100, Math.max(0, yearsCount));
+                
+                const dynamicStatus = getKinshipTerm(selectedPersonId, person.id);
+                
+                let detailBadgeHtml = "";
+                if (dynamicStatus === "Родственник" || dynamicStatus === "Свойственник") {
+                    const detailDesc = getDetailedKinshipDesc(selectedPersonId, person.id);
+                    if (detailDesc) {
+                        detailBadgeHtml = `<div class="status-badge status-detail">${detailDesc}</div>`;
+                    }
+                }
+                
+                const isSelected = person.id === selectedPersonId ? "selected" : "";
+                const birthdayClass = isTodayBirthday(person.dob) ? "is-birthday" : "";
+                const genderClass = person.gender === "F" ? "female" : "male";
+
+                const cardHtml = `
+                    <div class="card ${genderClass} ${birthdayClass} ${isSelected}" onclick="selectPerson('${person.id}')">
+                        <div class="card-section-left">
+                            <div class="name-row">
+                                <span class="person-name" 
+                                      onmousedown="handleTouchStart('${person.name}')" 
+                                      onmouseup="handleTouchEnd()" 
+                                      onmouseleave="handleTouchEnd()"
+                                      ontouchstart="handleTouchStart('${person.name}')" 
+                                      ontouchend="handleTouchEnd()">${person.name}</span>
+                                <span class="age-badge">${yearsCount}</span>
+                            </div>
+                            <div class="status-container">
+                                <span class="status-badge" onclick="showKinshipModal('${dynamicStatus}', event)">${dynamicStatus}</span>
+                                ${detailBadgeHtml}
+                            </div>
+                        </div>
+                        <div class="card-section-middle">
+                            <div class="dob-text">${formattedDob}</div>
+                            <div class="age-text">${ageText}</div>
+                            <div class="age-bar-container" title="Возраст: ${yearsCount} из 100 лет">
+                                <div class="age-bar-fill" style="width: ${agePercent}%;"></div>
+                            </div>
+                        </div>
+                        <div class="card-section-right">
+                            <span class="zodiac-icon" onclick="event.stopPropagation(); showWesternZodiacModal('${zodiacObj.name}')">${zodiacObj.symbol}</span>
+                            <span class="zodiac-icon" onclick="event.stopPropagation(); showEasternZodiacModal('${getEasternZodiacSignName(year)}')">${easternObj.emoji}</span>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML("beforeend", cardHtml);
+            });
+        }
+
+        renderCards();
+    </script>
+</body>
+</html>
