@@ -286,8 +286,9 @@
         }
 
         .med-card.grayed {
-            background: var(--color-gray-card);
-            opacity: 0.7;
+            background: var(--color-gray-card) !important;
+            opacity: 0.65;
+            border-color: rgba(142, 142, 147, 0.4) !important;
         }
 
         /* Зачеркивание лекарства при "нет" в столбце B */
@@ -296,21 +297,21 @@
             color: var(--text-secondary);
         }
 
-        .med-card.expired {
+        .med-card.expired:not(.grayed) {
             background: var(--color-danger-bg);
             border: 1px solid var(--color-danger-border);
         }
 
-        .med-card.expired .med-name {
+        .med-card.expired:not(.grayed) .med-name {
             color: var(--color-danger);
         }
 
-        .med-card.expired .med-date {
+        .med-card.expired:not(.grayed) .med-date {
             color: var(--color-danger);
             font-weight: 700;
         }
 
-        .med-card.expiring-soon:not(.expired) {
+        .med-card.expiring-soon:not(.expired):not(.grayed) {
             border: 1px solid var(--color-warning);
         }
 
@@ -387,6 +388,11 @@
         .badge-valid {
             background: rgba(52, 199, 89, 0.15);
             color: var(--color-success);
+        }
+
+        .badge-none {
+            background: rgba(142, 142, 147, 0.25);
+            color: var(--text-secondary);
         }
 
         .loader, .empty-msg {
@@ -511,6 +517,9 @@
             font-size: 0.75rem;
             color: var(--text-secondary);
             margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
     </style>
 </head>
@@ -556,7 +565,7 @@
                         <option value="name">По названию (А - Я)</option>
                         <option value="locationFridge">Лежат в холодильнике 🧊</option>
                         <option value="locationCabinet">Лежат в шкафу &#128452;</option>
-                        <option value="under6">Нельзя детям до 6 лет 👶🚫</option>
+                        <option value="underChildAge" id="sortChildAgeOption">Нельзя детям 👶🚫</option>
                         <option value="tempCold">Хранение (&lt;24 C) ❄️</option>
                     </select>
                 </div>
@@ -571,7 +580,8 @@
 
     <!-- Подвал -->
     <div class="footer">
-        Версия 1.0 от 1.08.2026
+        <div>Версия 1.0 от 1.08.2026</div>
+        <div id="totalRecordsCount">В базе 0 записей</div>
     </div>
 
     <!-- Модальное окно (iOS Style) -->
@@ -606,6 +616,36 @@
 
         let medicines = [];
         let activeStatFilter = null; // 'valid', 'expired', 'soon' или null
+
+        // Вычисление динамического возраста ограничений для детей
+        function getChildAgeThreshold() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth(); // 0 - Январь, 7 - Август
+
+            // Рождение детей: 2022 год
+            let age = year - 2022;
+            if (month < 7) { 
+                age -= 1; // До 1 августа текущего года возраст на 1 меньше
+            }
+
+            // Минимальный порог 6 лет, максимум 18 лет
+            let threshold = age + 2; 
+            if (threshold < 6) threshold = 6;
+            if (threshold > 18) threshold = 18;
+
+            return threshold;
+        }
+
+        const childAgeThreshold = getChildAgeThreshold();
+
+        // Обновляем текста фильтра в select
+        document.addEventListener("DOMContentLoaded", () => {
+            const opt = document.getElementById("sortChildAgeOption");
+            if (opt) {
+                opt.textContent = `Нельзя детям до ${childAgeThreshold} лет 👶🚫`;
+            }
+        });
 
         function parseCSV(text) {
             const lines = text.split(/\r?\n/);
@@ -695,6 +735,7 @@
                     const tempRaw = row[6] ? row[6].trim() : ''; // G
                     const ageRaw = row[7] ? row[7].trim() : '';  // H
 
+                    const isNo = colB.toLowerCase() === 'нет';
                     const expiryDate = parseExpiryDate(expiryRaw);
                     const isExpired = expiryDate ? (expiryDate < now) : false;
                     const isExpiringSoon = expiryDate ? (!isExpired && expiryDate <= threeMonthsLater) : false;
@@ -719,9 +760,9 @@
                         allFieldsStr: row.join(' ').toLowerCase(),
                         isFridge: colB.toLowerCase().includes('холод'),
                         isCabinet: colB.toLowerCase().includes('шкаф'),
-                        isNo: colB.toLowerCase() === 'нет',
+                        isNo: isNo,
                         isSnowflake: tempVal < 24,
-                        isNoChild: ageVal >= 6
+                        isNoChild: ageVal >= childAgeThreshold
                     });
                 }
 
@@ -734,13 +775,21 @@
         }
 
         function updateStats() {
-            const validCount = medicines.filter(m => !m.isExpired).length;
-            const expiredCount = medicines.filter(m => m.isExpired).length;
-            const soonCount = medicines.filter(m => m.isExpiringSoon).length;
+            // Для статистики считаем только имеющиеся медикаменты (!isNo)
+            const availableMeds = medicines.filter(m => !m.isNo);
+            const validCount = availableMeds.filter(m => !m.isExpired).length;
+            const expiredCount = availableMeds.filter(m => m.isExpired).length;
+            const soonCount = availableMeds.filter(m => m.isExpiringSoon).length;
 
             document.getElementById('stat-valid').textContent = validCount;
             document.getElementById('stat-expired').textContent = expiredCount;
             document.getElementById('stat-soon').textContent = soonCount;
+
+            // Вывод информации о всех записях базы внизу
+            const totalRecordsElem = document.getElementById('totalRecordsCount');
+            if (totalRecordsElem) {
+                totalRecordsElem.textContent = `В базе ${medicines.length} записей`;
+            }
         }
 
         function toggleStatFilter(type) {
@@ -805,21 +854,21 @@
             });
 
             if (activeStatFilter === 'valid') {
-                filtered = filtered.filter(m => !m.isExpired);
+                filtered = filtered.filter(m => !m.isNo && !m.isExpired);
                 filtered.sort((a, b) => {
                     if (!a.expiryDate) return 1;
                     if (!b.expiryDate) return -1;
                     return a.expiryDate - b.expiryDate;
                 });
             } else if (activeStatFilter === 'expired') {
-                filtered = filtered.filter(m => m.isExpired);
+                filtered = filtered.filter(m => !m.isNo && m.isExpired);
                 filtered.sort((a, b) => {
                     if (!a.expiryDate) return 1;
                     if (!b.expiryDate) return -1;
                     return a.expiryDate - b.expiryDate;
                 });
             } else if (activeStatFilter === 'soon') {
-                filtered = filtered.filter(m => m.isExpiringSoon);
+                filtered = filtered.filter(m => !m.isNo && m.isExpiringSoon);
                 filtered.sort((a, b) => {
                     if (!a.expiryDate) return 1;
                     if (!b.expiryDate) return -1;
@@ -830,7 +879,7 @@
                     filtered = filtered.filter(m => m.isFridge);
                 } else if (sortVal === 'locationCabinet') {
                     filtered = filtered.filter(m => m.isCabinet);
-                } else if (sortVal === 'under6') {
+                } else if (sortVal === 'underChildAge') {
                     filtered = filtered.filter(m => m.isNoChild);
                 } else if (sortVal === 'tempCold') {
                     filtered = filtered.filter(m => m.isSnowflake);
@@ -851,15 +900,17 @@
                 if (item.isExpired) classList.push('expired');
                 else if (item.isExpiringSoon) classList.push('expiring-soon');
 
-                // Иконка холодильника 🧊 и шкафа &#128452;
+                // Иконки
                 let iconsHtml = '';
                 if (item.isFridge) iconsHtml += '<span title="Холодильник">🧊</span>';
                 if (item.isCabinet) iconsHtml += '<span title="Шкаф">&#128452;</span>';
                 if (item.isSnowflake) iconsHtml += '<span title="Хранение ниже 24°C">❄️</span>';
-                if (item.isNoChild) iconsHtml += '<span class="badge-no-child" title="Нельзя детям до 6 лет">👶🚫</span>';
+                if (item.isNoChild) iconsHtml += `<span class="badge-no-child" title="Нельзя детям до ${childAgeThreshold} лет">👶🚫</span>`;
 
                 let badgeHtml = '';
-                if (item.isExpired) {
+                if (item.isNo) {
+                    badgeHtml = `<span class="badge badge-none">НЕТ</span>`;
+                } else if (item.isExpired) {
                     badgeHtml = `<span class="badge badge-expired">Просрочено</span>`;
                 } else if (item.isExpiringSoon) {
                     badgeHtml = `<span class="badge badge-warning">Скоро</span>`;
@@ -874,7 +925,7 @@
                             ${iconsHtml ? `<div class="med-icons">${iconsHtml}</div>` : ''}
                         </div>
                         <div class="med-status-badge">
-                            <div class="med-date">${item.expiryRaw ? escapeHtml(item.expiryRaw) : '—'}</div>
+                            <div class="med-date">${item.isNo ? '—' : (item.expiryRaw ? escapeHtml(item.expiryRaw) : '—')}</div>
                             ${badgeHtml}
                         </div>
                     </div>
