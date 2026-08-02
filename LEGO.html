@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Каталог LEGO Наборов</title>
+    <title>Каталог LEGO Наборов (v2)</title>
     <style>
         :root {
             --primary-color: #0066cc;
@@ -62,6 +62,11 @@
             background-color: #0052a3;
         }
 
+        button:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+
         button.secondary {
             background-color: #718096;
         }
@@ -87,6 +92,23 @@
             border-radius: 6px;
         }
 
+        .progress-bar-container {
+            width: 100%;
+            background-color: #cbd5e0;
+            border-radius: 4px;
+            height: 8px;
+            margin-top: 8px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
         .table-wrapper {
             overflow-x: auto;
             max-height: 75vh;
@@ -106,7 +128,7 @@
             padding: 10px 14px;
             text-align: left;
             border: 1px solid var(--border-color);
-            user-select: text; /* Allows normal selection */
+            user-select: text;
         }
 
         th {
@@ -136,10 +158,6 @@
             background-color: var(--hover-bg);
         }
 
-        tr.selected {
-            background-color: #ebf8ff;
-        }
-
         .btn-copy-row {
             padding: 3px 8px;
             font-size: 11px;
@@ -150,18 +168,6 @@
             background-color: #38a169;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .badge-success { background: #c6f6d5; color: #22543d; }
-        .badge-warning { background: #feebc8; color: #744210; }
-
-        /* Toast notifications */
         #toast {
             visibility: hidden;
             min-width: 250px;
@@ -207,6 +213,9 @@
 
     <div class="status-bar" id="status-bar">
         Готов к загрузке данных...
+        <div class="progress-bar-container" id="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
     </div>
 
     <div class="table-wrapper">
@@ -244,13 +253,16 @@
         { title: "11. № Коробки с инстр. (L)", key: "manual_box" },
         { title: "12. Служ. инфа (D)", key: "service_d" },
         { title: "13. Служ. инфа (E)", key: "service_e" },
-        { title: "14. Намерение (F)", key: "intent" }
+        { title: "14. Проверен ли набор (F)", key: "is_checked" }
     ];
 
     const rebrickableCache = {};
     let globalTableData = [];
 
-    // Simple CSV parser supporting quoted strings and commas
+    // Helper sleep function for rate limiting
+    const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Simple CSV parser
     function parseCSV(text) {
         let p = '', c = '', r = [];
         let q = false;
@@ -275,6 +287,21 @@
         return r;
     }
 
+    // Free Google Translate API call
+    async function translateText(text) {
+        if (!text) return "";
+        try {
+            const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ru&dt=t&q=${encodeURIComponent(text)}`;
+            const res = await fetch(url);
+            if (!res.ok) return text;
+            const data = await res.json();
+            return data[0].map(item => item[0]).join("");
+        } catch (e) {
+            console.warn("Translation failed for:", text, e);
+            return text;
+        }
+    }
+
     function initTableHeader() {
         const headerTr = document.getElementById("table-header");
         headerTr.innerHTML = "";
@@ -297,7 +324,6 @@
         let setNumStr = String(setNumRaw).trim();
         if (!setNumStr) return null;
 
-        // Ensure -1 suffix if plain number
         if (!setNumStr.includes("-")) {
             setNumStr = setNumStr + "-1";
         }
@@ -310,13 +336,20 @@
             const res = await fetch(`https://rebrickable.com/api/v3/lego/sets/${setNumStr}/`, {
                 headers: { "Authorization": `key ${API_KEY}` }
             });
+
+            if (res.status === 429) {
+                console.warn("Rate limit hit! Waiting extra 3 seconds...");
+                await sleep(3000);
+                return await fetchRebrickableInfo(setNumRaw);
+            }
+
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const data = await res.json();
 
-            // Fetch theme name if available
             let themeName = "";
             if (data.theme_id) {
                 try {
+                    await sleep(2000); // Respect rate limit for theme endpoint as well
                     const themeRes = await fetch(`https://rebrickable.com/api/v3/lego/themes/${data.theme_id}/`, {
                         headers: { "Authorization": `key ${API_KEY}` }
                     });
@@ -327,8 +360,13 @@
                 } catch(e) {}
             }
 
+            const nameEng = data.name || "";
+            // Automatic Translation to Russian
+            const nameRusTranslated = await translateText(nameEng);
+
             const result = {
-                name: data.name || "",
+                name_eng: nameEng,
+                name_rus: nameRusTranslated,
                 year: data.year || "",
                 num_parts: data.num_parts !== undefined ? data.num_parts : "",
                 theme: themeName
@@ -343,8 +381,15 @@
     }
 
     async function loadData() {
+        const btnLoad = document.getElementById("btn-load");
         const statusBar = document.getElementById("status-bar");
-        statusBar.textContent = "⏳ Скачиваем Google Таблицу...";
+        const progressContainer = document.getElementById("progress-container");
+        const progressBar = document.getElementById("progress-bar");
+
+        btnLoad.disabled = true;
+        progressContainer.style.display = "block";
+        progressBar.style.width = "0%";
+        statusBar.childNodes[0].nodeValue = "⏳ Скачиваем Google Таблицу... ";
 
         try {
             const response = await fetch(SHEET_CSV_URL);
@@ -353,40 +398,42 @@
             const rows = parseCSV(csvText);
 
             if (rows.length < 2) {
-                statusBar.textContent = "⚠️ Таблица пуста или содержит только заголовки.";
+                statusBar.childNodes[0].nodeValue = "⚠️ Таблица пуста или содержит только заголовки.";
+                btnLoad.disabled = false;
                 return;
             }
 
-            // Assume first row is header
             const dataRows = rows.slice(1).filter(r => r.some(cell => cell.trim() !== ""));
-
-            statusBar.textContent = `📊 Найдено строк: ${dataRows.length}. Запрашиваем данные с Rebrickable...`;
-
             globalTableData = [];
-            
+
             for (let i = 0; i < dataRows.length; i++) {
                 const r = dataRows[i];
-                // Mapping by column indexes (0-based):
-                // A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9, K:10, L:11
+
                 const box_num = r[0] || "";         // Col A
                 const set_num = r[2] || "";         // Col C
                 const service_d = r[3] || "";       // Col D
                 const service_e = r[4] || "";       // Col E
-                const intent = r[5] || "";          // Col F
-                const name_rus = r[6] || "";        // Col G (Название RUS)
+                const is_checked = r[5] || "";      // Col F ("Проверен ли набор")
                 const sale_status = r[7] || "";     // Col H
                 const condition_desc = r[8] || "";  // Col I
                 const manual_exist = r[10] || "";   // Col K
                 const manual_box = r[11] || "";     // Col L
 
-                statusBar.textContent = `⏳ Загрузка из Rebrickable (${i + 1}/${dataRows.length}) для набора: ${set_num}...`;
+                const percent = Math.round(((i + 1) / dataRows.length) * 100);
+                progressBar.style.width = `${percent}%`;
+                statusBar.childNodes[0].nodeValue = `⏳ Парсим Rebrickable (${i + 1}/${dataRows.length}) [Задержка 2 сек...] Набор: ${set_num} `;
 
-                const rebData = await fetchRebrickableInfo(set_num);
+                let rebData = null;
+                if (set_num) {
+                    rebData = await fetchRebrickableInfo(set_num);
+                    // MANDATORY 2 SECONDS DELAY
+                    await sleep(2000);
+                }
 
                 globalTableData.push({
                     set_num: set_num,
-                    name_eng: rebData ? rebData.name : "",
-                    name_rus: name_rus,
+                    name_eng: rebData ? rebData.name_eng : "",
+                    name_rus: rebData ? rebData.name_rus : "",
                     num_parts: rebData ? rebData.num_parts : "",
                     year: rebData ? rebData.year : "",
                     theme: rebData ? rebData.theme : "",
@@ -397,16 +444,20 @@
                     manual_box: manual_box,
                     service_d: service_d,
                     service_e: service_e,
-                    intent: intent
+                    is_checked: is_checked
                 });
+
+                // Progressive render so user sees rows popping up
+                renderTable(globalTableData);
             }
 
-            statusBar.textContent = `✅ Успешно загружено и обработано наборов: ${globalTableData.length}`;
-            renderTable(globalTableData);
+            statusBar.childNodes[0].nodeValue = `✅ Загрузка завершена! Все ${globalTableData.length} наборов успешно загружены. `;
 
         } catch (err) {
             console.error(err);
-            statusBar.textContent = `❌ Ошибка загрузки: ${err.message}`;
+            statusBar.childNodes[0].nodeValue = `❌ Ошибка загрузки: ${err.message} `;
+        } finally {
+            btnLoad.disabled = false;
         }
     }
 
@@ -417,12 +468,10 @@
         data.forEach((row, rowIndex) => {
             const tr = document.createElement("tr");
 
-            // Row Copy Button Column
             const tdAction = document.createElement("td");
             tdAction.innerHTML = `<button class="btn-copy-row" onclick="copyRow(${rowIndex})">📋 Строка</button>`;
             tr.appendChild(tdAction);
 
-            // Data Columns
             columnsConfig.slice(1).forEach(col => {
                 const td = document.createElement("td");
                 td.textContent = row[col.key] !== undefined ? row[col.key] : "";
@@ -479,7 +528,6 @@
         renderTable(filtered);
     }
 
-    // Auto-init header on load
     window.onload = () => {
         initTableHeader();
     };
