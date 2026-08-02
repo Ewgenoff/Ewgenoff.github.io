@@ -26,11 +26,11 @@
             --shadow-hover: 0 10px 15px -3px rgba(0,0,0,0.1);
 
             /* Цвета статусов */
-            --status-for-self: #16a34a; /* Зеленая */
-            --status-sale: #2563eb;     /* Синяя */
-            --status-sealed: #9333ea;   /* Фиолетовая */
-            --status-sold: #64748b;     /* Серая */
-            --status-no-set: #334155;   /* Тёмная плашка "Набора нет" */
+            --status-for-self: #16a34a;
+            --status-sale: #2563eb;
+            --status-sealed: #9333ea;
+            --status-sold: #64748b;
+            --status-no-set: #334155;
 
             /* Цвета проверки */
             --verified-green: #16a34a;
@@ -60,7 +60,7 @@
             flex: 1;
         }
 
-        /* Закрепленная верхняя панель с анимацией выезда */
+        /* Закрепленная верхняя панель */
         .sticky-top-panel {
             position: sticky;
             top: 0;
@@ -77,7 +77,7 @@
             transform: translateY(-100%);
         }
 
-        /* Уменьшенные плашки статусов над поиском */
+        /* Уменьшенные плашки статусов */
         .status-pills {
             display: flex;
             flex-wrap: wrap;
@@ -114,13 +114,8 @@
         .status-pill[data-status="Продан"] { background-color: var(--status-sold); color: #fff; }
         .status-pill[data-status="Только инструкция"] { background-color: #0d9488; color: #fff; }
 
-        .status-pill:not(.active) {
-            opacity: 0.7;
-        }
-
-        .status-pill:hover {
-            opacity: 1;
-        }
+        .status-pill:not(.active) { opacity: 0.7; }
+        .status-pill:hover { opacity: 1; }
 
         .controls {
             display: flex;
@@ -132,7 +127,6 @@
             align-items: center;
         }
 
-        /* Обертка поиска и управляющих кнопок для мобильных в 1 строку */
         .search-row {
             display: flex;
             align-items: center;
@@ -181,11 +175,6 @@
             flex-shrink: 0;
         }
 
-        .reset-btn:hover, .scroll-top-btn:hover {
-            background-color: #f8fafc;
-            border-color: #94a3b8;
-        }
-
         .reset-btn {
             background-color: #fef2f2;
             color: #dc2626;
@@ -194,10 +183,6 @@
         .reset-btn:hover {
             background-color: #fee2e2;
             border-color: #f87171;
-        }
-
-        .scroll-top-btn {
-            font-size: 14px;
         }
 
         .grid {
@@ -330,11 +315,12 @@
         .badge-theme:hover { background-color: #bae6fd; }
         .badge-year { background-color: var(--year-bg); color: var(--year-text); cursor: pointer; }
         .badge-year:hover { background-color: #e2e8f0; }
-        .badge-pieces { background-color: var(--pieces-bg); color: var(--pieces-text); }
+        .badge-pieces { background-color: var(--pieces-bg); color: var(--pieces-text); cursor: pointer; }
+        .badge-pieces:hover { background-color: #fde68a; }
         .badge-box { background-color: var(--box-bg); color: var(--box-text); cursor: pointer; }
         .badge-box:hover { background-color: #cbd5e1; }
 
-        /* Общие стили модальных окон */
+        /* Модальные окна */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -453,7 +439,7 @@
             line-height: 1.5;
         }
 
-        /* Окно выбора */
+        /* Окно выбора параметров */
         .picker-modal {
             max-width: 700px;
             padding: 20px 24px;
@@ -473,7 +459,6 @@
             font-weight: 800;
         }
 
-        /* Сетка для коробок и годов */
         .picker-grid-boxes {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -485,7 +470,6 @@
             padding: 4px;
         }
 
-        /* Список для серий */
         .picker-list-themes {
             display: flex;
             flex-direction: column;
@@ -529,14 +513,14 @@
             border-color: var(--primary);
         }
 
-        .picker-item-btn .year-count {
+        .picker-item-btn .item-count {
             color: #64748b;
             font-size: 11px;
             margin-left: 4px;
             font-weight: normal;
         }
 
-        .picker-item-btn.selected .year-count {
+        .picker-item-btn.selected .item-count {
             color: #e2e8f0;
         }
 
@@ -561,7 +545,6 @@
 
 <div class="container">
 
-    <!-- Закрепленный блок параметров и фильтров -->
     <div class="sticky-top-panel" id="stickyPanel">
         <div class="status-pills" id="statusPills">
             <div class="status-pill active" data-status="all" onclick="selectStatusPill('all')">Все (<span id="cnt-all">0</span>)</div>
@@ -577,17 +560,14 @@
                 <div class="search-box">
                     <input type="text" id="searchInput" placeholder="Поиск по номеру или названию..." oninput="filterData()">
                 </div>
-                <!-- Кнопка сброса всех фильтров -->
                 <button class="reset-btn" onclick="resetAllFilters()" title="Сбросить все фильтры">
                     ❌
                 </button>
-                <!-- Кнопка «Наверх» -->
                 <button class="scroll-top-btn" onclick="scrollToTop()" title="Наверх">⬆️</button>
             </div>
         </div>
     </div>
 
-    <!-- Сетка карточек -->
     <div id="grid" class="grid">
         <div class="loading-spinner">⏳ Загрузка каталога наборов...</div>
     </div>
@@ -595,7 +575,7 @@
 
 <footer>
     <div id="footerPiecesCount">Общее число деталей LEGO: 0</div>
-    <div>Версия 1.3 (by Ewgenoff 02.08.2026)</div>
+    <div>Версия 1.4 (by Ewgenoff 02.08.2026)</div>
 </footer>
 
 <!-- Модальное окно детализации набора -->
@@ -629,16 +609,14 @@
     </div>
 </div>
 
-<!-- Модальное окно выбора Серии / Коробки / Года -->
+<!-- Модальное окно выбора параметра -->
 <div class="modal-overlay" id="pickerModalOverlay" onclick="closePickerModal(event)">
     <div class="modal picker-modal">
         <button class="modal-close" onclick="closePickerModalDirect()">✕</button>
         <div class="picker-header">
             <h3 id="pickerTitle">Выбор</h3>
         </div>
-        <div id="pickerContainer">
-            <!-- Кнопки опций генерируются динамически -->
-        </div>
+        <div id="pickerContainer"></div>
     </div>
 </div>
 
@@ -660,19 +638,30 @@
     const COL_EXTRA2  = 12; 
     const COL_CHECK   = 13; 
 
+    // Диапазоны деталей для фильтрации
+    const PIECES_RANGES = [
+        { id: '0-100', label: '0–100', min: 0, max: 100 },
+        { id: '101-500', label: '101–500', min: 101, max: 500 },
+        { id: '501-1000', label: '501–1000', min: 501, max: 1000 },
+        { id: '1001-1500', label: '1001–1500', min: 1001, max: 1500 },
+        { id: '1501-2000', label: '1501–2000', min: 1501, max: 2000 },
+        { id: '2001-3000', label: '2001–3000', min: 2001, max: 3000 },
+        { id: '3001-4000', label: '3001–4000', min: 3001, max: 4000 },
+        { id: '5000+', label: '5000+', min: 5000, max: Infinity }
+    ];
+
     let rawSetsData = [];
     let selectedStatusPill = 'all';
     let selectedTheme = '';
     let selectedBox = '';
     let selectedYear = '';
+    let selectedPiecesRange = '';
 
-    /* Логика прячущейся панели при скролле */
     let lastScrollY = window.scrollY;
     const stickyPanel = document.getElementById('stickyPanel');
 
     window.addEventListener('scroll', () => {
         const currentScrollY = window.scrollY;
-        
         if (currentScrollY > lastScrollY && currentScrollY > 100) {
             stickyPanel.classList.add('hide');
         } else {
@@ -791,6 +780,7 @@
         selectedTheme = '';
         selectedBox = '';
         selectedYear = '';
+        selectedPiecesRange = '';
         document.getElementById('searchInput').value = '';
         selectStatusPill('all');
     }
@@ -844,7 +834,7 @@
             sortedThemes.forEach(tName => {
                 const btn = document.createElement('button');
                 btn.className = `picker-item-btn ${selectedTheme === tName ? 'selected' : ''}`;
-                btn.textContent = `${tName} (${themeCounts[tName]})`;
+                btn.innerHTML = `${tName} <span class="item-count">(${themeCounts[tName]})</span>`;
                 btn.onclick = () => selectThemeFilter(tName);
                 container.appendChild(btn);
             });
@@ -908,8 +898,44 @@
             sortedYears.forEach(yr => {
                 const btn = document.createElement('button');
                 btn.className = `picker-item-btn ${selectedYear === yr ? 'selected' : ''}`;
-                btn.innerHTML = `${yr} <span class="year-count">(${yearCounts[yr]})</span>`;
+                btn.innerHTML = `${yr} <span class="item-count">(${yearCounts[yr]})</span>`;
                 btn.onclick = () => selectYearFilter(yr);
+                container.appendChild(btn);
+            });
+
+        } else if (type === 'pieces') {
+            titleEl.textContent = 'Количество деталей';
+            container.className = 'picker-grid-boxes';
+
+            const piecesCounts = {};
+            PIECES_RANGES.forEach(r => piecesCounts[r.id] = 0);
+
+            rawSetsData.forEach(row => {
+                const p = parseInt(row[COL_PIECES], 10);
+                if (!isNaN(p)) {
+                    const rangeObj = PIECES_RANGES.find(r => p >= r.min && p <= r.max);
+                    if (rangeObj) {
+                        piecesCounts[rangeObj.id]++;
+                    }
+                }
+            });
+
+            const totalItems = PIECES_RANGES.length + 1;
+            const rowsCount = Math.ceil(totalItems / 3);
+            container.style.gridTemplateRows = `repeat(${rowsCount}, auto)`;
+
+            const allBtn = document.createElement('button');
+            allBtn.className = `picker-item-btn ${selectedPiecesRange === '' ? 'selected' : ''}`;
+            allBtn.textContent = 'Все диапазоны';
+            allBtn.onclick = () => selectPiecesFilter('');
+            container.appendChild(allBtn);
+
+            PIECES_RANGES.forEach(rangeObj => {
+                const count = piecesCounts[rangeObj.id] || 0;
+                const btn = document.createElement('button');
+                btn.className = `picker-item-btn ${selectedPiecesRange === rangeObj.id ? 'selected' : ''}`;
+                btn.innerHTML = `${rangeObj.label} <span class="item-count">(${count})</span>`;
+                btn.onclick = () => selectPiecesFilter(rangeObj.id);
                 container.appendChild(btn);
             });
         }
@@ -945,6 +971,12 @@
         filterData();
     }
 
+    function selectPiecesFilter(val) {
+        selectedPiecesRange = val;
+        closePickerModalDirect();
+        filterData();
+    }
+
     function filterData() {
         const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
 
@@ -956,6 +988,7 @@
             const status = (row[COL_STATUS] || '').trim();
             const box    = (row[COL_BOX] || '').trim();
             const year   = (row[COL_YEAR] || '').trim();
+            const pieces = parseInt(row[COL_PIECES], 10);
 
             if (selectedStatusPill === 'Только инструкция') {
                 if (box.toLowerCase() !== 'только инструкция') return false;
@@ -964,11 +997,19 @@
             }
 
             const matchesSearch = setNum.includes(searchVal) || nameRu.includes(searchVal) || nameEn.includes(searchVal);
-            const matchesTheme = !selectedTheme || theme === selectedTheme;
-            const matchesBox = !selectedBox || box === selectedBox;
-            const matchesYear = !selectedYear || year === selectedYear;
+            const matchesTheme  = !selectedTheme || theme === selectedTheme;
+            const matchesBox    = !selectedBox || box === selectedBox;
+            const matchesYear   = !selectedYear || year === selectedYear;
 
-            return matchesSearch && matchesTheme && matchesBox && matchesYear;
+            let matchesPieces = true;
+            if (selectedPiecesRange) {
+                const rangeObj = PIECES_RANGES.find(r => r.id === selectedPiecesRange);
+                if (rangeObj) {
+                    matchesPieces = !isNaN(pieces) && pieces >= rangeObj.min && pieces <= rangeObj.max;
+                }
+            }
+
+            return matchesSearch && matchesTheme && matchesBox && matchesYear && matchesPieces;
         });
 
         renderCards(filtered);
@@ -1029,7 +1070,7 @@
                         <div class="badges-container">
                             <span class="badge badge-theme" onclick="event.stopPropagation(); openPickerModal('theme');">${theme}</span>
                             <span class="badge badge-year" onclick="event.stopPropagation(); openPickerModal('year');">${year}</span>
-                            <span class="badge badge-pieces">🧩 ${pieces}</span>
+                            <span class="badge badge-pieces" onclick="event.stopPropagation(); openPickerModal('pieces');">🧩 ${pieces}</span>
                             ${!hideBox ? `<span class="badge badge-box" onclick="event.stopPropagation(); openPickerModal('box');">Box № ${box}</span>` : ''}
                         </div>
                     </div>
@@ -1078,7 +1119,7 @@
         let badgesHtml = `
             <span class="badge badge-theme" onclick="closeModalDirect(); openPickerModal('theme');">${theme}</span>
             <span class="badge badge-year" onclick="closeModalDirect(); openPickerModal('year');">${year}</span>
-            <span class="badge badge-pieces">🧩 ${pieces} дет.</span>
+            <span class="badge badge-pieces" onclick="closeModalDirect(); openPickerModal('pieces');">🧩 ${pieces} дет.</span>
             ${!hideBox ? `<span class="badge badge-box" onclick="closeModalDirect(); openPickerModal('box');">Box № ${box}</span>` : ''}
             ${status ? `<span class="status-badge ${statusClass}">${status}</span>` : ''}
         `;
