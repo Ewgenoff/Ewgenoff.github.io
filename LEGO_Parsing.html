@@ -253,7 +253,8 @@
         { title: "11. № Коробки с инстр. (L)", key: "manual_box" },
         { title: "12. Служ. инфа (D)", key: "service_d" },
         { title: "13. Служ. инфа (E)", key: "service_e" },
-        { title: "14. Проверен ли набор (F)", key: "is_checked" }
+        { title: "14. Проверен ли набор (F)", key: "is_checked" },
+        { title: "15. Ссылка Rebrickable", key: "set_url" }
     ];
 
     const rebrickableCache = {};
@@ -364,12 +365,15 @@
             // Automatic Translation to Russian
             const nameRusTranslated = await translateText(nameEng);
 
+            const setUrl = data.set_url || `https://rebrickable.com/sets/${setNumStr}/`;
+
             const result = {
                 name_eng: nameEng,
                 name_rus: nameRusTranslated,
                 year: data.year || "",
                 num_parts: data.num_parts !== undefined ? data.num_parts : "",
-                theme: themeName
+                theme: themeName,
+                set_url: setUrl
             };
 
             rebrickableCache[setNumStr] = result;
@@ -419,12 +423,13 @@
                 const condition_desc = r[8] || "";        // Col I
                 const manual_exist = r[10] || "";         // Col K
                 const manual_box = r[11] || "";           // Col L
+                const colO = (r[14] || "").trim();        // Col O (индекс 14)
 
                 const percent = Math.round(((i + 1) / dataRows.length) * 100);
                 progressBar.style.width = `${percent}%`;
 
-                // Условие: Столбец A должен быть заполнена, а Столбец B должен быть ПУСТЫМ
-                if (box_num !== "" && colB === "") {
+                // Условие: Столбец A должен быть заполнен, а Столбец O должен быть ПУСТЫМ
+                if (box_num !== "" && colO === "") {
                     statusBar.childNodes[0].nodeValue = `⏳ Парсим Rebrickable (${i + 1}/${dataRows.length}) [Задержка 2 сек...] Набор: ${set_num || box_num} `;
 
                     let rebData = null;
@@ -452,13 +457,14 @@
                         manual_box: manual_box,
                         service_d: service_d,
                         service_e: service_e,
-                        is_checked: is_checked
+                        is_checked: is_checked,
+                        set_url: rebData ? rebData.set_url : ""
                     });
 
                     // Отображаем строки по мере поступления
                     renderTable(globalTableData);
                 } else {
-                    statusBar.childNodes[0].nodeValue = `⏭️ Пропуск строки ${i + 1}/${dataRows.length} (Столбец A пуст или столбец B заполнена)`;
+                    statusBar.childNodes[0].nodeValue = `⏭️ Пропуск строки ${i + 1}/${dataRows.length} (Столбец A пуст или столбец O заполнен)`;
                 }
             }
 
@@ -485,7 +491,14 @@
 
             columnsConfig.slice(1).forEach(col => {
                 const td = document.createElement("td");
-                td.textContent = row[col.key] !== undefined ? row[col.key] : "";
+                const val = row[col.key] !== undefined ? row[col.key] : "";
+                
+                if (col.key === "set_url" && val) {
+                    td.innerHTML = `<a href="${val}" target="_blank" rel="noopener noreferrer">${val}</a>`;
+                } else {
+                    td.textContent = val;
+                }
+                
                 tr.appendChild(td);
             });
 
