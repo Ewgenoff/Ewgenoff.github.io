@@ -151,7 +151,7 @@
             transform: scale(1.05);
         }
 
-        /* Плашка статуса (Столбец H) */
+        /* Плашка статуса */
         .status-badge {
             position: absolute;
             top: 10px;
@@ -173,7 +173,6 @@
             flex-grow: 1;
         }
 
-        /* Номер набора (Столбец A) */
         .set-number {
             font-size: 13px;
             font-weight: 700;
@@ -181,7 +180,6 @@
             margin-bottom: 4px;
         }
 
-        /* Название (Столбец C) */
         .set-title {
             font-size: 16px;
             font-weight: 700;
@@ -195,7 +193,6 @@
             min-height: 42px;
         }
 
-        /* Плашки под номером */
         .badges-container {
             display: flex;
             flex-wrap: wrap;
@@ -212,19 +209,16 @@
             align-items: center;
         }
 
-        /* Серия (Столбец F) */
         .badge-theme {
             background-color: var(--theme-bg);
             color: var(--theme-text);
         }
 
-        /* Год (Столбец E) */
         .badge-year {
             background-color: var(--year-bg);
             color: var(--year-text);
         }
 
-        /* Детали (Столбец D) с иконкой 🧩 */
         .badge-pieces {
             background-color: var(--pieces-bg);
             color: var(--pieces-text);
@@ -414,14 +408,12 @@
 
     let rawSetsData = [];
 
-    // Прямой метод загрузки CDN изображений Rebrickable по номеру набора без CORS блокировок
+    // Относительный путь к локальной папке images/sets/
     function getImageUrl(setNum) {
         if (!setNum) return 'https://via.placeholder.com/300x220?text=No+Image';
-        let cleanNum = setNum.toString().trim();
-        if (!cleanNum.includes('-')) {
-            cleanNum += '-1';
-        }
-        return `https://cdn.rebrickable.com/media/sets/${cleanNum}.jpg`;
+        // Очищаем номер от пробелов и убираем "-1" (если в таблице "75375-1", получаем "75375")
+        let cleanNum = setNum.toString().trim().split('-')[0];
+        return `images/sets/${cleanNum}.jpg`;
     }
 
     function parseCSV(text) {
@@ -515,31 +507,22 @@
             const status = row[COL_STATUS]  || 'Не указан';
 
             const primaryImg = getImageUrl(setNum);
-            const fallbackImg = `https://cdn.rebrickable.com/media/sets/${setNum.toString().trim()}.jpg`;
 
             return `
                 <div class="card" onclick="openModal(${index})">
                     <div class="card-image-wrap">
-                        <!-- Изображение с автозаменой и обработкой ошибок -->
                         <img src="${primaryImg}" 
                              alt="${name}" 
-                             onerror="if (this.src !== '${fallbackImg}') { this.src='${fallbackImg}'; } else { this.onerror=null; this.src='https://via.placeholder.com/300x220?text=Нет+фото'; }" />
-                        <!-- Плашка Статус (Столбец H) -->
+                             onerror="this.onerror=null; this.src='https://via.placeholder.com/300x220?text=Нет+фото';" />
                         <span class="status-badge">${status}</span>
                     </div>
                     <div class="card-body">
-                        <!-- Номер набора (Столбец A) -->
                         <div class="set-number">№ ${setNum}</div>
-                        <!-- Название конструктора (Столбец C) -->
                         <h3 class="set-title">${name}</h3>
                         
-                        <!-- Плашки внизу под номером -->
                         <div class="badges-container">
-                            <!-- Серия (Столбец F) -->
                             <span class="badge badge-theme">${theme}</span>
-                            <!-- Год выпуска (Столбец E) -->
                             <span class="badge badge-year">${year}</span>
-                            <!-- Кол-во деталей (Столбец D) со значком 🧩 -->
                             <span class="badge badge-pieces">🧩 ${pieces}</span>
                         </div>
                     </div>
@@ -603,7 +586,6 @@
         document.getElementById('modalSetNum').textContent = `Артикул № ${setNum}`;
         document.getElementById('modalTitle').textContent = name;
         
-        // В окне с описанием: Серия из столбца F, Кол-во деталей из D
         document.getElementById('modalTheme').textContent = theme;
         document.getElementById('modalPieces').textContent = `${pieces} деталей`;
         document.getElementById('modalYear').textContent = year;
