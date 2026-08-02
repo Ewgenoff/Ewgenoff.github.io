@@ -1,0 +1,122 @@
+name: Download LEGO Images
+
+on:
+  workflow_dispatch: # Позволяет запускать вручную по кнопке
+
+jobs:
+  download-images:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run image parser script
+        env:
+          REBRICKABLE_API_KEY: ${{ secrets.REBRICKABLE_API_KEY }}
+        run: |
+          node -e '
+          const fs = require("fs");
+          const path = require("path");
+          const https = require("https");
+
+          const API_KEY = process.env.REBRICKABLE_API_KEY;
+          const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPpn75qFGUsV-gVTl3MzZ9SDzYK88acKUfzIyphP15jdfDzqVEku1zQaOWPccc5z6BCJf1-EPMcraO/pub?gid=475660989&single=true&output=csv";
+          const OUTPUT_DIR = path.join(process.cwd(), "images", "sets");
+
+          if (!fs.existsSync(OUTPUT_DIR)) {
+            fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+          }
+
+          const fetchUrl = (url, headers = {}) => new Promise((resolve, reject) => {
+            https.get(url, { headers }, (res) => {
+              if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                return fetchUrl(res.headers.location, headers).then(resolve).catch(reject);
+              }
+              let data = "";
+              res.on("data", chunk => data += chunk);
+              res.on("end", () => resolve({ statusCode: res.statusCode, body: data }));
+            }).on("error", reject);
+          });
+
+          const downloadFile = (fileUrl, filePath) => new Promise((resolve, reject) => {
+            https.get(fileUrl, (res) => {
+              if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+                return downloadFile(res.headers.location, filePath).then(resolve).catch(reject);
+              }
+              const fileStream = fs.createWriteStream(filePath);
+              res.pipe(fileStream);
+              fileStream.on("finish", () => {
+                fileStream.close();
+                resolve();
+              });
+            }).on("error", reject);
+          });
+
+          const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+          async function main() {
+            console.log("Скачиваем CSV из Google Таблиц...");
+            const csvRes = await fetchUrl(CSV_URL);
+            const lines = csvRes.body.split(/\r?\n/);
+
+            // Получаем номера наборов из столбца A
+            const setNums = lines
+              .map(line => line.split(",")[0].replace(/"/g, "").trim())
+              .filter(num => /^\d+$/.test(num));
+
+            console.log(`Найдено наборов в таблице: ${setNums.length}`);
+
+            for (const num of setNums) {
+              const fullSetNum = `${num}-1`;
+              const filePath = path.join(OUTPUT_DIR, `${num}.jpg`);
+
+              if (fs.existsSync(filePath)) {
+                console.log(`[ПРОПУЩЕНО] Набор ${num}.jpg уже есть`);
+                continue;
+              }
+
+              console.log(`[ЗАПРОС] Получаем данные для ${fullSetNum}...`);
+              try {
+                const apiRes = await fetchUrl(`https://rebrickable.com/api/v3/lego/sets/${fullSetNum}/`, {
+                  "Authorization": `key ${API_KEY}`
+                });
+
+                if (apiRes.statusCode === 200) {
+                  const data = JSON.parse(apiRes.body);
+                  if (data.set_img_url) {
+                    console.log(`[СКАЧИВАНИЕ] Сохраняем ${num}.jpg...`);
+                    await downloadFile(data.set_img_url, filePath);
+                  }
+                } else {
+                  console.error(`[ОШИБКА] Не удалось получить данные для ${fullSetNum}, статус: ${apiRes.statusCode}`);
+                }
+              } catch (e) {
+                console.error(`[ОШИБКА] Для ${num}: ${e.message}`);
+              }
+
+              // Задержка 1 секунда для защиты API-ключа
+              await sleep(1000);
+            }
+            console.log("Обработка завершена!");
+          }
+
+          main();
+          '
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add images/sets/
+          if git diff --staged --quiet; then
+            echo "Новых картинок нет, коммит не требуется."
+          else
+            git commit -m "Auto-download set images from Rebrickable"
+            git push
+          fi
