@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог LEGO Наборов</title>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --hover-bg: #edf2f7;
+            --text-color: #2d3748;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #1a202c;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #0052a3;
+        }
+
+        button.secondary {
+            background-color: #718096;
+        }
+
+        button.secondary:hover {
+            background-color: #4a5568;
+        }
+
+        input[type="text"] {
+            padding: 9px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 14px;
+            min-width: 250px;
+        }
+
+        .status-bar {
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #4a5568;
+            padding: 10px;
+            background: #e2e8f0;
+            border-radius: 6px;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 75vh;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            position: relative;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        th, td {
+            padding: 10px 14px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+            user-select: text; /* Allows normal selection */
+        }
+
+        th {
+            background-color: #edf2f7;
+            color: #2d3748;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th .btn-copy-col {
+            display: block;
+            margin-top: 4px;
+            padding: 2px 6px;
+            font-size: 10px;
+            background: #cbd5e0;
+            color: #2d3748;
+            border-radius: 4px;
+        }
+
+        th .btn-copy-col:hover {
+            background: #a0aec0;
+        }
+
+        tr:hover {
+            background-color: var(--hover-bg);
+        }
+
+        tr.selected {
+            background-color: #ebf8ff;
+        }
+
+        .btn-copy-row {
+            padding: 3px 8px;
+            font-size: 11px;
+            background-color: #48bb78;
+        }
+
+        .btn-copy-row:hover {
+            background-color: #38a169;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-success { background: #c6f6d5; color: #22543d; }
+        .badge-warning { background: #feebc8; color: #744210; }
+
+        /* Toast notifications */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 12px 20px;
+            position: fixed;
+            z-index: 100;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📦 Каталог LEGO наборов</h1>
+
+    <div class="controls">
+        <button id="btn-load" onclick="loadData()">🔄 Загрузить / Обновить данные</button>
+        <button class="secondary" onclick="copyEntireTable()">📋 Копировать всю таблицу</button>
+        <input type="text" id="search-input" placeholder="🔍 Поиск по таблице..." onkeyup="filterTable()">
+    </div>
+
+    <div class="status-bar" id="status-bar">
+        Готов к загрузке данных...
+    </div>
+
+    <div class="table-wrapper">
+        <table id="lego-table">
+            <thead>
+                <tr id="table-header">
+                    <!-- Dynamic Headers -->
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <!-- Dynamic Content -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="toast">Скопировано!</div>
+
+<script>
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPpn75qFGUsV-gVTl3MzZ9SDzYK88acKUfzIyphP15jdfDzqVEku1zQaOWPccc5z6BCJf1-EPMcraO/pub?gid=1060205013&single=true&output=csv";
+    const API_KEY = "027adf4d957633844024586e8a92d7e8";
+
+    const columnsConfig = [
+        { title: "Копировать", isAction: true },
+        { title: "1. Номер набора (С)", key: "set_num" },
+        { title: "2. Название (ENG)", key: "name_eng" },
+        { title: "3. Название (RUS)", key: "name_rus" },
+        { title: "4. Кол-во деталей", key: "num_parts" },
+        { title: "5. Год выпуска", key: "year" },
+        { title: "6. Серия (Theme)", key: "theme" },
+        { title: "7. № Коробки (А)", key: "box_num" },
+        { title: "8. Статус продажи (H)", key: "sale_status" },
+        { title: "9. Описание состояния (I)", key: "condition_desc" },
+        { title: "10. Наличие инструкции (K)", key: "manual_exist" },
+        { title: "11. № Коробки с инстр. (L)", key: "manual_box" },
+        { title: "12. Служ. инфа (D)", key: "service_d" },
+        { title: "13. Служ. инфа (E)", key: "service_e" },
+        { title: "14. Намерение (F)", key: "intent" }
+    ];
+
+    const rebrickableCache = {};
+    let globalTableData = [];
+
+    // Simple CSV parser supporting quoted strings and commas
+    function parseCSV(text) {
+        let p = '', c = '', r = [];
+        let q = false;
+        let row = [''];
+        for (let i = 0; i < text.length; i++) {
+            c = text[i];
+            let next = text[i+1];
+            if (c === '"') {
+                if (q && next === '"') { row[row.length - 1] += '"'; i++; }
+                else { q = !q; }
+            } else if (c === ',' && !q) {
+                row.push('');
+            } else if ((c === '\r' || c === '\n') && !q) {
+                if (c === '\r' && next === '\n') { i++; }
+                r.push(row);
+                row = [''];
+            } else {
+                row[row.length - 1] += c;
+            }
+        }
+        if (row.length > 1 || row[0] !== '') { r.push(row); }
+        return r;
+    }
+
+    function initTableHeader() {
+        const headerTr = document.getElementById("table-header");
+        headerTr.innerHTML = "";
+        columnsConfig.forEach((col, index) => {
+            const th = document.createElement("th");
+            if (col.isAction) {
+                th.textContent = col.title;
+            } else {
+                th.innerHTML = `
+                    <div>${col.title}</div>
+                    <button class="btn-copy-col" onclick="copyColumn(${index})">📋 Коп. столбец</button>
+                `;
+            }
+            headerTr.appendChild(th);
+        });
+    }
+
+    async function fetchRebrickableInfo(setNumRaw) {
+        if (!setNumRaw) return null;
+        let setNumStr = String(setNumRaw).trim();
+        if (!setNumStr) return null;
+
+        // Ensure -1 suffix if plain number
+        if (!setNumStr.includes("-")) {
+            setNumStr = setNumStr + "-1";
+        }
+
+        if (rebrickableCache[setNumStr]) {
+            return rebrickableCache[setNumStr];
+        }
+
+        try {
+            const res = await fetch(`https://rebrickable.com/api/v3/lego/sets/${setNumStr}/`, {
+                headers: { "Authorization": `key ${API_KEY}` }
+            });
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+
+            // Fetch theme name if available
+            let themeName = "";
+            if (data.theme_id) {
+                try {
+                    const themeRes = await fetch(`https://rebrickable.com/api/v3/lego/themes/${data.theme_id}/`, {
+                        headers: { "Authorization": `key ${API_KEY}` }
+                    });
+                    if (themeRes.ok) {
+                        const themeData = await themeRes.json();
+                        themeName = themeData.name || "";
+                    }
+                } catch(e) {}
+            }
+
+            const result = {
+                name: data.name || "",
+                year: data.year || "",
+                num_parts: data.num_parts !== undefined ? data.num_parts : "",
+                theme: themeName
+            };
+
+            rebrickableCache[setNumStr] = result;
+            return result;
+        } catch (err) {
+            console.warn(`Не удалось получить данные для набора ${setNumStr}:`, err);
+            return null;
+        }
+    }
+
+    async function loadData() {
+        const statusBar = document.getElementById("status-bar");
+        statusBar.textContent = "⏳ Скачиваем Google Таблицу...";
+
+        try {
+            const response = await fetch(SHEET_CSV_URL);
+            if (!response.ok) throw new Error("Не удалось загрузить CSV файл");
+            const csvText = await response.text();
+            const rows = parseCSV(csvText);
+
+            if (rows.length < 2) {
+                statusBar.textContent = "⚠️ Таблица пуста или содержит только заголовки.";
+                return;
+            }
+
+            // Assume first row is header
+            const dataRows = rows.slice(1).filter(r => r.some(cell => cell.trim() !== ""));
+
+            statusBar.textContent = `📊 Найдено строк: ${dataRows.length}. Запрашиваем данные с Rebrickable...`;
+
+            globalTableData = [];
+            
+            for (let i = 0; i < dataRows.length; i++) {
+                const r = dataRows[i];
+                // Mapping by column indexes (0-based):
+                // A:0, B:1, C:2, D:3, E:4, F:5, G:6, H:7, I:8, J:9, K:10, L:11
+                const box_num = r[0] || "";         // Col A
+                const set_num = r[2] || "";         // Col C
+                const service_d = r[3] || "";       // Col D
+                const service_e = r[4] || "";       // Col E
+                const intent = r[5] || "";          // Col F
+                const name_rus = r[6] || "";        // Col G (Название RUS)
+                const sale_status = r[7] || "";     // Col H
+                const condition_desc = r[8] || "";  // Col I
+                const manual_exist = r[10] || "";   // Col K
+                const manual_box = r[11] || "";     // Col L
+
+                statusBar.textContent = `⏳ Загрузка из Rebrickable (${i + 1}/${dataRows.length}) для набора: ${set_num}...`;
+
+                const rebData = await fetchRebrickableInfo(set_num);
+
+                globalTableData.push({
+                    set_num: set_num,
+                    name_eng: rebData ? rebData.name : "",
+                    name_rus: name_rus,
+                    num_parts: rebData ? rebData.num_parts : "",
+                    year: rebData ? rebData.year : "",
+                    theme: rebData ? rebData.theme : "",
+                    box_num: box_num,
+                    sale_status: sale_status,
+                    condition_desc: condition_desc,
+                    manual_exist: manual_exist,
+                    manual_box: manual_box,
+                    service_d: service_d,
+                    service_e: service_e,
+                    intent: intent
+                });
+            }
+
+            statusBar.textContent = `✅ Успешно загружено и обработано наборов: ${globalTableData.length}`;
+            renderTable(globalTableData);
+
+        } catch (err) {
+            console.error(err);
+            statusBar.textContent = `❌ Ошибка загрузки: ${err.message}`;
+        }
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById("table-body");
+        tbody.innerHTML = "";
+
+        data.forEach((row, rowIndex) => {
+            const tr = document.createElement("tr");
+
+            // Row Copy Button Column
+            const tdAction = document.createElement("td");
+            tdAction.innerHTML = `<button class="btn-copy-row" onclick="copyRow(${rowIndex})">📋 Строка</button>`;
+            tr.appendChild(tdAction);
+
+            // Data Columns
+            columnsConfig.slice(1).forEach(col => {
+                const td = document.createElement("td");
+                td.textContent = row[col.key] !== undefined ? row[col.key] : "";
+                tr.appendChild(td);
+            });
+
+            tbody.appendChild(tr);
+        });
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.className = "show";
+        setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 3000);
+    }
+
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            showToast("Скопировано в буфер обмена!");
+        }).catch(err => {
+            showToast("Ошибка копирования!");
+        });
+    }
+
+    function copyRow(rowIndex) {
+        const row = globalTableData[rowIndex];
+        if (!row) return;
+        const line = columnsConfig.slice(1).map(col => row[col.key]).join("\t");
+        copyToClipboard(line);
+    }
+
+    function copyColumn(colIndex) {
+        if (colIndex === 0) return;
+        const key = columnsConfig[colIndex].key;
+        const lines = globalTableData.map(row => row[key]);
+        copyToClipboard(lines.join("\n"));
+    }
+
+    function copyEntireTable() {
+        const headers = columnsConfig.slice(1).map(c => c.title).join("\t");
+        const rows = globalTableData.map(row => {
+            return columnsConfig.slice(1).map(col => row[col.key]).join("\t");
+        }).join("\n");
+        
+        copyToClipboard(headers + "\n" + rows);
+    }
+
+    function filterTable() {
+        const query = document.getElementById("search-input").value.toLowerCase();
+        const filtered = globalTableData.filter(row => {
+            return Object.values(row).some(val => String(val).toLowerCase().includes(query));
+        });
+        renderTable(filtered);
+    }
+
+    // Auto-init header on load
+    window.onload = () => {
+        initTableHeader();
+    };
+</script>
+
+</body>
+</html>
