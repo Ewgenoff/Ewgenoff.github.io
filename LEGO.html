@@ -20,7 +20,7 @@
             --pieces-text: #92400e;
             --box-bg: #e2e8f0;
             --box-text: #334155;
-            --border-color: #cbd5e1; /* Тонкая линия для карточек */
+            --border-color: #cbd5e1;
             --radius: 12px;
             --shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
             --shadow-hover: 0 10px 15px -3px rgba(0,0,0,0.1);
@@ -32,7 +32,7 @@
             --status-sold: #64748b;     /* Серая */
 
             /* Цвета проверки */
-            --verified-gold: #d97706;
+            --verified-green: #16a34a;  /* Зеленый для проверен */
             --unverified-red: #dc2626;
         }
 
@@ -101,6 +101,7 @@
         .status-pill[data-status="Продажа"] { background-color: var(--status-sale); color: #fff; }
         .status-pill[data-status="Запечатан"] { background-color: var(--status-sealed); color: #fff; }
         .status-pill[data-status="Продан"] { background-color: var(--status-sold); color: #fff; }
+        .status-pill[data-status="Только инструкции"] { background-color: #0d9488; color: #fff; }
 
         .status-pill:not(.active) {
             opacity: 0.65;
@@ -162,7 +163,6 @@
             gap: 20px;
         }
 
-        /* Обводка карточки тонкой линией */
         .card {
             background: var(--card-bg);
             border-radius: var(--radius);
@@ -213,7 +213,6 @@
             gap: 4px;
         }
 
-        /* Динамические цвета плашек статуса */
         .status-badge {
             padding: 4px 10px;
             border-radius: 20px;
@@ -237,7 +236,7 @@
             color: #fff;
             text-transform: uppercase;
         }
-        .verified-badge.gold { background-color: var(--verified-gold); }
+        .verified-badge.green { background-color: var(--verified-green); }
         .verified-badge.red { background-color: var(--unverified-red); }
 
         .card-body {
@@ -426,7 +425,6 @@
             color: var(--text-muted);
         }
 
-        /* Подвал */
         footer {
             margin-top: 40px;
             padding: 20px 0;
@@ -444,13 +442,13 @@
         <h1>🧩 Каталог наборов LEGO</h1>
     </header>
 
-    <!-- Плашки статусов взаимоисключающие -->
     <div class="status-pills" id="statusPills">
         <div class="status-pill active" data-status="all" onclick="selectStatusPill('all')">Все (<span id="cnt-all">0</span>)</div>
         <div class="status-pill" data-status="Для себя" onclick="selectStatusPill('Для себя')">Для себя (<span id="cnt-self">0</span>)</div>
         <div class="status-pill" data-status="Продажа" onclick="selectStatusPill('Продажа')">Продажа (<span id="cnt-sale">0</span>)</div>
         <div class="status-pill" data-status="Запечатан" onclick="selectStatusPill('Запечатан')">Запечатан (<span id="cnt-sealed">0</span>)</div>
         <div class="status-pill" data-status="Продан" onclick="selectStatusPill('Продан')">Продан (<span id="cnt-sold">0</span>)</div>
+        <div class="status-pill" data-status="Только инструкции" onclick="selectStatusPill('Только инструкции')">Только инструкции (<span id="cnt-instructions">0</span>)</div>
     </div>
 
     <div class="controls">
@@ -475,7 +473,6 @@
     <div>Версия 1.0 (by Ewgenoff 02.08.2026)</div>
 </footer>
 
-<!-- Модальное окно описания -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
     <div class="modal">
         <button class="modal-close" onclick="closeModalDirect()">✕</button>
@@ -527,7 +524,6 @@
 <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPpn75qFGUsV-gVTl3MzZ9SDzYK88acKUfzIyphP15jdfDzqVEku1zQaOWPccc5z6BCJf1-EPMcraO/pub?gid=475660989&single=true&output=csv';
 
-    // Индексы столбцов
     const COL_SET_NUM = 0;  // A: Номер набора
     const COL_NAME_EN = 1;  // B: Название на англ
     const COL_NAME_RU = 2;  // C: Название на русском
@@ -600,12 +596,17 @@
         }
     }
 
-    // Подсчет количества в плашках статуса (Наборы без статуса не участвуют)
     function updateStatusPillCounts() {
-        let cntAll = 0, cntSelf = 0, cntSale = 0, cntSealed = 0, cntSold = 0;
+        let cntAll = 0, cntSelf = 0, cntSale = 0, cntSealed = 0, cntSold = 0, cntInstructions = 0;
 
         rawSetsData.forEach(row => {
             const st = (row[COL_STATUS] || '').trim();
+            const box = (row[COL_BOX] || '').trim().toLowerCase();
+
+            if (box === 'только инструкции') {
+                cntInstructions++;
+            }
+
             if (st === 'Для себя') { cntSelf++; cntAll++; }
             else if (st === 'Продажа') { cntSale++; cntAll++; }
             else if (st === 'Запечатан') { cntSealed++; cntAll++; }
@@ -617,6 +618,7 @@
         document.getElementById('cnt-sale').textContent = cntSale;
         document.getElementById('cnt-sealed').textContent = cntSealed;
         document.getElementById('cnt-sold').textContent = cntSold;
+        document.getElementById('cnt-instructions').textContent = cntInstructions;
     }
 
     function selectStatusPill(status) {
@@ -632,7 +634,6 @@
     }
 
     function populateFilters(data) {
-        // Подсчет пар: Серия -> Кол-во (статусы только 'Для себя' и 'Запечатан')
         const themeCounts = {};
         const boxes = new Set();
 
@@ -648,10 +649,9 @@
                 }
             }
 
-            if (box) boxes.add(box);
+            if (box && box.toLowerCase() !== 'только инструкции') boxes.add(box);
         });
 
-        // Заполнение фильтра "Все серии"
         const themeSelect = document.getElementById('themeFilter');
         themeSelect.innerHTML = '<option value="">Все серии</option>';
         Object.keys(themeCounts).sort().forEach(theme => {
@@ -661,7 +661,6 @@
             themeSelect.appendChild(opt);
         });
 
-        // Заполнение фильтра по коробкам
         const boxSelect = document.getElementById('boxFilter');
         boxSelect.innerHTML = '<option value="">Все коробки</option>';
         Array.from(boxes).sort((a,b) => a.localeCompare(b, undefined, {numeric: true})).forEach(box => {
@@ -685,11 +684,11 @@
             const status = (row[COL_STATUS] || '').trim();
             const box    = (row[COL_BOX] || '').trim();
 
-            // Взаимоисключающий выбор плашек
-            if (selectedStatusPill !== 'all') {
+            if (selectedStatusPill === 'Только инструкции') {
+                if (box.toLowerCase() !== 'только инструкции') return false;
+            } else if (selectedStatusPill !== 'all') {
                 if (status !== selectedStatusPill) return false;
             } else {
-                // Без статуса не участвуют
                 if (!['Для себя', 'Продажа', 'Запечатан', 'Продан'].includes(status)) return false;
             }
 
@@ -719,26 +718,32 @@
             const theme  = row[COL_THEME]   || '—';
             const box    = row[COL_BOX]     || '—';
             const status = row[COL_STATUS]  || '';
-            const checkStatus = (row[COL_CHECK] || '').trim().toLowerCase();
+            const checkRaw = row[COL_CHECK] ? row[COL_CHECK].trim() : '';
+            const checkStatus = checkRaw.toLowerCase();
 
             const primaryImg = getImageUrl(setNum);
 
-            // Определение класса плашки статуса
             let statusClass = '';
             if (status === 'Для себя') statusClass = 'st-для-себя';
             else if (status === 'Продажа') statusClass = 'st-продажа';
             else if (status === 'Запечатан') statusClass = 'st-запечатан';
             else if (status === 'Продан') statusClass = 'st-продан';
 
-            // Проверка статус плашка
+            // 1. Если столбец N пуст — плашку проверки не показываем
             let checkBadge = '';
-            if (checkStatus === 'проверен') {
-                checkBadge = '<span class="verified-badge gold">Проверен</span>';
-            } else {
-                checkBadge = '<span class="verified-badge red">Не проверен</span>';
+            if (checkRaw !== '') {
+                if (checkStatus === 'проверен') {
+                    // 4. Зеленый цвет для «Проверен»
+                    checkBadge = '<span class="verified-badge green">Проверен</span>';
+                } else {
+                    checkBadge = '<span class="verified-badge red">Не проверен</span>';
+                }
             }
 
-            // Уникальный ID для вызова modal
+            // 2. Скрытие плашки Box если статус: Продан, Набора нет, Запечатан
+            const normalizedStatus = status.toLowerCase();
+            const hideBox = normalizedStatus === 'продан' || normalizedStatus === 'запечатан' || normalizedStatus === 'набора нет';
+
             const rowIndex = rawSetsData.indexOf(row);
 
             return `
@@ -760,7 +765,7 @@
                             <span class="badge badge-theme">${theme}</span>
                             <span class="badge badge-year">${year}</span>
                             <span class="badge badge-pieces">🧩 ${pieces}</span>
-                            <span class="badge badge-box">Box № ${box}</span>
+                            ${!hideBox ? `<span class="badge badge-box">Box № ${box}</span>` : ''}
                         </div>
                     </div>
                 </div>
@@ -802,7 +807,7 @@
         document.getElementById('modalTheme').textContent = theme;
         document.getElementById('modalPieces').textContent = `${pieces} дет.`;
         document.getElementById('modalYearBox').textContent = `${year} г. / Box № ${box}`;
-        document.getElementById('modalStatus').textContent = `${status} (${checkStatus || 'Не проверен'})`;
+        document.getElementById('modalStatus').textContent = `${status} ${checkStatus ? `(${checkStatus})` : ''}`;
 
         document.getElementById('modalDesc').textContent = desc;
         document.getElementById('modalManual').textContent = `${manual} ${manualBox}`;
