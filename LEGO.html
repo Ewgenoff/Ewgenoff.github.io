@@ -30,6 +30,7 @@
             --status-sale: #2563eb;     /* Синяя */
             --status-sealed: #9333ea;   /* Фиолетовая */
             --status-sold: #64748b;     /* Серая */
+            --status-no-set: #334155;   /* Тёмная плашка "Набора нет" */
 
             /* Цвета проверки */
             --verified-green: #16a34a;
@@ -59,7 +60,7 @@
             flex: 1;
         }
 
-        /* Закрепленная верхняя панель */
+        /* Закрепленная верхняя панель с анимацией выезда */
         .sticky-top-panel {
             position: sticky;
             top: 0;
@@ -69,6 +70,11 @@
             padding-bottom: 8px;
             border-bottom: 1px solid #cbd5e1;
             margin-bottom: 16px;
+            transition: transform 0.3s ease;
+        }
+
+        .sticky-top-panel.hide {
+            transform: translateY(-100%);
         }
 
         /* Уменьшенные плашки статусов над поиском */
@@ -106,6 +112,7 @@
         .status-pill[data-status="Продажа"] { background-color: var(--status-sale); color: #fff; }
         .status-pill[data-status="Запечатан"] { background-color: var(--status-sealed); color: #fff; }
         .status-pill[data-status="Продан"] { background-color: var(--status-sold); color: #fff; }
+        .status-pill[data-status="Набора нет"] { background-color: var(--status-no-set); color: #fff; }
         .status-pill[data-status="Только инструкция"] { background-color: #0d9488; color: #fff; }
 
         .status-pill:not(.active) {
@@ -266,6 +273,7 @@
         .status-badge.st-продажа { background-color: var(--status-sale); }
         .status-badge.st-запечатан { background-color: var(--status-sealed); }
         .status-badge.st-продан { background-color: var(--status-sold); }
+        .status-badge.st-набора-нет { background-color: var(--status-no-set); color: #ffffff; }
 
         .verified-badge {
             padding: 3px 8px;
@@ -464,21 +472,23 @@
             font-weight: 800;
         }
 
-        /* Сетка для коробок (3 равных столбца) */
+        /* Сетка для коробок (3 столбца, заполнение сверху вниз) */
         .picker-grid-boxes {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
+            grid-auto-flow: column;
             gap: 8px;
             max-height: 65vh;
+            overflow-x: auto;
             overflow-y: auto;
             padding: 4px;
         }
 
-        /* Список для серий (1 узкий столбец) */
+        /* Список для серий (1 столбец) */
         .picker-list-themes {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
             max-height: 65vh;
             overflow-y: auto;
             padding: 4px;
@@ -486,7 +496,7 @@
 
         .picker-item-btn {
             width: 100%;
-            padding: 6px 10px;
+            padding: 8px 10px;
             border-radius: 6px;
             border: 1px solid #cbd5e1;
             background: #ffffff;
@@ -496,13 +506,14 @@
             cursor: pointer;
             transition: all 0.15s ease;
             box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            white-space: normal;
+            word-wrap: break-word;
+            line-height: 1.3;
         }
 
         .picker-grid-boxes .picker-item-btn {
             text-align: center;
+            white-space: nowrap;
         }
 
         .picker-item-btn:hover {
@@ -539,13 +550,14 @@
 <div class="container">
 
     <!-- Закрепленный блок параметров и фильтров -->
-    <div class="sticky-top-panel">
+    <div class="sticky-top-panel" id="stickyPanel">
         <div class="status-pills" id="statusPills">
             <div class="status-pill active" data-status="all" onclick="selectStatusPill('all')">Все (<span id="cnt-all">0</span>)</div>
             <div class="status-pill" data-status="Для себя" onclick="selectStatusPill('Для себя')">Для себя (<span id="cnt-self">0</span>)</div>
             <div class="status-pill" data-status="Продажа" onclick="selectStatusPill('Продажа')">Продажа (<span id="cnt-sale">0</span>)</div>
             <div class="status-pill" data-status="Запечатан" onclick="selectStatusPill('Запечатан')">Запечатан (<span id="cnt-sealed">0</span>)</div>
             <div class="status-pill" data-status="Продан" onclick="selectStatusPill('Продан')">Продан (<span id="cnt-sold">0</span>)</div>
+            <div class="status-pill" data-status="Набора нет" onclick="selectStatusPill('Набора нет')">Набора нет (<span id="cnt-no-set">0</span>)</div>
             <div class="status-pill" data-status="Только инструкция" onclick="selectStatusPill('Только инструкция')">📖 (<span id="cnt-instructions">0</span>)</div>
         </div>
 
@@ -589,7 +601,6 @@
         <button class="modal-close" onclick="closeModalDirect()">✕</button>
         <div class="modal-img-container">
             <img id="modalImg" src="" alt="">
-            <!-- Плашки поверх изображения -->
             <div class="modal-image-badges" id="modalImageBadges"></div>
         </div>
         <div class="modal-content">
@@ -631,25 +642,40 @@
 <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPpn75qFGUsV-gVTl3MzZ9SDzYK88acKUfzIyphP15jdfDzqVEku1zQaOWPccc5z6BCJf1-EPMcraO/pub?gid=475660989&single=true&output=csv';
 
-    const COL_SET_NUM = 0;  // A: Номер набора
-    const COL_NAME_EN = 1;  // B: Название на англ
-    const COL_NAME_RU = 2;  // C: Название на русском
-    const COL_PIECES  = 3;  // D: Детали
-    const COL_YEAR    = 4;  // E: Год
-    const COL_THEME   = 5;  // F: Серия
-    const COL_BOX     = 6;  // G: Номер коробки
-    const COL_STATUS  = 7;  // H: Статус
-    const COL_DESC    = 8;  // I: Описание
-    const COL_MANUAL  = 9;  // J: Инструкция
-    const COL_MANUAL_BOX = 10; // K: Коробка инструкции
-    const COL_EXTRA1  = 11; // L: Инфа 1
-    const COL_EXTRA2  = 12; // M: Инфа 2
-    const COL_CHECK   = 13; // N: Проверен / Не проверен
+    const COL_SET_NUM = 0;  
+    const COL_NAME_EN = 1;  
+    const COL_NAME_RU = 2;  
+    const COL_PIECES  = 3;  
+    const COL_YEAR    = 4;  
+    const COL_THEME   = 5;  
+    const COL_BOX     = 6;  
+    const COL_STATUS  = 7;  
+    const COL_DESC    = 8;  
+    const COL_MANUAL  = 9;  
+    const COL_MANUAL_BOX = 10; 
+    const COL_EXTRA1  = 11; 
+    const COL_EXTRA2  = 12; 
+    const COL_CHECK   = 13; 
 
     let rawSetsData = [];
     let selectedStatusPill = 'all';
     let selectedTheme = '';
     let selectedBox = '';
+
+    /* Логика прячущейся панели при скролле */
+    let lastScrollY = window.scrollY;
+    const stickyPanel = document.getElementById('stickyPanel');
+
+    window.addEventListener('scroll', () => {
+        const currentScrollY = window.scrollY;
+        
+        if (currentScrollY > lastScrollY && currentScrollY > 100) {
+            stickyPanel.classList.add('hide');
+        } else {
+            stickyPanel.classList.remove('hide');
+        }
+        lastScrollY = currentScrollY;
+    });
 
     function getImageUrl(setNum) {
         if (!setNum) return 'https://via.placeholder.com/300x220?text=No+Image';
@@ -705,7 +731,7 @@
     }
 
     function updateStatusPillCounts() {
-        let cntSelf = 0, cntSale = 0, cntSealed = 0, cntSold = 0, cntInstructions = 0;
+        let cntSelf = 0, cntSale = 0, cntSealed = 0, cntSold = 0, cntNoSet = 0, cntInstructions = 0;
 
         rawSetsData.forEach(row => {
             const st = (row[COL_STATUS] || '').trim();
@@ -719,6 +745,7 @@
             else if (st === 'Продажа') { cntSale++; }
             else if (st === 'Запечатан') { cntSealed++; }
             else if (st === 'Продан') { cntSold++; }
+            else if (st === 'Набора нет') { cntNoSet++; }
         });
 
         document.getElementById('cnt-all').textContent = rawSetsData.length;
@@ -726,6 +753,7 @@
         document.getElementById('cnt-sale').textContent = cntSale;
         document.getElementById('cnt-sealed').textContent = cntSealed;
         document.getElementById('cnt-sold').textContent = cntSold;
+        document.getElementById('cnt-no-set').textContent = cntNoSet;
         document.getElementById('cnt-instructions').textContent = cntInstructions;
     }
 
@@ -768,7 +796,6 @@
             titleEl.textContent = 'Выбор серии LEGO';
             container.className = 'picker-list-themes';
 
-            // Подсчёт количества наборов для каждой серии с учетом тек. статуса и поиска
             const themeCounts = {};
             rawSetsData.forEach(row => {
                 const status = (row[COL_STATUS] || '').trim();
@@ -777,18 +804,15 @@
                 const nameRu = (row[COL_NAME_RU] || '').toLowerCase();
                 const nameEn = (row[COL_NAME_EN] || '').toLowerCase();
 
-                // Проверка статуса
                 if (selectedStatusPill === 'Только инструкция') {
                     if (box.toLowerCase() !== 'только инструкция') return;
                 } else if (selectedStatusPill !== 'all') {
                     if (status !== selectedStatusPill) return;
                 }
 
-                // Проверка поиска
                 const matchesSearch = setNum.includes(searchVal) || nameRu.includes(searchVal) || nameEn.includes(searchVal);
                 if (!matchesSearch) return;
 
-                // Проверка коробки
                 if (selectedBox && box !== selectedBox) return;
 
                 const theme = row[COL_THEME] ? row[COL_THEME].trim() : '';
@@ -799,7 +823,6 @@
 
             const sortedThemes = Object.keys(themeCounts).sort((a,b) => a.localeCompare(b));
 
-            // Кнопка "Все серии"
             const allBtn = document.createElement('button');
             allBtn.className = `picker-item-btn ${selectedTheme === '' ? 'selected' : ''}`;
             allBtn.textContent = 'Все серии';
@@ -827,8 +850,12 @@
             });
 
             const sortedBoxes = Array.from(boxesSet).sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+            
+            // Расчет строк для равномерного распределения сверху вниз по 3 колонкам
+            const totalItems = sortedBoxes.length + 1; // +1 за кнопку "Все"
+            const rowsCount = Math.ceil(totalItems / 3);
+            container.style.gridTemplateRows = `repeat(${rowsCount}, auto)`;
 
-            // Кнопка "Все"
             const allBtn = document.createElement('button');
             allBtn.className = `picker-item-btn ${selectedBox === '' ? 'selected' : ''}`;
             allBtn.textContent = 'Все';
@@ -838,7 +865,6 @@
             sortedBoxes.forEach(box => {
                 const btn = document.createElement('button');
                 btn.className = `picker-item-btn ${selectedBox === box ? 'selected' : ''}`;
-                // Слово Box убрано, остался только номер
                 btn.textContent = `№ ${box}`;
                 btn.onclick = () => selectBoxFilter(box);
                 container.appendChild(btn);
@@ -936,6 +962,7 @@
             else if (status === 'Продажа') statusClass = 'st-продажа';
             else if (status === 'Запечатан') statusClass = 'st-запечатан';
             else if (status === 'Продан') statusClass = 'st-продан';
+            else if (status === 'Набора нет') statusClass = 'st-набора-нет';
 
             let checkBadge = '';
             if (checkRaw.toLowerCase() === 'не проверен') {
@@ -1001,12 +1028,12 @@
             this.src = 'https://via.placeholder.com/400x300?text=Нет+фото';
         };
 
-        // Формирование плашек поверх фото
         let statusClass = '';
         if (status === 'Для себя') statusClass = 'st-для-себя';
         else if (status === 'Продажа') statusClass = 'st-продажа';
         else if (status === 'Запечатан') statusClass = 'st-запечатан';
         else if (status === 'Продан') statusClass = 'st-продан';
+        else if (status === 'Набора нет') statusClass = 'st-набора-нет';
 
         const normalizedStatus = status.toLowerCase();
         const hideBox = normalizedStatus === 'продан' || normalizedStatus === 'запечатан' || normalizedStatus === 'набора нет';
