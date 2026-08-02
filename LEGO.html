@@ -112,7 +112,6 @@
         .status-pill[data-status="Продажа"] { background-color: var(--status-sale); color: #fff; }
         .status-pill[data-status="Запечатан"] { background-color: var(--status-sealed); color: #fff; }
         .status-pill[data-status="Продан"] { background-color: var(--status-sold); color: #fff; }
-        .status-pill[data-status="Набора нет"] { background-color: var(--status-no-set); color: #fff; }
         .status-pill[data-status="Только инструкция"] { background-color: #0d9488; color: #fff; }
 
         .status-pill:not(.active) {
@@ -191,6 +190,7 @@
             background-color: #fef2f2;
             color: #dc2626;
             border-color: #fca5a5;
+            padding: 8px 12px;
         }
         .reset-btn:hover {
             background-color: #fee2e2;
@@ -329,9 +329,11 @@
         }
 
         .badge-theme { background-color: var(--theme-bg); color: var(--theme-text); }
-        .badge-year { background-color: var(--year-bg); color: var(--year-text); }
+        .badge-year { background-color: var(--year-bg); color: var(--year-text); cursor: pointer; }
+        .badge-year:hover { background-color: #e2e8f0; }
         .badge-pieces { background-color: var(--pieces-bg); color: var(--pieces-text); }
-        .badge-box { background-color: var(--box-bg); color: var(--box-text); }
+        .badge-box { background-color: var(--box-bg); color: var(--box-text); cursor: pointer; }
+        .badge-box:hover { background-color: #cbd5e1; }
 
         /* Общие стили модальных окон */
         .modal-overlay {
@@ -452,7 +454,7 @@
             line-height: 1.5;
         }
 
-        /* Окно выбора (Серии / Коробки) */
+        /* Окно выбора */
         .picker-modal {
             max-width: 700px;
             padding: 20px 24px;
@@ -472,7 +474,7 @@
             font-weight: 800;
         }
 
-        /* Сетка для коробок (3 столбца, заполнение сверху вниз) */
+        /* Сетка для коробок и годов (3 столбца, заполнение сверху вниз) */
         .picker-grid-boxes {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -557,7 +559,6 @@
             <div class="status-pill" data-status="Продажа" onclick="selectStatusPill('Продажа')">Продажа (<span id="cnt-sale">0</span>)</div>
             <div class="status-pill" data-status="Запечатан" onclick="selectStatusPill('Запечатан')">Запечатан (<span id="cnt-sealed">0</span>)</div>
             <div class="status-pill" data-status="Продан" onclick="selectStatusPill('Продан')">Продан (<span id="cnt-sold">0</span>)</div>
-            <div class="status-pill" data-status="Набора нет" onclick="selectStatusPill('Набора нет')">Набора нет (<span id="cnt-no-set">0</span>)</div>
             <div class="status-pill" data-status="Только инструкция" onclick="selectStatusPill('Только инструкция')">📖 (<span id="cnt-instructions">0</span>)</div>
         </div>
 
@@ -570,13 +571,9 @@
                 <span id="themeBtnLabel">Все серии</span> ▾
             </button>
 
-            <button id="boxBtn" class="modal-trigger-btn" onclick="openPickerModal('box')">
-                <span id="boxBtnLabel">Все коробки</span> ▾
-            </button>
-
             <!-- Кнопка сброса всех фильтров -->
             <button class="reset-btn" onclick="resetAllFilters()" title="Сбросить все фильтры">
-                ❌ Сбросить
+                ❌
             </button>
 
             <!-- Кнопка «Наверх» -->
@@ -591,8 +588,8 @@
 </div>
 
 <footer>
-    <div id="footerCount">Общее число записей: 0</div>
-    <div>Версия 1.2 (by Ewgenoff 02.08.2026)</div>
+    <div id="footerPiecesCount">Общее число деталей LEGO: 0</div>
+    <div>Версия 1.3 (by Ewgenoff 02.08.2026)</div>
 </footer>
 
 <!-- Модальное окно детализации набора -->
@@ -626,7 +623,7 @@
     </div>
 </div>
 
-<!-- Модальное окно выбора Серии / Коробки -->
+<!-- Модальное окно выбора Серии / Коробки / Года -->
 <div class="modal-overlay" id="pickerModalOverlay" onclick="closePickerModal(event)">
     <div class="modal picker-modal">
         <button class="modal-close" onclick="closePickerModalDirect()">✕</button>
@@ -661,6 +658,7 @@
     let selectedStatusPill = 'all';
     let selectedTheme = '';
     let selectedBox = '';
+    let selectedYear = '';
 
     /* Логика прячущейся панели при скролле */
     let lastScrollY = window.scrollY;
@@ -717,9 +715,8 @@
             rawSetsData = parsed.slice(1).filter(row => row.length > 0 && row[COL_SET_NUM]);
 
             updateStatusPillCounts();
+            calculateTotalPieces();
             filterData();
-
-            document.getElementById('footerCount').textContent = `Общее число записей: ${rawSetsData.length}`;
         } catch (error) {
             console.error('Ошибка загрузки данных:', error);
             document.getElementById('grid').innerHTML = `
@@ -730,8 +727,25 @@
         }
     }
 
+    function calculateTotalPieces() {
+        const allowedStatuses = ['для себя', 'продажа', 'запечатан'];
+        let totalPieces = 0;
+
+        rawSetsData.forEach(row => {
+            const status = (row[COL_STATUS] || '').trim().toLowerCase();
+            if (allowedStatuses.includes(status)) {
+                const pieces = parseInt(row[COL_PIECES], 10);
+                if (!isNaN(pieces)) {
+                    totalPieces += pieces;
+                }
+            }
+        });
+
+        document.getElementById('footerPiecesCount').textContent = `Общее число деталей LEGO: ${totalPieces.toLocaleString('ru-RU')}`;
+    }
+
     function updateStatusPillCounts() {
-        let cntSelf = 0, cntSale = 0, cntSealed = 0, cntSold = 0, cntNoSet = 0, cntInstructions = 0;
+        let cntSelf = 0, cntSale = 0, cntSealed = 0, cntSold = 0, cntInstructions = 0;
 
         rawSetsData.forEach(row => {
             const st = (row[COL_STATUS] || '').trim();
@@ -745,7 +759,6 @@
             else if (st === 'Продажа') { cntSale++; }
             else if (st === 'Запечатан') { cntSealed++; }
             else if (st === 'Продан') { cntSold++; }
-            else if (st === 'Набора нет') { cntNoSet++; }
         });
 
         document.getElementById('cnt-all').textContent = rawSetsData.length;
@@ -753,7 +766,6 @@
         document.getElementById('cnt-sale').textContent = cntSale;
         document.getElementById('cnt-sealed').textContent = cntSealed;
         document.getElementById('cnt-sold').textContent = cntSold;
-        document.getElementById('cnt-no-set').textContent = cntNoSet;
         document.getElementById('cnt-instructions').textContent = cntInstructions;
     }
 
@@ -772,15 +784,12 @@
     function resetAllFilters() {
         selectedTheme = '';
         selectedBox = '';
+        selectedYear = '';
         document.getElementById('searchInput').value = '';
         
         const themeBtn = document.getElementById('themeBtn');
         document.getElementById('themeBtnLabel').textContent = 'Все серии';
         themeBtn.classList.remove('active-filter');
-
-        const boxBtn = document.getElementById('boxBtn');
-        document.getElementById('boxBtnLabel').textContent = 'Все коробки';
-        boxBtn.classList.remove('active-filter');
 
         selectStatusPill('all');
     }
@@ -800,6 +809,7 @@
             rawSetsData.forEach(row => {
                 const status = (row[COL_STATUS] || '').trim();
                 const box = (row[COL_BOX] || '').trim();
+                const year = (row[COL_YEAR] || '').trim();
                 const setNum = (row[COL_SET_NUM] || '').toLowerCase();
                 const nameRu = (row[COL_NAME_RU] || '').toLowerCase();
                 const nameEn = (row[COL_NAME_EN] || '').toLowerCase();
@@ -814,6 +824,7 @@
                 if (!matchesSearch) return;
 
                 if (selectedBox && box !== selectedBox) return;
+                if (selectedYear && year !== selectedYear) return;
 
                 const theme = row[COL_THEME] ? row[COL_THEME].trim() : '';
                 if (theme) {
@@ -851,14 +862,13 @@
 
             const sortedBoxes = Array.from(boxesSet).sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
             
-            // Расчет строк для равномерного распределения сверху вниз по 3 колонкам
-            const totalItems = sortedBoxes.length + 1; // +1 за кнопку "Все"
+            const totalItems = sortedBoxes.length + 1;
             const rowsCount = Math.ceil(totalItems / 3);
             container.style.gridTemplateRows = `repeat(${rowsCount}, auto)`;
 
             const allBtn = document.createElement('button');
             allBtn.className = `picker-item-btn ${selectedBox === '' ? 'selected' : ''}`;
-            allBtn.textContent = 'Все';
+            allBtn.textContent = 'Все коробки';
             allBtn.onclick = () => selectBoxFilter('');
             container.appendChild(allBtn);
 
@@ -867,6 +877,38 @@
                 btn.className = `picker-item-btn ${selectedBox === box ? 'selected' : ''}`;
                 btn.textContent = `№ ${box}`;
                 btn.onclick = () => selectBoxFilter(box);
+                container.appendChild(btn);
+            });
+
+        } else if (type === 'year') {
+            titleEl.textContent = 'Выбор года выпуска';
+            container.className = 'picker-grid-boxes';
+
+            const yearsSet = new Set();
+            rawSetsData.forEach(row => {
+                const year = row[COL_YEAR] ? row[COL_YEAR].trim() : '';
+                if (year) {
+                    yearsSet.add(year);
+                }
+            });
+
+            const sortedYears = Array.from(yearsSet).sort((a,b) => b.localeCompare(a, undefined, {numeric: true}));
+
+            const totalItems = sortedYears.length + 1;
+            const rowsCount = Math.ceil(totalItems / 3);
+            container.style.gridTemplateRows = `repeat(${rowsCount}, auto)`;
+
+            const allBtn = document.createElement('button');
+            allBtn.className = `picker-item-btn ${selectedYear === '' ? 'selected' : ''}`;
+            allBtn.textContent = 'Все года';
+            allBtn.onclick = () => selectYearFilter('');
+            container.appendChild(allBtn);
+
+            sortedYears.forEach(yr => {
+                const btn = document.createElement('button');
+                btn.className = `picker-item-btn ${selectedYear === yr ? 'selected' : ''}`;
+                btn.textContent = yr;
+                btn.onclick = () => selectYearFilter(yr);
                 container.appendChild(btn);
             });
         }
@@ -899,13 +941,12 @@
 
     function selectBoxFilter(val) {
         selectedBox = val;
-        const btn = document.getElementById('boxBtn');
-        const label = document.getElementById('boxBtnLabel');
-        label.textContent = val ? `№ ${val}` : 'Все коробки';
+        closePickerModalDirect();
+        filterData();
+    }
 
-        if (val) btn.classList.add('active-filter');
-        else btn.classList.remove('active-filter');
-
+    function selectYearFilter(val) {
+        selectedYear = val;
         closePickerModalDirect();
         filterData();
     }
@@ -920,6 +961,7 @@
             const theme  = (row[COL_THEME] || '').trim();
             const status = (row[COL_STATUS] || '').trim();
             const box    = (row[COL_BOX] || '').trim();
+            const year   = (row[COL_YEAR] || '').trim();
 
             if (selectedStatusPill === 'Только инструкция') {
                 if (box.toLowerCase() !== 'только инструкция') return false;
@@ -930,8 +972,9 @@
             const matchesSearch = setNum.includes(searchVal) || nameRu.includes(searchVal) || nameEn.includes(searchVal);
             const matchesTheme = !selectedTheme || theme === selectedTheme;
             const matchesBox = !selectedBox || box === selectedBox;
+            const matchesYear = !selectedYear || year === selectedYear;
 
-            return matchesSearch && matchesTheme && matchesBox;
+            return matchesSearch && matchesTheme && matchesBox && matchesYear;
         });
 
         renderCards(filtered);
@@ -991,9 +1034,9 @@
                         
                         <div class="badges-container">
                             <span class="badge badge-theme">${theme}</span>
-                            <span class="badge badge-year">${year}</span>
+                            <span class="badge badge-year" onclick="event.stopPropagation(); openPickerModal('year');">${year}</span>
                             <span class="badge badge-pieces">🧩 ${pieces}</span>
-                            ${!hideBox ? `<span class="badge badge-box">Box № ${box}</span>` : ''}
+                            ${!hideBox ? `<span class="badge badge-box" onclick="event.stopPropagation(); openPickerModal('box');">Box № ${box}</span>` : ''}
                         </div>
                     </div>
                 </div>
@@ -1040,9 +1083,9 @@
 
         let badgesHtml = `
             <span class="badge badge-theme">${theme}</span>
-            <span class="badge badge-year">${year}</span>
+            <span class="badge badge-year" onclick="closeModalDirect(); openPickerModal('year');">${year}</span>
             <span class="badge badge-pieces">🧩 ${pieces} дет.</span>
-            ${!hideBox ? `<span class="badge badge-box">Box № ${box}</span>` : ''}
+            ${!hideBox ? `<span class="badge badge-box" onclick="closeModalDirect(); openPickerModal('box');">Box № ${box}</span>` : ''}
             ${status ? `<span class="status-badge ${statusClass}">${status}</span>` : ''}
         `;
 
