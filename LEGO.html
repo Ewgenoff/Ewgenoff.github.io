@@ -124,8 +124,6 @@
 
         .controls {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
             background: #ffffff;
             padding: 10px 14px;
             border-radius: var(--radius);
@@ -134,12 +132,11 @@
             align-items: center;
         }
 
-        /* Обертка поиска и управляющих кнопок для мобильных */
+        /* Обертка поиска и управляющих кнопок для мобильных в 1 строку */
         .search-row {
             display: flex;
             align-items: center;
             gap: 8px;
-            flex: 1 1 300px;
             width: 100%;
         }
 
@@ -167,8 +164,8 @@
             opacity: 0.6;
         }
 
-        .modal-trigger-btn, .reset-btn, .scroll-top-btn {
-            padding: 8px 14px;
+        .reset-btn, .scroll-top-btn {
+            padding: 8px 12px;
             border: 1px solid #cbd5e1;
             border-radius: 8px;
             font-size: 13px;
@@ -181,27 +178,18 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            white-space: nowrap;
+            flex-shrink: 0;
         }
 
-        .modal-trigger-btn:hover, .reset-btn:hover, .scroll-top-btn:hover {
+        .reset-btn:hover, .scroll-top-btn:hover {
             background-color: #f8fafc;
             border-color: #94a3b8;
-        }
-
-        .modal-trigger-btn.active-filter {
-            background-color: var(--theme-bg);
-            border-color: var(--primary);
-            color: var(--theme-text);
         }
 
         .reset-btn {
             background-color: #fef2f2;
             color: #dc2626;
             border-color: #fca5a5;
-            padding: 8px 12px;
-            flex-shrink: 0;
         }
         .reset-btn:hover {
             background-color: #fee2e2;
@@ -209,9 +197,7 @@
         }
 
         .scroll-top-btn {
-            padding: 8px 12px;
             font-size: 14px;
-            flex-shrink: 0;
         }
 
         .grid {
@@ -487,7 +473,7 @@
             font-weight: 800;
         }
 
-        /* Сетка для коробок и годов (3 столбца, заполнение сверху вниз) */
+        /* Сетка для коробок и годов */
         .picker-grid-boxes {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -499,7 +485,7 @@
             padding: 4px;
         }
 
-        /* Список для серий (1 столбец) */
+        /* Список для серий */
         .picker-list-themes {
             display: flex;
             flex-direction: column;
@@ -598,10 +584,6 @@
                 <!-- Кнопка «Наверх» -->
                 <button class="scroll-top-btn" onclick="scrollToTop()" title="Наверх">⬆️</button>
             </div>
-            
-            <button id="themeBtn" class="modal-trigger-btn" onclick="openPickerModal('theme')">
-                <span id="themeBtnLabel">Все серии</span> ▾
-            </button>
         </div>
     </div>
 
@@ -810,11 +792,6 @@
         selectedBox = '';
         selectedYear = '';
         document.getElementById('searchInput').value = '';
-        
-        const themeBtn = document.getElementById('themeBtn');
-        document.getElementById('themeBtnLabel').textContent = 'Все серии';
-        themeBtn.classList.remove('active-filter');
-
         selectStatusPill('all');
     }
 
@@ -952,13 +929,6 @@
 
     function selectThemeFilter(val) {
         selectedTheme = val;
-        const btn = document.getElementById('themeBtn');
-        const label = document.getElementById('themeBtnLabel');
-        label.textContent = val ? `Серия: ${val}` : 'Все серии';
-
-        if (val) btn.classList.add('active-filter');
-        else btn.classList.remove('active-filter');
-
         closePickerModalDirect();
         filterData();
     }
@@ -1057,7 +1027,7 @@
                         <h3 class="set-title">${name}</h3>
                         
                         <div class="badges-container">
-                            <span class="badge badge-theme" onclick="event.stopPropagation(); selectThemeFilter('${theme}');">${theme}</span>
+                            <span class="badge badge-theme" onclick="event.stopPropagation(); openPickerModal('theme');">${theme}</span>
                             <span class="badge badge-year" onclick="event.stopPropagation(); openPickerModal('year');">${year}</span>
                             <span class="badge badge-pieces">🧩 ${pieces}</span>
                             ${!hideBox ? `<span class="badge badge-box" onclick="event.stopPropagation(); openPickerModal('box');">Box № ${box}</span>` : ''}
@@ -1106,7 +1076,7 @@
         const hideBox = normalizedStatus === 'продан' || normalizedStatus === 'запечатан' || normalizedStatus === 'набора нет';
 
         let badgesHtml = `
-            <span class="badge badge-theme" onclick="closeModalDirect(); selectThemeFilter('${theme}');">${theme}</span>
+            <span class="badge badge-theme" onclick="closeModalDirect(); openPickerModal('theme');">${theme}</span>
             <span class="badge badge-year" onclick="closeModalDirect(); openPickerModal('year');">${year}</span>
             <span class="badge badge-pieces">🧩 ${pieces} дет.</span>
             ${!hideBox ? `<span class="badge badge-box" onclick="closeModalDirect(); openPickerModal('box');">Box № ${box}</span>` : ''}
