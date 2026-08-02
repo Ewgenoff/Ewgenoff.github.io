@@ -426,10 +426,12 @@
                 let rebData = null;
                 if (set_num) {
                     rebData = await fetchRebrickableInfo(set_num);
-                    // MANDATORY 2 SECONDS DELAY
-                    await sleep(2000);
-                }
-
+                    
+                    // Рандомная задержка от 2.5 до 4.5 секунд (чтобы Cloudflare не считал вас ботом)
+                    const randomDelay = Math.floor(Math.random() * 2000) + 2500; 
+                    await sleep(randomDelay);
+                }      
+                
                 globalTableData.push({
                     set_num: set_num,
                     name_eng: rebData ? rebData.name_eng : "",
