@@ -2,383 +2,251 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Моя коллекция LEGO</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог конструкторов LEGO</title>
     <style>
         :root {
-            --bg-color: #F2F2F7;
-            --gradient-tl: radial-gradient(at 0% 0%, rgba(0, 122, 255, 0.05) 0px, transparent 50%);
-            --gradient-br: radial-gradient(at 100% 100%, rgba(255, 45, 85, 0.04) 0px, transparent 50%);
-            
-            --text-primary: #1C1C1E;
-            --text-secondary: #8E8E93;
-            
-            --card-bg-glass: rgba(255, 255, 255, 0.75);
-            --card-border: rgba(255, 255, 255, 0.8);
-            
-            --color-default: #007AFF;
-            --color-sale: #FF9500;        /* На продажу - оранжевый */
-            --color-sale-bg: rgba(255, 149, 0, 0.15);
-            --color-keep: #34C759;        /* Себе - зеленый */
-            --color-keep-bg: rgba(52, 199, 89, 0.15);
-            --color-sold: #8E8E93;        /* Продан - серый */
-            --color-sold-bg: rgba(142, 142, 147, 0.25);
-
-            --ios-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-            --ios-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-            
-            --radius-card: 14px;
-            --radius-control: 10px;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --primary: #2563eb;
+            --status-bg: #1e293b;
+            --theme-bg: #e0f2fe;
+            --theme-text: #0369a1;
+            --year-bg: #f1f5f9;
+            --year-text: #475569;
+            --pieces-bg: #fef3c7;
+            --pieces-text: #92400e;
+            --border-color: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            --shadow-hover: 0 10px 15px -3px rgba(0,0,0,0.1);
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: var(--ios-font);
-            -webkit-font-smoothing: antialiased;
-            user-select: none;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
         body {
             background-color: var(--bg-color);
-            background-image: var(--gradient-tl), var(--gradient-br);
-            background-attachment: fixed;
-            color: var(--text-primary);
+            color: var(--text-main);
+            padding: 24px 16px;
             min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            margin-bottom: 24px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .controls {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 12px 16px 20px 16px;
-        }
-
-        .main-container {
-            width: 100%;
-            max-width: 500px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .sticky-top {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            width: 100%;
-            background: rgba(242, 242, 247, 0.85);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            padding-top: 12px;
-            padding-bottom: 8px;
-            margin-bottom: 8px;
-        }
-
-        /* Статистика */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-
-        .stat-badge {
-            background: var(--card-bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-control);
-            padding: 8px 4px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: var(--ios-shadow);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .stat-badge:active {
-            transform: scale(0.96);
-        }
-
-        .stat-badge.active-sale {
-            background: var(--color-sale);
-            border-color: var(--color-sale);
-        }
-        .stat-badge.active-sale .stat-value,
-        .stat-badge.active-sale .stat-label {
-            color: #FFFFFF !important;
-        }
-
-        .stat-badge.active-keep {
-            background: var(--color-keep);
-            border-color: var(--color-keep);
-        }
-        .stat-badge.active-keep .stat-value,
-        .stat-badge.active-keep .stat-label {
-            color: #FFFFFF !important;
-        }
-
-        .stat-badge.active-sold {
-            background: var(--color-sold);
-            border-color: var(--color-sold);
-        }
-        .stat-badge.active-sold .stat-value,
-        .stat-badge.active-sold .stat-label {
-            color: #FFFFFF !important;
-        }
-
-        .stat-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            transition: color 0.2s;
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            margin-top: 2px;
-            transition: color 0.2s;
-        }
-
-        .text-sale { color: var(--color-sale); }
-        .text-keep { color: var(--color-keep); }
-        .text-sold { color: var(--color-sold); }
-
-        /* Элементы управления */
-        .controls-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 28px;
+            background: #ffffff;
+            padding: 16px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
         }
 
         .search-box {
+            flex: 1 1 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 14px 10px 38px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 14px;
+            opacity: 0.6;
+        }
+
+        .filter-select {
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #fff;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .stats-bar {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .card-image-wrap {
             position: relative;
             width: 100%;
-        }
-
-        .search-input {
-            width: 100%;
-            padding: 10px 30px 10px 32px;
-            background: var(--card-bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-control);
-            font-size: 0.85rem;
-            color: var(--text-primary);
-            box-shadow: var(--ios-shadow);
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .search-input::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.8;
-        }
-
-        .search-input:focus {
-            border-color: var(--color-default);
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            pointer-events: none;
-        }
-
-        .clear-icon {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.75rem;
-            color: #FFFFFF;
-            background: rgba(142, 142, 147, 0.6);
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            display: none;
+            height: 220px;
+            background-color: #f8fafc;
+            display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            line-height: 1;
+            overflow: hidden;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        .sort-box {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--card-bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-control);
-            padding: 6px 12px;
-            box-shadow: var(--ios-shadow);
+        .card-image-wrap img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            transition: transform 0.3s;
         }
 
-        .sort-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-            white-space: nowrap;
+        .card:hover .card-image-wrap img {
+            transform: scale(1.05);
         }
 
-        .sort-select {
-            background: transparent;
-            border: none;
-            color: var(--color-default);
-            font-size: 0.88rem;
-            font-weight: 600;
-            outline: none;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .sort-select option {
-            background: var(--bg-color);
-            color: var(--text-primary);
-        }
-
-        /* Список карточек */
-        .lego-list {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .lego-card {
-            background: var(--card-bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-card);
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: var(--ios-shadow);
-            transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
-            cursor: pointer;
-        }
-
-        .lego-card:active {
-            transform: scale(0.98);
-        }
-
-        .lego-card.status-sold {
-            opacity: 0.65;
-            background: rgba(220, 220, 225, 0.6);
-        }
-
-        .lego-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex-grow: 1;
-            padding-right: 12px;
-        }
-
-        .lego-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .lego-set-num {
-            font-size: 0.85rem;
-            font-weight: 700;
-            background: rgba(0, 122, 255, 0.1);
-            color: var(--color-default);
-            padding: 2px 6px;
-            border-radius: 6px;
-        }
-
-        .lego-name {
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            letter-spacing: -0.2px;
-        }
-
-        .lego-subdetails {
-            font-size: 0.78rem;
-            color: var(--text-secondary);
-            margin-top: 2px;
-        }
-
-        .lego-status-badge {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-            flex-shrink: 0;
-        }
-
-        .badge {
-            font-size: 0.72rem;
-            padding: 4px 8px;
+        /* Плашка статуса (Столбец H) */
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            color: #ffffff;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
         }
 
-        .badge-sale {
-            background: var(--color-sale-bg);
-            color: var(--color-sale);
+        .card-body {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
 
-        .badge-keep {
-            background: var(--color-keep-bg);
-            color: var(--color-keep);
+        /* Номер набора (Столбец A) */
+        .set-number {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
         }
 
-        .badge-sold {
-            background: var(--color-sold-bg);
-            color: var(--color-sold);
+        /* Название (Столбец C) */
+        .set-title {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.3;
+            color: var(--text-main);
+            margin-bottom: 12px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 42px;
         }
 
-        .badge-other {
-            background: rgba(142, 142, 147, 0.15);
-            color: var(--text-secondary);
+        /* Плашки под номером */
+        .badges-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: auto;
         }
 
-        .loader, .empty-msg {
-            text-align: center;
-            padding: 30px 16px;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            background: var(--card-bg-glass);
-            border-radius: var(--radius-card);
-            border: 1px solid var(--card-border);
+        .badge {
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
         }
 
-        /* Модальное окно */
+        /* Серия (Столбец F) */
+        .badge-theme {
+            background-color: var(--theme-bg);
+            color: var(--theme-text);
+        }
+
+        /* Год (Столбец E) */
+        .badge-year {
+            background-color: var(--year-bg);
+            color: var(--year-text);
+        }
+
+        /* Детали (Столбец D) с иконкой 🧩 */
+        .badge-pieces {
+            background-color: var(--pieces-bg);
+            color: var(--pieces-text);
+        }
+
+        /* Окно детализации */
         .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             z-index: 1000;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.25s ease;
-            padding: 20px;
+            padding: 16px;
         }
 
         .modal-overlay.active {
@@ -386,480 +254,375 @@
             pointer-events: auto;
         }
 
-        .ios-modal {
-            background: var(--card-bg-glass);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
+        .modal {
+            background: #ffffff;
+            border-radius: 16px;
+            max-width: 600px;
             width: 100%;
-            max-width: 440px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            overflow: hidden;
-            transform: scale(0.9);
-            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
         }
 
-        .modal-overlay.active .ios-modal {
-            transform: scale(1);
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #f1f5f9;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .modal-img-container {
             width: 100%;
-            height: 200px;
-            background: rgba(255, 255, 255, 0.5);
+            height: 280px;
+            background: #f8fafc;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 1px solid var(--card-border);
-            position: relative;
-            overflow: hidden;
+            padding: 20px;
         }
 
         .modal-img-container img {
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
         }
 
-        .img-loader {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-
-        .modal-header {
-            padding: 16px 20px 10px;
-            border-bottom: 1px solid var(--card-border);
+        .modal-content {
+            padding: 24px;
         }
 
         .modal-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--text-primary);
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 16px;
         }
 
-        .modal-subtitle {
-            font-size: 0.85rem;
-            color: var(--color-default);
-            font-weight: 600;
-            margin-top: 2px;
-        }
-
-        .modal-body {
-            padding: 16px 20px;
-            display: flex;
-            flex-direction: column;
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 12px;
-            max-height: 50vh;
-            overflow-y: auto;
         }
 
-        .modal-section {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
+        .info-card {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
         }
 
-        .modal-label {
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            font-weight: 600;
+        .info-card .label {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
         }
 
-        .modal-value {
-            font-size: 0.92rem;
-            color: var(--text-primary);
-            line-height: 1.4;
-            word-break: break-word;
+        .info-card .value {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
         }
 
-        .modal-footer {
-            padding: 12px 20px;
-            border-top: 1px solid var(--card-border);
-            display: flex;
-            justify-content: flex-end;
-        }
-
-        .ios-btn {
-            background: var(--color-default);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 8px 18px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .footer {
+        .loading-spinner {
             text-align: center;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+            padding: 60px 0;
+            font-size: 18px;
+            color: var(--text-muted);
         }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <!-- Закрепленный верхний блок -->
-        <div class="sticky-top">
-            <!-- Статистика -->
-            <div class="stats-grid">
-                <div class="stat-badge" id="btn-stat-sale" onclick="toggleStatFilter('sale')">
-                    <span id="stat-sale" class="stat-value text-sale">0</span>
-                    <span class="stat-label">На продажу</span>
-                </div>
-                <div class="stat-badge" id="btn-stat-keep" onclick="toggleStatFilter('keep')">
-                    <span id="stat-keep" class="stat-value text-keep">0</span>
-                    <span class="stat-label">Себе</span>
-                </div>
-                <div class="stat-badge" id="btn-stat-sold" onclick="toggleStatFilter('sold')">
-                    <span id="stat-sold" class="stat-value text-sold">0</span>
-                    <span class="stat-label">Продано</span>
-                </div>
-            </div>
+<div class="container">
+    <header>
+        <h1>🧩 Каталог наборов LEGO</h1>
+    </header>
 
-            <!-- Поиск и Сортировки -->
-            <div class="controls-container">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="searchGlobalInput" class="search-input" placeholder="Поиск по всем записям..." oninput="handleSearchInput('searchGlobalInput', 'clearGlobalBtn')">
-                    <span id="clearGlobalBtn" class="clear-icon" onclick="clearSearch('searchGlobalInput', 'clearGlobalBtn')">✕</span>
-                </div>
-                
-                <div class="sort-box">
-                    <span class="sort-label">Сортировка:</span>
-                    <select id="sortBoxSelect" class="sort-select" onchange="filterAndRender()">
-                        <option value="all">Все коробки</option>
-                    </select>
-                </div>
-            </div>
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Поиск по номеру или названию..." oninput="filterData()">
         </div>
-
-        <!-- Список наборов -->
-        <div id="legoList" class="lego-list">
-            <div class="loader">Загрузка коллекции...</div>
-        </div>
+        <select id="themeFilter" class="filter-select" onchange="filterData()">
+            <option value="">Все серии</option>
+        </select>
+        <select id="statusFilter" class="filter-select" onchange="filterData()">
+            <option value="">Все статусы</option>
+        </select>
     </div>
 
-    <!-- Подвал со счетчиком -->
-    <div class="footer">
-        <div id="totalRecordsCount">В базе 0 записей</div>
+    <div class="stats-bar">
+        <span id="countDisplay">Загрузка данных...</span>
     </div>
 
-    <!-- Модальное окно (iOS Style) -->
-    <div class="modal-overlay" id="iosModal" onclick="closeModal(event)">
-        <div class="ios-modal" onclick="event.stopPropagation()">
-            <!-- Контейнер для загружаемой картинки Rebrickable -->
-            <div class="modal-img-container" id="m-img-box">
-                <span class="img-loader">Нажмите для загрузки...</span>
-            </div>
+    <div id="grid" class="grid">
+        <div class="loading-spinner">⏳ Загрузка каталога наборов...</div>
+    </div>
+</div>
 
-            <div class="modal-header">
-                <div class="modal-title" id="m-title">Название</div>
-                <div class="modal-subtitle" id="m-subtitle">Номер и Серия</div>
-            </div>
+<!-- Модальное окно описания -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal">
+        <button class="modal-close" onclick="closeModalDirect()">✕</button>
+        <div class="modal-img-container">
+            <img id="modalImg" src="" alt="">
+        </div>
+        <div class="modal-content">
+            <div id="modalSetNum" class="set-number"></div>
+            <h2 id="modalTitle" class="modal-title"></h2>
             
-            <div class="modal-body">
-                <div class="modal-section">
-                    <span class="modal-label">Описание / Информация</span>
-                    <span class="modal-value" id="m-desc">—</span>
+            <div class="modal-info-grid">
+                <div class="info-card">
+                    <div class="label">Серия набора</div>
+                    <div id="modalTheme" class="value">—</div>
                 </div>
-                <div class="modal-section">
-                    <span class="modal-label">Инструкция</span>
-                    <span class="modal-value" id="m-instruction">—</span>
+                <div class="info-card">
+                    <div class="label">Количество деталей</div>
+                    <div id="modalPieces" class="value">—</div>
                 </div>
-                <div class="modal-section">
-                    <span class="modal-label">Служебная информация</span>
-                    <span class="modal-value" id="m-service">—</span>
+                <div class="info-card">
+                    <div class="label">Год выпуска</div>
+                    <div id="modalYear" class="value">—</div>
                 </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button class="ios-btn" onclick="closeModal()">Закрыть</button>
+                <div class="info-card">
+                    <div class="label">Статус</div>
+                    <div id="modalStatus" class="value">—</div>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
-    <script>
-        const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRPpn75qFGUsV-gVTl3MzZ9SDzYK88acKUfzIyphP15jdfDzqVEku1zQaOWPccc5z6BCJf1-EPMcraO/pub?gid=475660989&single=true&output=csv";
-        const REBRICKABLE_API_KEY = "027adf4d957633844024586e8a92d7e8";
+<script>
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRPpn75qFGUsV-gVTl3MzZ9SDzYK88acKUfzIyphP15jdfDzqVEku1zQaOWPccc5z6BCJf1-EPMcraO/pub?gid=475660989&single=true&output=csv';
 
-        let legoData = [];
-        let activeStatFilter = null; // 'sale', 'keep', 'sold' или null
-        let imageCache = {}; // Кэширование изображений Rebrickable во избежание повторных запросов
+    // Индексы столбцов таблицы Google Sheets
+    const COL_SET_NUM = 0;  // A: Номер набора
+    const COL_NAME    = 2;  // C: Название конструктора
+    const COL_PIECES  = 3;  // D: Кол-во деталей
+    const COL_YEAR    = 4;  // E: Год выпуска
+    const COL_THEME   = 5;  // F: Серия
+    const COL_STATUS  = 7;  // H: Статус
 
-        function parseCSV(text) {
-            const lines = text.split(/\r?\n/);
-            const result = [];
-            for (let line of lines) {
-                if (!line.trim()) continue;
-                let cells = [];
-                let insideQuotes = false;
-                let currentCell = '';
-                for (let i = 0; i < line.length; i++) {
-                    let char = line[i];
-                    if (char === '"' || char === "'") {
-                        insideQuotes = !insideQuotes;
-                    } else if (char === ',' && !insideQuotes) {
-                        cells.push(currentCell.trim().replace(/^["']|["']$/g, ''));
-                        currentCell = '';
-                    } else {
-                        currentCell += char;
-                    }
+    let rawSetsData = [];
+
+    // Прямой метод загрузки CDN изображений Rebrickable по номеру набора без CORS блокировок
+    function getImageUrl(setNum) {
+        if (!setNum) return 'https://via.placeholder.com/300x220?text=No+Image';
+        let cleanNum = setNum.toString().trim();
+        if (!cleanNum.includes('-')) {
+            cleanNum += '-1';
+        }
+        return `https://cdn.rebrickable.com/media/sets/${cleanNum}.jpg`;
+    }
+
+    function parseCSV(text) {
+        const lines = text.split(/\r?\n/);
+        const result = [];
+        for (let line of lines) {
+            if (!line.trim()) continue;
+            let row = [];
+            let inQuotes = false;
+            let currentStr = '';
+            for (let i = 0; i < line.length; i++) {
+                let char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    row.push(currentStr.trim().replace(/^"|"$/g, ''));
+                    currentStr = '';
+                } else {
+                    currentStr += char;
                 }
-                cells.push(currentCell.trim().replace(/^["']|["']$/g, ''));
-                result.push(cells);
             }
-            return result;
+            row.push(currentStr.trim().replace(/^"|"$/g, ''));
+            result.push(row);
+        }
+        return result;
+    }
+
+    async function loadData() {
+        try {
+            const response = await fetch(CSV_URL);
+            const csvText = await response.text();
+            const parsed = parseCSV(csvText);
+
+            rawSetsData = parsed.slice(1).filter(row => row.length > 2 && row[COL_SET_NUM]);
+
+            populateFilters(rawSetsData);
+            renderCards(rawSetsData);
+        } catch (error) {
+            console.error('Ошибка загрузки данных:', error);
+            document.getElementById('grid').innerHTML = `
+                <div class="loading-spinner" style="color: #ef4444;">
+                    ❌ Ошибка загрузки данных таблицы.
+                </div>
+            `;
+        }
+    }
+
+    function populateFilters(data) {
+        const themes = new Set();
+        const statuses = new Set();
+
+        data.forEach(row => {
+            if (row[COL_THEME]) themes.add(row[COL_THEME]);
+            if (row[COL_STATUS]) statuses.add(row[COL_STATUS]);
+        });
+
+        const themeSelect = document.getElementById('themeFilter');
+        Array.from(themes).sort().forEach(theme => {
+            const opt = document.createElement('option');
+            opt.value = theme;
+            opt.textContent = theme;
+            themeSelect.appendChild(opt);
+        });
+
+        const statusSelect = document.getElementById('statusFilter');
+        Array.from(statuses).sort().forEach(status => {
+            const opt = document.createElement('option');
+            opt.value = status;
+            opt.textContent = status;
+            statusSelect.appendChild(opt);
+        });
+    }
+
+    function renderCards(data) {
+        const grid = document.getElementById('grid');
+        const countDisplay = document.getElementById('countDisplay');
+        
+        countDisplay.textContent = `Найдено наборов: ${data.length}`;
+
+        if (data.length === 0) {
+            grid.innerHTML = '<div class="loading-spinner">Наборы не найдены</div>';
+            return;
         }
 
-        async function fetchLegoCollection() {
-            try {
-                const response = await fetch(CSV_URL);
-                if (!response.ok) throw new Error("Ошибка загрузки CSV");
-                
-                const csvText = await response.text();
-                const rows = parseCSV(csvText);
+        grid.innerHTML = data.map((row, index) => {
+            const setNum = row[COL_SET_NUM] || '—';
+            const name   = row[COL_NAME]    || 'Без названия';
+            const pieces = row[COL_PIECES]  || '—';
+            const year   = row[COL_YEAR]    || '—';
+            const theme  = row[COL_THEME]   || '—';
+            const status = row[COL_STATUS]  || 'Не указан';
 
-                legoData = [];
-                const boxesSet = new Set();
+            const primaryImg = getImageUrl(setNum);
+            const fallbackImg = `https://cdn.rebrickable.com/media/sets/${setNum.toString().trim()}.jpg`;
 
-                // Пропускаем заголовок, если он присутствует
-                let startIdx = 0;
-                if (rows.length > 0 && rows[0].some(c => c.toLowerCase().includes('номер') || c.toLowerCase().includes('название'))) {
-                    startIdx = 1;
-                }
-
-                for (let i = startIdx; i < rows.length; i++) {
-                    const r = rows[i];
-                    
-                    // Парсинг столбцов согласно структуре таблицы
-                    const setNum = r[0] ? r[0].trim() : '';
-                    const nameRu = r[1] ? r[1].trim() : '';
-                    if (!setNum && !nameRu) continue;
-
-                    const status = r[2] ? r[2].trim() : '';
-                    const parts = r[3] ? r[3].trim() : '';
-                    const year = r[4] ? r[4].trim() : '';
-                    const theme = r[5] ? r[5].trim() : '';
-                    const box = r[6] ? r[6].trim() : '';
-                    const desc = r[7] ? r[7].trim() : '';
-                    const instruction = r[8] ? r[8].trim() : '';
-                    const serviceInfo = r[9] ? r[9].trim() : '';
-
-                    if (box) boxesSet.add(box);
-
-                    legoData.push({
-                        id: i,
-                        setNum: setNum,
-                        nameRu: nameRu,
-                        status: status,
-                        parts: parts,
-                        year: year,
-                        theme: theme,
-                        box: box,
-                        desc: desc,
-                        instruction: instruction,
-                        serviceInfo: serviceInfo,
-                        allFieldsStr: r.join(' ').toLowerCase()
-                    });
-                }
-
-                populateBoxFilter(Array.from(boxesSet).sort());
-                updateStats();
-                filterAndRender();
-
-            } catch (err) {
-                console.error(err);
-                document.getElementById('legoList').innerHTML = `<div class="empty-msg">Ошибка получения данных из Google Таблицы.</div>`;
-            }
-        }
-
-        function populateBoxFilter(boxes) {
-            const select = document.getElementById('sortBoxSelect');
-            select.innerHTML = '<option value="all">Все коробки</option>';
-            boxes.forEach(box => {
-                const opt = document.createElement('option');
-                opt.value = box;
-                opt.textContent = `Коробка: ${box}`;
-                select.appendChild(opt);
-            });
-        }
-
-        function updateStats() {
-            const saleCount = legoData.filter(i => i.status.toLowerCase().includes('продажу')).length;
-            const keepCount = legoData.filter(i => i.status.toLowerCase().includes('себе')).length;
-            const soldCount = legoData.filter(i => i.status.toLowerCase().includes('продан')).length;
-
-            document.getElementById('stat-sale').textContent = saleCount;
-            document.getElementById('stat-keep').textContent = keepCount;
-            document.getElementById('stat-sold').textContent = soldCount;
-
-            document.getElementById('totalRecordsCount').textContent = `В базе ${legoData.length} записей`;
-        }
-
-        function toggleStatFilter(type) {
-            if (activeStatFilter === type) {
-                activeStatFilter = null;
-            } else {
-                activeStatFilter = type;
-            }
-            updateStatButtonsUI();
-            filterAndRender();
-        }
-
-        function updateStatButtonsUI() {
-            const btnSale = document.getElementById('btn-stat-sale');
-            const btnKeep = document.getElementById('btn-stat-keep');
-            const btnSold = document.getElementById('btn-stat-sold');
-
-            btnSale.classList.remove('active-sale');
-            btnKeep.classList.remove('active-keep');
-            btnSold.classList.remove('active-sold');
-
-            if (activeStatFilter === 'sale') btnSale.classList.add('active-sale');
-            if (activeStatFilter === 'keep') btnKeep.classList.add('active-keep');
-            if (activeStatFilter === 'sold') btnSold.classList.add('active-sold');
-        }
-
-        function handleSearchInput(inputId, clearBtnId) {
-            const input = document.getElementById(inputId);
-            const clearBtn = document.getElementById(clearBtnId);
-            clearBtn.style.display = input.value.trim().length > 0 ? 'flex' : 'none';
-            filterAndRender();
-        }
-
-        function clearSearch(inputId, clearBtnId) {
-            const input = document.getElementById(inputId);
-            input.value = '';
-            document.getElementById(clearBtnId).style.display = 'none';
-            filterAndRender();
-        }
-
-        function filterAndRender() {
-            const globalQuery = document.getElementById('searchGlobalInput').value.toLowerCase().trim();
-            const selectedBox = document.getElementById('sortBoxSelect').value;
-
-            let filtered = legoData.filter(item => {
-                const matchGlobal = globalQuery ? item.allFieldsStr.includes(globalQuery) : true;
-                const matchBox = selectedBox === 'all' ? true : item.box === selectedBox;
-                
-                let matchStatus = true;
-                if (activeStatFilter === 'sale') matchStatus = item.status.toLowerCase().includes('продажу');
-                if (activeStatFilter === 'keep') matchStatus = item.status.toLowerCase().includes('себе');
-                if (activeStatFilter === 'sold') matchStatus = item.status.toLowerCase().includes('продан');
-
-                return matchGlobal && matchBox && matchStatus;
-            });
-
-            const container = document.getElementById('legoList');
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="empty-msg">Наборы не найдены</div>`;
-                return;
-            }
-
-            container.innerHTML = filtered.map(item => {
-                const isSold = item.status.toLowerCase().includes('продан');
-                const isSale = item.status.toLowerCase().includes('продажу');
-                const isKeep = item.status.toLowerCase().includes('себе');
-
-                let badgeClass = 'badge-other';
-                if (isSale) badgeClass = 'badge-sale';
-                if (isKeep) badgeClass = 'badge-keep';
-                if (isSold) badgeClass = 'badge-sold';
-
-                return `
-                    <div class="lego-card ${isSold ? 'status-sold' : ''}" onclick="openModal(${item.id})">
-                        <div class="lego-info">
-                            <div class="lego-header">
-                                ${item.setNum ? `<span class="lego-set-num">№ ${escapeHtml(item.setNum)}</span>` : ''}
-                                <span class="lego-name">${escapeHtml(item.nameRu || 'Без названия')}</span>
-                            </div>
-                            <div class="lego-subdetails">
-                                ${item.theme ? escapeHtml(item.theme) : ''} 
-                                ${item.year ? `• ${escapeHtml(item.year)} г.` : ''} 
-                                ${item.parts ? `• ${escapeHtml(item.parts)} дет.` : ''}
-                                ${item.box ? `• [${escapeHtml(item.box)}]` : ''}
-                            </div>
-                        </div>
-                        <div class="lego-status-badge">
-                            <span class="badge ${badgeClass}">${escapeHtml(item.status || 'Нет статуса')}</span>
+            return `
+                <div class="card" onclick="openModal(${index})">
+                    <div class="card-image-wrap">
+                        <!-- Изображение с автозаменой и обработкой ошибок -->
+                        <img src="${primaryImg}" 
+                             alt="${name}" 
+                             onerror="if (this.src !== '${fallbackImg}') { this.src='${fallbackImg}'; } else { this.onerror=null; this.src='https://via.placeholder.com/300x220?text=Нет+фото'; }" />
+                        <!-- Плашка Статус (Столбец H) -->
+                        <span class="status-badge">${status}</span>
+                    </div>
+                    <div class="card-body">
+                        <!-- Номер набора (Столбец A) -->
+                        <div class="set-number">№ ${setNum}</div>
+                        <!-- Название конструктора (Столбец C) -->
+                        <h3 class="set-title">${name}</h3>
+                        
+                        <!-- Плашки внизу под номером -->
+                        <div class="badges-container">
+                            <!-- Серия (Столбец F) -->
+                            <span class="badge badge-theme">${theme}</span>
+                            <!-- Год выпуска (Столбец E) -->
+                            <span class="badge badge-year">${year}</span>
+                            <!-- Кол-во деталей (Столбец D) со значком 🧩 -->
+                            <span class="badge badge-pieces">🧩 ${pieces}</span>
                         </div>
                     </div>
-                `;
-            }).join('');
+                </div>
+            `;
+        }).join('');
+    }
+
+    function filterData() {
+        const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+        const selectedTheme = document.getElementById('themeFilter').value;
+        const selectedStatus = document.getElementById('statusFilter').value;
+
+        const filtered = rawSetsData.filter(row => {
+            const setNum = (row[COL_SET_NUM] || '').toLowerCase();
+            const name   = (row[COL_NAME] || '').toLowerCase();
+            const theme  = row[COL_THEME] || '';
+            const status = row[COL_STATUS] || '';
+
+            return (setNum.includes(searchVal) || name.includes(searchVal)) &&
+                   (!selectedTheme || theme === selectedTheme) &&
+                   (!selectedStatus || status === selectedStatus);
+        });
+
+        renderCards(filtered);
+    }
+
+    function openModal(index) {
+        const searchVal = document.getElementById('searchInput').value.toLowerCase().trim();
+        const selectedTheme = document.getElementById('themeFilter').value;
+        const selectedStatus = document.getElementById('statusFilter').value;
+
+        const filteredData = rawSetsData.filter(row => {
+            const setNum = (row[COL_SET_NUM] || '').toLowerCase();
+            const name   = (row[COL_NAME] || '').toLowerCase();
+            const theme  = row[COL_THEME] || '';
+            const status = row[COL_STATUS] || '';
+
+            return (setNum.includes(searchVal) || name.includes(searchVal)) &&
+                   (!selectedTheme || theme === selectedTheme) &&
+                   (!selectedStatus || status === selectedStatus);
+        });
+
+        const row = filteredData[index];
+        if (!row) return;
+
+        const setNum = row[COL_SET_NUM] || '—';
+        const name   = row[COL_NAME]    || 'Без названия';
+        const pieces = row[COL_PIECES]  || '—';
+        const year   = row[COL_YEAR]    || '—';
+        const theme  = row[COL_THEME]   || '—';
+        const status = row[COL_STATUS]  || 'Не указан';
+
+        const imgUrl = getImageUrl(setNum);
+
+        document.getElementById('modalImg').src = imgUrl;
+        document.getElementById('modalImg').onerror = function() {
+            this.onerror = null;
+            this.src = 'https://via.placeholder.com/400x300?text=Нет+фото';
+        };
+        document.getElementById('modalSetNum').textContent = `Артикул № ${setNum}`;
+        document.getElementById('modalTitle').textContent = name;
+        
+        // В окне с описанием: Серия из столбца F, Кол-во деталей из D
+        document.getElementById('modalTheme').textContent = theme;
+        document.getElementById('modalPieces').textContent = `${pieces} деталей`;
+        document.getElementById('modalYear').textContent = year;
+        document.getElementById('modalStatus').textContent = status;
+
+        document.getElementById('modalOverlay').classList.add('active');
+    }
+
+    function closeModal(event) {
+        if (event.target === document.getElementById('modalOverlay')) {
+            closeModalDirect();
         }
+    }
 
-        /* Вызов модального окна и парсинг изображения с Rebrickable */
-        async function openModal(id) {
-            const item = legoData.find(i => i.id === id);
-            if (!item) return;
+    function closeModalDirect() {
+        document.getElementById('modalOverlay').classList.remove('active');
+    }
 
-            document.getElementById('m-title').textContent = item.nameRu || 'Без названия';
-            document.getElementById('m-subtitle').textContent = `№ ${item.setNum || '—'} | Серия: ${item.theme || '—'} (${item.year || '—'})`;
-            document.getElementById('m-desc').textContent = item.desc || '—';
-            document.getElementById('m-instruction').textContent = item.instruction || '—';
-            document.getElementById('m-service').textContent = item.serviceInfo || '—';
-
-            const imgBox = document.getElementById('m-img-box');
-            imgBox.innerHTML = `<span class="img-loader">Загрузка фото с Rebrickable...</span>`;
-
-            document.getElementById('iosModal').classList.add('active');
-
-            // Запрос картинки с Rebrickable выпоняется строго в момент нажатия
-            if (item.setNum) {
-                const formattedNum = item.setNum.includes('-') ? item.setNum : `${item.setNum}-1`;
-
-                if (imageCache[formattedNum]) {
-                    imgBox.innerHTML = `<img src="${imageCache[formattedNum]}" alt="Lego ${formattedNum}">`;
-                } else {
-                    try {
-                        const url = `https://rebrickable.com/api/v3/lego/sets/${formattedNum}/?key=${REBRICKABLE_API_KEY}`;
-                        const res = await fetch(url);
-                        if (res.ok) {
-                            const data = await res.json();
-                            if (data.set_img_url) {
-                                imageCache[formattedNum] = data.set_img_url;
-                                imgBox.innerHTML = `<img src="${data.set_img_url}" alt="Lego ${formattedNum}">`;
-                            } else {
-                                imgBox.innerHTML = `<span class="img-loader">Изображение отсутствует</span>`;
-                            }
-                        } else {
-                            imgBox.innerHTML = `<span class="img-loader">Изображение не найдено</span>`;
-                        }
-                    } catch (e) {
-                        console.error("Ошибка Rebrickable API:", e);
-                        imgBox.innerHTML = `<span class="img-loader">Не удалось загрузить фото</span>`;
-                    }
-                }
-            } else {
-                imgBox.innerHTML = `<span class="img-loader">Номер набора не указан</span>`;
-            }
-        }
-
-        function closeModal() {
-            document.getElementById('iosModal').classList.remove('active');
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/[&<>"']/g, function(m) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                }[m];
-            });
-        }
-
-        fetchLegoCollection();
-    </script>
+    loadData();
+</script>
 </body>
 </html>
