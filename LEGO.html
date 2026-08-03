@@ -244,17 +244,6 @@
             z-index: 10;
         }
 
-        /* Плашки сверху слева */
-        .card-badges-top-left {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            z-index: 10;
-        }
-
         .status-badge {
             padding: 4px 10px;
             border-radius: 20px;
@@ -299,8 +288,8 @@
             opacity: 0.9;
             transform: scale(1.05);
         }
-        .external-link-badge.bricklink { background-color: #dc2626; }
-        .external-link-badge.rebrickable { background-color: #1e293b; }
+        .external-link-badge.bricklink { background-color: #64748b; }
+        .external-link-badge.rebrickable { background-color: #64748b; }
 
         .card-body {
             padding: 16px;
@@ -731,11 +720,19 @@
         let bricklinkUrl = row[COL_BRICKLINK] ? row[COL_BRICKLINK].trim() : '';
         let rebrickableUrl = row[COL_REBRICKABLE] ? row[COL_REBRICKABLE].trim() : '';
 
+        // Очищаем номер набора от лишних символов (берем только цифры до первого пробела или тире)
+        let cleanSetNum = setNum.toString().trim().split(' ')[0].split('-')[0];
+
         if (!bricklinkUrl) {
-            bricklinkUrl = `https://www.bricklink.com/v2/catalog/catalogitem.page?S=${setNum}`;
+            bricklinkUrl = `https://www.bricklink.com/v2/catalog/catalogitem.page?S=${cleanSetNum}`;
+        } else if (!bricklinkUrl.startsWith('http')) {
+            bricklinkUrl = 'https://' + bricklinkUrl;
         }
+
         if (!rebrickableUrl) {
-            rebrickableUrl = `https://rebrickable.com/sets/${setNum}/`;
+            rebrickableUrl = `https://rebrickable.com/sets/${cleanSetNum}/`;
+        } else if (!rebrickableUrl.startsWith('http')) {
+            rebrickableUrl = 'https://' + rebrickableUrl;
         }
 
         return { bricklinkUrl, rebrickableUrl };
@@ -1108,7 +1105,6 @@
             const checkRaw = row[COL_CHECK] ? row[COL_CHECK].trim() : '';
 
             const primaryImg = getImageUrl(setNum);
-            const { bricklinkUrl, rebrickableUrl } = getExternalLinks(row, setNum);
 
             let statusClass = '';
             if (status === 'Для себя') statusClass = 'st-для-себя';
@@ -1134,12 +1130,7 @@
                              alt="${name}" 
                              onerror="this.onerror=null; this.src='https://via.placeholder.com/300x220?text=Нет+фото';" />
                         
-                        <div class="card-badges-top-left">
-                            <a href="${bricklinkUrl}" target="_blank" rel="noopener noreferrer" class="external-link-badge bricklink" onclick="event.stopPropagation()">BrickLink</a>
-                        </div>
-                        
                         <div class="card-badges-top">
-                            <a href="${rebrickableUrl}" target="_blank" rel="noopener noreferrer" class="external-link-badge rebrickable" onclick="event.stopPropagation()">Rebrickable</a>
                             ${status ? `<span class="status-badge ${statusClass}">${status}</span>` : ''}
                             ${checkBadge}
                         </div>
@@ -1178,6 +1169,7 @@
         const extra1 = row[COL_EXTRA1]  || '';
         const extra2 = row[COL_EXTRA2]  || '';
         const checkStatus = (row[COL_CHECK] || '').trim();
+        
         const { bricklinkUrl, rebrickableUrl } = getExternalLinks(row, setNum);
 
         const imgUrl = getImageUrl(setNum);
@@ -1248,4 +1240,3 @@
 </script>
 </body>
 </html>
-```
