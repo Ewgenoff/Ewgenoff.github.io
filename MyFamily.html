@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -1280,7 +1281,7 @@
                 meaning: "«Светлая», «сияющая», «солнечная», «факел».",
                 shortForms: "Лена, Леночка, Ленуся, Алёна (исторически народная форма, ставшая отдельным именем), Еля.",
                 foreignAnalogs: "Хелен (англ.), Елен (фр.), Елена, Хелена (нем.), Элена (исп.).",
-                context: "Восходит к Елене Троянской — прекраснейшей женщине античных мифов, а также к святой равноапостольной императрице Елене. В русских сказках фигурирует как Елена Прекрасная и Елена Премудрая."
+                context: "Восходит к Елене Троянской — прекраснейшей женщине античных мифов, а также к святой равноапостольской императрице Елене. В русских сказках фигурирует как Елена Прекрасная и Елена Премудрая."
             },
             "Елизавета": {
                 origin: "Древнееврейское (от Elisheva).",
@@ -1383,7 +1384,7 @@
             { id: "maria", name: "Мария Попова", gender: "F", dob: "1975-06-07", mother: "tatiana" },
             { id: "nadezhda", name: "Надежда Говорова", gender: "F", dob: "1961-10-30", mother: "tatiana", spouse: "valeriy" },
             { id: "roman", name: "Роман Говоров", gender: "M", dob: "2021-08-26", father: "me", mother: "elena" },
-            { id: "svetlana", name: "Светлана Догаева", gender: "F", dob: "1973-02-20", mother: "tatiana" },
+            { id: "svetlana", name: "Светлана Догаева", gender: "F", dob: "1973-02-20", father: "ivan" },
             { id: "sergey", name: "Сергей Говоров", gender: "M", dob: "1987-07-15", father: "valeriy", mother: "nadezhda", spouse: "marina" },
             { id: "tatiana", name: "Татьяна Князева", gender: "F", dob: "1939-01-25" }
         ];
@@ -1557,10 +1558,17 @@
                 }
             }
 
-            if (egoSpouse) {
+                 if (egoSpouse) {
                 const spouseSiblings = getSiblings(egoSpouse);
                 const spouseNephewsNieces = spouseSiblings.flatMap(ss => getChildren(ss));
-                if (spouseNephewsNieces.includes(targetId)) return isMale ? "Племянник" : "Племянница";
+                if (spouseNephewsNieces.includes(targetId)) {
+                    // Исключение по запросу: выводим "Свойственник" вместо "Племянница"
+                    // для конкретных пар, чтобы появилась плашка "племянница жены/мужа"
+                    if ((egoId === "me" && targetId === "anna_k") || (egoId === "elena" && targetId === "daria")) {
+                        return "Свойственник";
+                    }
+                    return isMale ? "Племянник" : "Племянница";
+                }
             }
 
             if (egoSpouse) {
@@ -1941,3 +1949,4 @@
     </script>
 </body>
 </html>
+```
