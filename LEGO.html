@@ -232,6 +232,7 @@
             transform: scale(1.05);
         }
 
+        /* Плашки сверху справа */
         .card-badges-top {
             position: absolute;
             top: 10px;
@@ -240,6 +241,18 @@
             flex-direction: column;
             align-items: flex-end;
             gap: 4px;
+            z-index: 10;
+        }
+
+        /* Плашки сверху слева */
+        .card-badges-top-left {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            z-index: 10;
         }
 
         .status-badge {
@@ -267,6 +280,27 @@
             text-transform: uppercase;
         }
         .verified-badge.red { background-color: var(--unverified-red); }
+
+        /* Внешние ссылки (Bricklink, Rebrickable) */
+        .external-link-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            display: inline-block;
+        }
+        .external-link-badge:hover {
+            opacity: 0.9;
+            transform: scale(1.05);
+        }
+        .external-link-badge.bricklink { background-color: #dc2626; }
+        .external-link-badge.rebrickable { background-color: #1e293b; }
 
         .card-body {
             padding: 16px;
@@ -650,6 +684,8 @@
     const COL_EXTRA1  = 11; 
     const COL_EXTRA2  = 12; 
     const COL_CHECK   = 13; 
+    const COL_REBRICKABLE = 14; // Столбец O
+    const COL_BRICKLINK   = 15; // Столбец P
 
     // Обновленные диапазоны деталей
     const PIECES_RANGES = [
@@ -688,6 +724,21 @@
         if (!setNum) return 'https://via.placeholder.com/300x220?text=No+Image';
         let cleanNum = setNum.toString().trim().split('-')[0];
         return `images/sets/${cleanNum}.jpg`;
+    }
+
+    // Функция получения ссылок (берет из таблицы, если пусто - генерирует сама)
+    function getExternalLinks(row, setNum) {
+        let bricklinkUrl = row[COL_BRICKLINK] ? row[COL_BRICKLINK].trim() : '';
+        let rebrickableUrl = row[COL_REBRICKABLE] ? row[COL_REBRICKABLE].trim() : '';
+
+        if (!bricklinkUrl) {
+            bricklinkUrl = `https://www.bricklink.com/v2/catalog/catalogitem.page?S=${setNum}`;
+        }
+        if (!rebrickableUrl) {
+            rebrickableUrl = `https://rebrickable.com/sets/${setNum}/`;
+        }
+
+        return { bricklinkUrl, rebrickableUrl };
     }
 
     function parseCSV(text) {
@@ -1057,6 +1108,7 @@
             const checkRaw = row[COL_CHECK] ? row[COL_CHECK].trim() : '';
 
             const primaryImg = getImageUrl(setNum);
+            const { bricklinkUrl, rebrickableUrl } = getExternalLinks(row, setNum);
 
             let statusClass = '';
             if (status === 'Для себя') statusClass = 'st-для-себя';
@@ -1081,7 +1133,13 @@
                         <img src="${primaryImg}" 
                              alt="${name}" 
                              onerror="this.onerror=null; this.src='https://via.placeholder.com/300x220?text=Нет+фото';" />
+                        
+                        <div class="card-badges-top-left">
+                            <a href="${bricklinkUrl}" target="_blank" rel="noopener noreferrer" class="external-link-badge bricklink" onclick="event.stopPropagation()">BrickLink</a>
+                        </div>
+                        
                         <div class="card-badges-top">
+                            <a href="${rebrickableUrl}" target="_blank" rel="noopener noreferrer" class="external-link-badge rebrickable" onclick="event.stopPropagation()">Rebrickable</a>
                             ${status ? `<span class="status-badge ${statusClass}">${status}</span>` : ''}
                             ${checkBadge}
                         </div>
@@ -1120,6 +1178,7 @@
         const extra1 = row[COL_EXTRA1]  || '';
         const extra2 = row[COL_EXTRA2]  || '';
         const checkStatus = (row[COL_CHECK] || '').trim();
+        const { bricklinkUrl, rebrickableUrl } = getExternalLinks(row, setNum);
 
         const imgUrl = getImageUrl(setNum);
 
@@ -1145,6 +1204,8 @@
             <span class="badge badge-pieces" onclick="closeModalDirect(); openPickerModal('pieces');">🧩 ${pieces} дет.</span>
             ${!hideBox ? `<span class="badge badge-box" onclick="closeModalDirect(); openPickerModal('box');">Box № ${box}</span>` : ''}
             ${status ? `<span class="status-badge ${statusClass}">${status}</span>` : ''}
+            <a href="${bricklinkUrl}" target="_blank" rel="noopener noreferrer" class="external-link-badge bricklink">BrickLink</a>
+            <a href="${rebrickableUrl}" target="_blank" rel="noopener noreferrer" class="external-link-badge rebrickable">Rebrickable</a>
         `;
 
         if (checkStatus.toLowerCase() === 'не проверен') {
@@ -1187,3 +1248,4 @@
 </script>
 </body>
 </html>
+```
