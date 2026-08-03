@@ -584,7 +584,7 @@
     <div class="sticky-top-panel" id="stickyPanel">
         <div class="status-pills" id="statusPills">
             <div class="status-pill active" data-status="all" onclick="selectStatusPill('all')">Все (<span id="cnt-all">0</span>)</div>
-            <div class="status-pill" data-status="Для себя" onclick="selectStatusPill('Для себя')">Для себя (<span id="cnt-self">0</span>)</div>
+            <div class="status-pill data-status="Для себя" onclick="selectStatusPill('Для себя')">Для себя (<span id="cnt-self">0</span>)</div>
             <div class="status-pill" data-status="Продажа" onclick="selectStatusPill('Продажа')">Продажа (<span id="cnt-sale">0</span>)</div>
             <div class="status-pill" data-status="Запечатан" onclick="selectStatusPill('Запечатан')">Запечатан (<span id="cnt-sealed">0</span>)</div>
             <div class="status-pill" data-status="Продан" onclick="selectStatusPill('Продан')">Продан (<span id="cnt-sold">0</span>)</div>
@@ -673,8 +673,6 @@
     const COL_EXTRA1  = 11; 
     const COL_EXTRA2  = 12; 
     const COL_CHECK   = 13; 
-    const COL_REBRICKABLE = 14; // Столбец O
-    const COL_BRICKLINK   = 15; // Столбец P
 
     // Обновленные диапазоны деталей
     const PIECES_RANGES = [
@@ -715,10 +713,19 @@
         return `images/sets/${cleanNum}.jpg`;
     }
 
-    // Функция получения ссылок строго из таблицы (без автогенерации)
-    function getExternalLinks(row) {
-        let bricklinkUrl = row[COL_BRICKLINK] ? row[COL_BRICKLINK].trim().replace(/^"|"$/g, '') : '';
-        let rebrickableUrl = row[COL_REBRICKABLE] ? row[COL_REBRICKABLE].trim().replace(/^"|"$/g, '') : '';
+    // Функция генерации ссылок ВНУТРИ кода (игнорируем гугл-таблицу)
+    function getExternalLinks(setNum) {
+        // Очищаем номер набора от возможных пробелов
+        let cleanSetNum = setNum.toString().trim().split(' ')[0];
+        
+        // Если в номере набора нет тире (например, просто 30291), добавляем "-1"
+        // Если тире есть (например, 30291-1), оставляем как есть
+        if (!cleanSetNum.includes('-')) {
+            cleanSetNum += '-1';
+        }
+
+        let bricklinkUrl = `https://www.bricklink.com/v2/catalog/catalogitem.page?S=${cleanSetNum}`;
+        let rebrickableUrl = `https://rebrickable.com/sets/${cleanSetNum}/`;
 
         return { bricklinkUrl, rebrickableUrl };
     }
@@ -1155,7 +1162,8 @@
         const extra2 = row[COL_EXTRA2]  || '';
         const checkStatus = (row[COL_CHECK] || '').trim();
         
-        const { bricklinkUrl, rebrickableUrl } = getExternalLinks(row);
+        // Генерируем ссылки внутри кода
+        const { bricklinkUrl, rebrickableUrl } = getExternalLinks(setNum);
 
         const imgUrl = getImageUrl(setNum);
 
@@ -1175,22 +1183,14 @@
         const normalizedStatus = status.toLowerCase();
         const hideBox = normalizedStatus === 'продан' || normalizedStatus === 'запечатан' || normalizedStatus === 'набора нет';
 
-        // Формируем HTML для плашек только если ссылки существуют
-        let externalLinksHtml = '';
-        if (bricklinkUrl) {
-            externalLinksHtml += `<a href="${bricklinkUrl}" target="_blank" rel="noopener noreferrer" class="external-link-badge bricklink">BrickLink</a>`;
-        }
-        if (rebrickableUrl) {
-            externalLinksHtml += `<a href="${rebrickableUrl}" target="_blank" rel="noopener noreferrer" class="external-link-badge rebrickable">Rebrickable</a>`;
-        }
-
         let badgesHtml = `
             <span class="badge badge-theme" onclick="closeModalDirect(); openPickerModal('theme');">${theme}</span>
             <span class="badge badge-year" onclick="closeModalDirect(); openPickerModal('year');">${year}</span>
             <span class="badge badge-pieces" onclick="closeModalDirect(); openPickerModal('pieces');">🧩 ${pieces} дет.</span>
             ${!hideBox ? `<span class="badge badge-box" onclick="closeModalDirect(); openPickerModal('box');">Box № ${box}</span>` : ''}
             ${status ? `<span class="status-badge ${statusClass}">${status}</span>` : ''}
-            ${externalLinksHtml}
+            <a href="${bricklinkUrl}" target="_blank" rel="noopener noreferrer" class="external-link-badge bricklink">BrickLink</a>
+            <a href="${rebrickableUrl}" target="_blank" rel="noopener noreferrer" class="external-link-badge rebrickable">Rebrickable</a>
         `;
 
         if (checkStatus.toLowerCase() === 'не проверен') {
