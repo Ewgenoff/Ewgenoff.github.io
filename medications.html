@@ -567,6 +567,7 @@
                         <option value="locationCabinet">Лежат в шкафу &#128452;</option>
                         <option value="underChildAge" id="sortChildAgeOption">Нельзя детям 👶🚫</option>
                         <option value="tempCold">Хранение (&lt;24 C) ❄️</option>
+                        <option value="finished">Закончились ❌</option>
                     </select>
                 </div>
             </div>
@@ -883,6 +884,8 @@
                     filtered = filtered.filter(m => m.isNoChild);
                 } else if (sortVal === 'tempCold') {
                     filtered = filtered.filter(m => m.isSnowflake);
+                } else if (sortVal === 'finished') {
+                    filtered = filtered.filter(m => m.isNo);
                 } else {
                     filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
                 }
