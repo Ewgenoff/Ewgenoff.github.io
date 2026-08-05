@@ -7,7 +7,7 @@ export async function onRequest(context) {
       const [user, pass] = decoded.split(':');
       
       // УКАЖИТЕ СВОЙ ЛОГИН И ПАРОЛЬ:
-      if (user === 'Ewgenoff' && pass === '663770+') {
+      if (user === 'Ewgenoff' && pass === '123456') {
         return await context.next();
       }
     }
