@@ -104,7 +104,6 @@
             transform: scale(0.96);
         }
 
-        /* Стили активных нажатых счетчиков */
         .stat-badge.active-valid {
             background: var(--color-success);
             border-color: var(--color-success);
@@ -157,7 +156,6 @@
             gap: 10px;
         }
 
-        /* Две строки поиска рядом */
         .search-row {
             display: flex;
             gap: 8px;
@@ -222,40 +220,39 @@
             line-height: 1;
         }
 
-        .sort-box {
+        /* Кнопка открытия окна сортировки */
+        .sort-trigger {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
             background: var(--card-bg-glass);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-control);
-            padding: 6px 12px;
+            padding: 10px 14px;
             box-shadow: var(--ios-shadow);
+            cursor: pointer;
+            transition: transform 0.15s;
         }
 
-        .sort-label {
+        .sort-trigger:active {
+            transform: scale(0.98);
+        }
+
+        .sort-trigger-label {
             font-size: 0.85rem;
             color: var(--text-secondary);
             font-weight: 500;
-            white-space: nowrap;
         }
 
-        .sort-select {
-            background: transparent;
-            border: none;
-            color: var(--color-default);
+        .sort-trigger-value {
             font-size: 0.88rem;
             font-weight: 600;
-            outline: none;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .sort-select option {
-            background: var(--bg-color);
-            color: var(--text-primary);
+            color: var(--color-default);
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         /* Список лекарств */
@@ -291,7 +288,6 @@
             border-color: rgba(142, 142, 147, 0.4) !important;
         }
 
-        /* Зачеркивание лекарства при "нет" в столбце B */
         .med-card.strikethrough .med-name {
             text-decoration: line-through;
             color: var(--text-secondary);
@@ -338,7 +334,6 @@
             margin-top: 2px;
         }
 
-        /* Объединенная плашка "Нельзя детям" */
         .badge-no-child {
             display: inline-flex;
             align-items: center;
@@ -457,13 +452,7 @@
             font-size: 1.2rem;
             font-weight: 700;
             color: var(--text-primary);
-        }
-
-        .modal-group {
-            font-size: 0.85rem;
-            color: var(--color-default);
-            font-weight: 600;
-            margin-top: 2px;
+            text-align: center;
         }
 
         .modal-body {
@@ -471,8 +460,60 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
-            max-height: 60vh;
-            overflow-y: auto;
+        }
+
+        /* Окно сортировки с кнопками iOS Style внутри модалки */
+        .sort-window {
+            background: rgba(142, 142, 147, 0.2);
+            border-radius: var(--radius-control);
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+        }
+
+        .sort-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+        }
+
+        .sort-btn {
+            background: var(--card-bg-glass);
+            border: none;
+            padding: 14px 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+            min-height: 80px;
+            outline: none;
+        }
+
+        .sort-btn .sort-emoji {
+            font-size: 1.4rem;
+            line-height: 1;
+        }
+
+        .sort-btn .sort-text {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .sort-btn.active {
+            background: rgba(0, 122, 255, 0.12);
+        }
+
+        .sort-btn.active .sort-text {
+            color: var(--color-default);
+        }
+
+        .sort-btn:active {
+            opacity: 0.7;
         }
 
         .modal-section {
@@ -498,7 +539,7 @@
             padding: 12px 20px;
             border-top: 1px solid var(--card-border);
             display: flex;
-            justify-content: flex-end;
+            justify-content: center;
         }
 
         .ios-btn {
@@ -506,10 +547,11 @@
             color: white;
             border: none;
             border-radius: 10px;
-            padding: 8px 18px;
-            font-size: 0.9rem;
+            padding: 10px 24px;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
+            width: 100%;
         }
 
         .footer {
@@ -559,16 +601,13 @@
                     </div>
                 </div>
                 
-                <div class="sort-box">
-                    <span class="sort-label">Сортировка:</span>
-                    <select id="sortSelect" class="sort-select" onchange="onSelectSortChange()">
-                        <option value="name">По названию (А - Я)</option>
-                        <option value="locationFridge">Лежат в холодильнике 🧊</option>
-                        <option value="locationCabinet">Лежат в шкафу &#128452;</option>
-                        <option value="underChildAge" id="sortChildAgeOption">Нельзя детям 👶🚫</option>
-                        <option value="tempCold">Хранение (&lt;24 C) ❄️</option>
-                        <option value="finished">Закончились ❌</option>
-                    </select>
+                <!-- Кнопка открытия модалки сортировки -->
+                <div class="sort-trigger" onclick="openSortModal()">
+                    <span class="sort-trigger-label">Сортировка</span>
+                    <span class="sort-trigger-value">
+                        <span id="currentSortText">По названию (А - Я)</span>
+                        <span>▸</span>
+                    </span>
                 </div>
             </div>
         </div>
@@ -585,12 +624,54 @@
         <div id="totalRecordsCount">В базе 0 записей</div>
     </div>
 
-    <!-- Модальное окно (iOS Style) -->
+    <!-- Модальное окно сортировки (iOS Style) -->
+    <div class="modal-overlay" id="sortModal" onclick="closeSortModal(event)">
+        <div class="ios-modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">Выберите сортировку</div>
+            </div>
+            <div class="modal-body">
+                <div class="sort-window">
+                    <div class="sort-grid">
+                        <button class="sort-btn active" data-sort="name" data-text="По названию (А - Я)" onclick="handleSortClick(this)">
+                            <span class="sort-emoji">🔤</span>
+                            <span class="sort-text">По названию (А - Я)</span>
+                        </button>
+                        <button class="sort-btn" data-sort="locationFridge" data-text="В холодильнике" onclick="handleSortClick(this)">
+                            <span class="sort-emoji">🧊</span>
+                            <span class="sort-text">В холодильнике</span>
+                        </button>
+                        <button class="sort-btn" data-sort="locationCabinet" data-text="В шкафу" onclick="handleSortClick(this)">
+                            <span class="sort-emoji">🗄️</span>
+                            <span class="sort-text">В шкафу</span>
+                        </button>
+                        <button class="sort-btn" data-sort="underChildAge" id="sortChildAgeBtn" data-text="Нельзя детям" onclick="handleSortClick(this)">
+                            <span class="sort-emoji">👶🚫</span>
+                            <span class="sort-text">Нельзя детям</span>
+                        </button>
+                        <button class="sort-btn" data-sort="tempCold" data-text="Хранение < 24°C" onclick="handleSortClick(this)">
+                            <span class="sort-emoji">❄️</span>
+                            <span class="sort-text">Хранение &lt; 24°C</span>
+                        </button>
+                        <button class="sort-btn" data-sort="finished" data-text="Закончились" onclick="handleSortClick(this)">
+                            <span class="sort-emoji">❌</span>
+                            <span class="sort-text">Закончились</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="ios-btn" onclick="closeSortModal()">Отмена</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно информации о лекарстве (iOS Style) -->
     <div class="modal-overlay" id="iosModal" onclick="closeModal(event)">
         <div class="ios-modal" onclick="event.stopPropagation()">
             <div class="modal-header">
                 <div class="modal-title" id="m-name">Название</div>
-                <div class="modal-group" id="m-group">Группа</div>
+                <div class="modal-group" id="m-group" style="font-size: 0.85rem; color: var(--color-default); font-weight: 600; margin-top: 2px;">Группа</div>
             </div>
             <div class="modal-body">
                 <div class="modal-section">
@@ -617,6 +698,7 @@
 
         let medicines = [];
         let activeStatFilter = null; // 'valid', 'expired', 'soon' или null
+        let currentSort = 'name'; // Текущая сортировка по умолчанию
 
         // Вычисление динамического возраста ограничений для детей
         function getChildAgeThreshold() {
@@ -624,13 +706,11 @@
             const year = now.getFullYear();
             const month = now.getMonth(); // 0 - Январь, 7 - Август
 
-            // Рождение детей: 2022 год
             let age = year - 2022;
             if (month < 7) { 
-                age -= 1; // До 1 августа текущего года возраст на 1 меньше
+                age -= 1; 
             }
 
-            // Минимальный порог 6 лет, максимум 18 лет
             let threshold = age + 2; 
             if (threshold < 6) threshold = 6;
             if (threshold > 18) threshold = 18;
@@ -640,11 +720,13 @@
 
         const childAgeThreshold = getChildAgeThreshold();
 
-        // Обновляем текста фильтра в select
         document.addEventListener("DOMContentLoaded", () => {
-            const opt = document.getElementById("sortChildAgeOption");
-            if (opt) {
-                opt.textContent = `Нельзя детям до ${childAgeThreshold} лет 👶🚫`;
+            const btn = document.getElementById("sortChildAgeBtn");
+            if (btn) {
+                const customText = `Нельзя до ${childAgeThreshold} лет`;
+                btn.setAttribute('data-text', customText);
+                const textSpan = btn.querySelector('.sort-text');
+                if(textSpan) textSpan.textContent = customText;
             }
         });
 
@@ -731,10 +813,10 @@
 
                     const colB = row[1] ? row[1].trim() : '';
                     const expiryRaw = row[2] ? row[2].trim() : '';
-                    const group = row[4] ? row[4].trim() : ''; // E
-                    const desc = row[5] ? row[5].trim() : '';  // F
-                    const tempRaw = row[6] ? row[6].trim() : ''; // G
-                    const ageRaw = row[7] ? row[7].trim() : '';  // H
+                    const group = row[4] ? row[4].trim() : ''; 
+                    const desc = row[5] ? row[5].trim() : '';  
+                    const tempRaw = row[6] ? row[6].trim() : ''; 
+                    const ageRaw = row[7] ? row[7].trim() : '';  
 
                     const isNo = colB.toLowerCase() === 'нет';
                     const expiryDate = parseExpiryDate(expiryRaw);
@@ -776,7 +858,6 @@
         }
 
         function updateStats() {
-            // Для статистики считаем только имеющиеся медикаменты (!isNo)
             const availableMeds = medicines.filter(m => !m.isNo);
             const validCount = availableMeds.filter(m => !m.isExpired).length;
             const expiredCount = availableMeds.filter(m => m.isExpired).length;
@@ -786,7 +867,6 @@
             document.getElementById('stat-expired').textContent = expiredCount;
             document.getElementById('stat-soon').textContent = soonCount;
 
-            // Вывод информации о всех записях базы внизу
             const totalRecordsElem = document.getElementById('totalRecordsCount');
             if (totalRecordsElem) {
                 totalRecordsElem.textContent = `В базе ${medicines.length} записей`;
@@ -796,18 +876,44 @@
         function toggleStatFilter(type) {
             if (activeStatFilter === type) {
                 activeStatFilter = null;
-                document.getElementById('sortSelect').value = 'name';
+                currentSort = 'name';
+                document.getElementById('currentSortText').textContent = 'По названию (А - Я)';
+                document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+                document.querySelector('.sort-btn[data-sort="name"]').classList.add('active');
             } else {
                 activeStatFilter = type;
+                if (type === 'valid') document.getElementById('currentSortText').textContent = 'Только годные';
+                if (type === 'expired') document.getElementById('currentSortText').textContent = 'Только просроченные';
+                if (type === 'soon') document.getElementById('currentSortText').textContent = 'Истекают (≤ 3 мес.)';
+                document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
             }
             updateStatButtonsUI();
             filterAndRender();
         }
 
-        function onSelectSortChange() {
+        function openSortModal() {
+            document.getElementById('sortModal').classList.add('active');
+        }
+
+        function closeSortModal(event) {
+            if(event) event.stopPropagation();
+            document.getElementById('sortModal').classList.remove('active');
+        }
+
+        function handleSortClick(button) {
+            currentSort = button.getAttribute('data-sort');
+            const currentSortText = button.getAttribute('data-text');
+            
+            document.getElementById('currentSortText').textContent = currentSortText;
+
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            button.classList.add('active');
+
             activeStatFilter = null;
             updateStatButtonsUI();
             filterAndRender();
+            
+            document.getElementById('sortModal').classList.remove('active');
         }
 
         function updateStatButtonsUI() {
@@ -828,7 +934,6 @@
             }
         }
 
-        /* Управление инпутами поиска и крестиком */
         function handleSearchInput(inputId, clearBtnId) {
             const input = document.getElementById(inputId);
             const clearBtn = document.getElementById(clearBtnId);
@@ -846,7 +951,7 @@
         function filterAndRender() {
             const nameQuery = document.getElementById('searchNameInput').value.toLowerCase().trim();
             const globalQuery = document.getElementById('searchGlobalInput').value.toLowerCase().trim();
-            const sortVal = document.getElementById('sortSelect').value;
+            const sortVal = currentSort; 
 
             let filtered = medicines.filter(m => {
                 const matchName = nameQuery ? m.name.toLowerCase().includes(nameQuery) : true;
@@ -878,14 +983,19 @@
             } else {
                 if (sortVal === 'locationFridge') {
                     filtered = filtered.filter(m => m.isFridge);
+                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
                 } else if (sortVal === 'locationCabinet') {
                     filtered = filtered.filter(m => m.isCabinet);
+                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
                 } else if (sortVal === 'underChildAge') {
                     filtered = filtered.filter(m => m.isNoChild);
+                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
                 } else if (sortVal === 'tempCold') {
                     filtered = filtered.filter(m => m.isSnowflake);
+                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
                 } else if (sortVal === 'finished') {
                     filtered = filtered.filter(m => m.isNo);
+                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
                 } else {
                     filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
                 }
@@ -903,7 +1013,6 @@
                 if (item.isExpired) classList.push('expired');
                 else if (item.isExpiringSoon) classList.push('expiring-soon');
 
-                // Иконки
                 let iconsHtml = '';
                 if (item.isFridge) iconsHtml += '<span title="Холодильник">🧊</span>';
                 if (item.isCabinet) iconsHtml += '<span title="Шкаф">&#128452;</span>';
@@ -949,7 +1058,8 @@
             document.getElementById('iosModal').classList.add('active');
         }
 
-        function closeModal() {
+        function closeModal(event) {
+            if(event) event.stopPropagation();
             document.getElementById('iosModal').classList.remove('active');
         }
 
