@@ -167,6 +167,39 @@
             opacity: 0.8;
         }
 
+        /* Контейнер для двух кнопок в ряд */
+        .row-container {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            flex-wrap: nowrap;
+        }
+
+        /* Компактные карточки */
+        .card-small {
+            flex: 1;
+            padding: 12px 14px;
+            justify-content: center;
+        }
+
+        .card-small .row-icon {
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        .card-small .row-content h2 {
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-small .chevron {
+            display: none;
+        }
+
         /* Подвал */
         .footer {
             text-align: center;
@@ -226,21 +259,22 @@
                 <div class="chevron">›</div>
             </a>
 
-            <a href="LEGO_Parsing.html" class="card">
-                <div class="row-icon">🌐</div>
-                <div class="row-content">
-                    <h2>Лего парсинг с Сайта</h2>
-                </div>
-                <div class="chevron">›</div>
-            </a>
+            <!-- Две маленькие кнопки в одну строку -->
+            <div class="row-container">
+                <a href="LEGO_Parsing.html" class="card card-small">
+                    <div class="row-icon">🌐</div>
+                    <div class="row-content">
+                        <h2>Лего парсинг</h2>
+                    </div>
+                </a>
 
-            <a href="LEGO_Find.html" class="card">
-                <div class="row-icon">🔍</div>
-                <div class="row-content">
-                    <h2>Поиск по набору LEGO</h2>
-                </div>
-                <div class="chevron">›</div>
-            </a>
+                <a href="LEGO_Find.html" class="card card-small">
+                    <div class="row-icon">🔍</div>
+                    <div class="row-content">
+                        <h2>Поиск LEGO</h2>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 
