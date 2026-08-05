@@ -208,6 +208,87 @@
             margin-top: 24px;
             font-weight: 400;
         }
+
+        ===================== */
+        /* IOS MODAL (ALERT) STYLES */
+        ===================== */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .ios-modal {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            width: 80%;
+            max-width: 300px;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            transform: scale(1.1);
+            opacity: 0;
+            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease;
+        }
+
+        .modal-overlay.active .ios-modal {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        .modal-content {
+            padding: 20px 16px 16px 16px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .modal-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        .modal-button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            background: transparent;
+            color: var(--color-default);
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            transition: background-color 0.15s;
+            font-family: var(--ios-font);
+        }
+
+        .modal-button:active {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
     </style>
 </head>
 <body>
@@ -227,8 +308,8 @@
 
         <!-- Кнопки-ссылки -->
         <div class="list-container">
-            <!-- Изменена эта строка: добавлен onclick для показа alert и отмены перехода -->
-            <a href="#" class="card" onclick="event.preventDefault(); alert('Упс...Доступ к странице ограничен офлайн режимом!');">
+            <!-- Изменена эта строка: теперь вызываем кастомное модальное окно -->
+            <a href="#" class="card" onclick="event.preventDefault(); showIosAlert('Офлайн режим', 'Упс... Доступ к странице ограничен офлайн режимом!');">
                 <div class="row-icon">⏳</div>
                 <div class="row-content">
                     <h2>Мой таймлайн</h2>
@@ -284,7 +365,33 @@
         Версия 1.2 (by Ewgenoff 02.08.2026)
     </div>
 
+    ===================== */
+    <!-- HTML СТРУКТУРА МОДАЛЬНОГО ОКНА -->
+    ===================== -->
+    <div class="modal-overlay" id="iosAlertOverlay" onclick="hideIosAlert(event)">
+        <div class="ios-modal" onclick="event.stopPropagation()">
+            <div class="modal-content">
+                <div class="modal-title" id="iosAlertTitle">Заголовок</div>
+                <div class="modal-text" id="iosAlertText">Текст сообщения</div>
+            </div>
+            <button class="modal-button" onclick="hideIosAlert()">OK</button>
+        </div>
+    </div>
+
     <script>
+        // Функции для управления модальным окном
+        function showIosAlert(title, text) {
+            document.getElementById('iosAlertTitle').textContent = title;
+            document.getElementById('iosAlertText').textContent = text;
+            document.getElementById('iosAlertOverlay').classList.add('active');
+        }
+
+        function hideIosAlert(event) {
+            // Закрываем либо по клику на кнопку, либо по клику на фон (overlay)
+            if (event) event.preventDefault();
+            document.getElementById('iosAlertOverlay').classList.remove('active');
+        }
+
         function updateWidget() {
             const now = new Date();
             const month = now.getMonth(); // 0-11 (Июль = 6)
