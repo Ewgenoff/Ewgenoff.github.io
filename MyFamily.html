@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -167,7 +166,7 @@
             max-width: 45%;
         }
 
-        .controls select {
+        .sort-trigger-btn {
             width: 100%;
             font-family: inherit;
             font-size: 12px;
@@ -175,23 +174,77 @@
             color: #007aff;
             background: var(--input-bg);
             border: 1px solid var(--input-border);
-            padding: 6px 6px;
+            padding: 6px 12px;
             border-radius: 8px;
             outline: none;
             cursor: pointer;
             text-overflow: ellipsis;
             white-space: nowrap;
             overflow: hidden;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
             text-align: center;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
-        .controls select option {
+        /* iOS Action Sheet Styles */
+        #sort-modal {
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0 0 12px 0;
+        }
+
+        #sort-modal .action-sheet {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            width: 92%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            animation: slideUp 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 14px;
+            cursor: default;
+        }
+
+        body.dark-theme #sort-modal .action-sheet {
+            background: rgba(40, 40, 42, 0.8);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0.5; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .action-sheet-group {
             background: var(--modal-bg);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .action-sheet-btn {
+            padding: 14px 16px;
+            font-size: 14px;
             color: #007aff;
+            text-align: center;
+            cursor: pointer;
+            border-bottom: 1px solid var(--card-border-inner);
+            transition: background 0.1s;
+            user-select: none;
+        }
+
+        .action-sheet-btn:last-child {
+            border-bottom: none;
+        }
+
+        .action-sheet-btn:active {
+            background: var(--ios-group-bg);
+        }
+
+        .action-sheet-btn.cancel {
             font-weight: 600;
+            color: #ff3b30;
         }
 
         .container {
@@ -572,7 +625,7 @@
             .zodiac-icon { font-size: 18px; }
             .controls { padding: 6px 8px; gap: 4px; }
             .search-input { font-size: 11.5px; padding: 5px 20px 5px 6px; }
-            .controls select { font-size: 11.5px; padding: 5px 4px; }
+            .sort-trigger-btn { font-size: 11.5px; padding: 5px 8px; }
         }
     </style>
 </head>
@@ -590,22 +643,34 @@
             <!-- Dark/Light Theme Button -->
             <button class="theme-toggle-btn" id="theme-btn" onclick="toggleTheme()" title="Переключить тему">🌙</button>
 
-            <!-- iOS Style Sort Select -->
+            <!-- iOS Style Sort Button -->
             <div class="sort-group">
-                <select id="sort-select" onchange="renderCards()">
-                    <option value="kinship">Степень родства</option>
-                    <option value="name">По алфавиту</option>
-                    <option value="next_bday">Ближайший ДР</option>
-                    <option value="age_desc">Старше → Младше</option>
-                    <option value="age_asc">Младше → Старше</option>
-                    <option value="zodiac_west">Знак зодиака</option>
-                    <option value="zodiac_east">Восточный знак</option>
-                </select>
+                <button id="sort-btn" class="sort-trigger-btn" onclick="openSortSheet()">
+                    Степень родства
+                </button>
             </div>
         </div>
     </div>
 
     <div class="container" id="cards-container"></div>
+
+    <!-- Sort Action Sheet (iOS Style) -->
+    <div class="modal-overlay" id="sort-modal" onclick="closeSortSheet()">
+        <div class="action-sheet" onclick="event.stopPropagation()">
+            <div class="action-sheet-group">
+                <div class="action-sheet-btn" onclick="selectSortOption('kinship', 'Степень родства')">Степень родства</div>
+                <div class="action-sheet-btn" onclick="selectSortOption('name', 'По алфавиту')">По алфавиту</div>
+                <div class="action-sheet-btn" onclick="selectSortOption('next_bday', 'Ближайший ДР')">Ближайший ДР</div>
+                <div class="action-sheet-btn" onclick="selectSortOption('age_desc', 'Старше → Младше')">Старше → Младше</div>
+                <div class="action-sheet-btn" onclick="selectSortOption('age_asc', 'Младше → Старше')">Младше → Старше</div>
+                <div class="action-sheet-btn" onclick="selectSortOption('zodiac_west', 'Знак зодиака')">Знак зодиака</div>
+                <div class="action-sheet-btn" onclick="selectSortOption('zodiac_east', 'Восточный знак')">Восточный знак</div>
+            </div>
+            <div class="action-sheet-group">
+                <div class="action-sheet-btn cancel" onclick="closeSortSheet()">Отмена</div>
+            </div>
+        </div>
+    </div>
 
     <!-- Eastern Zodiac Modal Popup (iOS Style) -->
     <div class="modal-overlay" id="zodiac-modal" onclick="hideModal()">
@@ -740,6 +805,23 @@
         function clearSearch() {
             const searchInput = document.getElementById("search-input");
             searchInput.value = "";
+            renderCards();
+        }
+
+        let currentSortCriterion = "kinship";
+
+        function openSortSheet() {
+            document.getElementById("sort-modal").classList.add("active");
+        }
+
+        function closeSortSheet() {
+            document.getElementById("sort-modal").classList.remove("active");
+        }
+
+        function selectSortOption(value, text) {
+            currentSortCriterion = value;
+            document.getElementById("sort-btn").innerText = text;
+            closeSortSheet();
             renderCards();
         }
 
@@ -1849,7 +1931,7 @@
 
         function renderCards() {
             const container = document.getElementById("cards-container");
-            const sortCriterion = document.getElementById("sort-select").value;
+            const sortCriterion = currentSortCriterion;
             const searchQuery = document.getElementById("search-input").value.trim().toLowerCase();
             
             container.innerHTML = "";
@@ -1949,4 +2031,3 @@
     </script>
 </body>
 </html>
-```
