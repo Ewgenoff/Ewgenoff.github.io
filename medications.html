@@ -29,6 +29,7 @@
 
             --ios-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
             --ios-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            --ios-shadow-btn: 0 4px 12px rgba(0, 0, 0, 0.12); /* Новая более заметная тень */
             
             --radius-card: 14px;
             --radius-control: 10px;
@@ -78,7 +79,6 @@
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
 
-        /* Класс для скрытия панели при скролле вниз */
         .sticky-top.hidden {
             transform: translateY(-110%);
             opacity: 0;
@@ -102,7 +102,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-shadow: var(--ios-shadow);
+            box-shadow: var(--ios-shadow-btn); /* Обновленная тень */
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -176,7 +176,7 @@
 
         .search-input {
             width: 100%;
-            padding: 10px 30px 10px 32px;
+            padding: 10px 30px 10px 34px;
             background: var(--card-bg-glass);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -184,7 +184,7 @@
             border-radius: var(--radius-control);
             font-size: 0.85rem;
             color: var(--text-primary);
-            box-shadow: var(--ios-shadow);
+            box-shadow: var(--ios-shadow-btn); /* Обновленная тень */
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
@@ -192,11 +192,12 @@
         .search-input::placeholder {
             color: var(--text-secondary);
             opacity: 0.8;
+            font-style: italic; /* Наклонный шрифт */
         }
 
         .search-input:focus {
             border-color: var(--color-default);
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2), var(--ios-shadow-btn);
         }
 
         .search-icon {
@@ -204,9 +205,11 @@
             left: 10px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 0.85rem;
             color: var(--text-secondary);
             pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .clear-icon {
@@ -238,7 +241,7 @@
             border: 1px solid var(--card-border);
             border-radius: var(--radius-control);
             padding: 10px 14px;
-            box-shadow: var(--ios-shadow);
+            box-shadow: var(--ios-shadow-btn); /* Обновленная тень */
             cursor: pointer;
             transition: transform 0.15s;
         }
@@ -423,7 +426,6 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            font-size: 1.6rem;
             cursor: pointer;
             z-index: 90;
             opacity: 0;
@@ -632,12 +634,16 @@
             <div class="controls-container">
                 <div class="search-row">
                     <div class="search-box">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" id="searchNameInput" class="search-input" placeholder="Поиск по названию" oninput="handleSearchInput('searchNameInput', 'clearNameBtn')">
+                        <span class="search-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </span>
+                        <input type="text" id="searchNameInput" class="search-input" placeholder="Поиск" oninput="handleSearchInput('searchNameInput', 'clearNameBtn')">
                         <span id="clearNameBtn" class="clear-icon" onclick="clearSearch('searchNameInput', 'clearNameBtn')">✕</span>
                     </div>
                     <div class="search-box">
-                        <span class="search-icon">🔎</span>
+                        <span class="search-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        </span>
                         <input type="text" id="searchGlobalInput" class="search-input" placeholder="Поиск везде" oninput="handleSearchInput('searchGlobalInput', 'clearGlobalBtn')">
                         <span id="clearGlobalBtn" class="clear-icon" onclick="clearSearch('searchGlobalInput', 'clearGlobalBtn')">✕</span>
                     </div>
@@ -661,7 +667,9 @@
     </div>
 
     <!-- Плавающая кнопка Поиска везде -->
-    <div class="fab-search" id="fabSearch" onclick="activateGlobalSearch()">🌐</div>
+    <div class="fab-search" id="fabSearch" onclick="activateGlobalSearch()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+    </div>
 
     <!-- Подвал -->
     <div class="footer">
@@ -742,14 +750,13 @@
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vROsTHKb21QaPxXxGW_xWgQJ5kKz3BKCfIsVHX6JSH4QOoqnhHDAxcuAbOtQYUiFKrKiODjlQSnLnUi/pub?gid=2071309898&single=true&output=csv";
 
         let medicines = [];
-        let activeStatFilter = null; // 'valid', 'expired', 'soon' или null
-        let currentSort = 'name'; // Текущая сортировка по умолчанию
+        let activeStatFilter = null;
+        let currentSort = 'name';
 
-        // Вычисление динамического возраста ограничений для детей
         function getChildAgeThreshold() {
             const now = new Date();
             const year = now.getFullYear();
-            const month = now.getMonth(); // 0 - Январь, 7 - Август
+            const month = now.getMonth();
 
             let age = year - 2022;
             if (month < 7) { 
@@ -1129,16 +1136,13 @@
         window.addEventListener('scroll', () => {
             const currentScrollY = window.scrollY;
 
-            // Показываем плавающую кнопку при любой попытке скролла
             fabSearch.classList.add('visible');
             
-            // Сбрасываем таймер скрытия кнопки
             clearTimeout(scrollTimeout);
             scrollTimeout = setTimeout(() => {
                 fabSearch.classList.remove('visible');
-            }, 2000); // Прячем через 2 секунды бездействия
+            }, 2000);
 
-            // Скрываем панель поиска/фильтрации при скролле вниз, показываем при скролле вверх
             if (currentScrollY > lastScrollY && currentScrollY > 100) {
                 stickyTop.classList.add('hidden');
             } else {
@@ -1148,23 +1152,17 @@
             lastScrollY = currentScrollY;
         });
 
-        // Функция для вызова глобального поиска по клику на FAB
         function activateGlobalSearch() {
-            // Сразу скрываем кнопку, чтобы не мешала
             fabSearch.classList.remove('visible');
             clearTimeout(scrollTimeout);
 
-            // Показываем панель, если она скрыта
             stickyTop.classList.remove('hidden');
             
-            // Плавный скролл наверх
             window.scrollTo({ top: 0, behavior: 'smooth' });
             
-            // Фокусируемся на поле "Поиск везде" после небольшой задержки (чтобы скролл завершился)
             setTimeout(() => {
                 const input = document.getElementById('searchGlobalInput');
                 input.focus();
-                // На мобильных устройствах это может вызвать появление клавиатуры
             }, 500);
         }
 
