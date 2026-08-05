@@ -75,6 +75,13 @@
             padding-top: 12px;
             padding-bottom: 8px;
             margin-bottom: 8px;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+
+        /* Класс для скрытия панели при скролле вниз */
+        .sticky-top.hidden {
+            transform: translateY(-110%);
+            opacity: 0;
         }
 
         /* Статистика */
@@ -400,6 +407,41 @@
             border: 1px solid var(--card-border);
         }
 
+        /* Плавающая кнопка "Поиск везде" (FAB) */
+        .fab-search {
+            position: fixed;
+            bottom: 25px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-size: 1.6rem;
+            cursor: pointer;
+            z-index: 90;
+            opacity: 0;
+            transform: scale(0.6) translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .fab-search.visible {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: auto;
+        }
+
+        .fab-search:active {
+            transform: scale(0.9);
+        }
+
         /* iOS Модальное окно */
         .modal-overlay {
             position: fixed;
@@ -569,7 +611,7 @@
 
     <div class="main-container">
         <!-- Закрепленный верхний блок -->
-        <div class="sticky-top">
+        <div class="sticky-top" id="stickyTop">
             <!-- Статистика -->
             <div class="stats-grid">
                 <div class="stat-badge" id="btn-stat-valid" onclick="toggleStatFilter('valid')">
@@ -618,9 +660,12 @@
         </div>
     </div>
 
+    <!-- Плавающая кнопка Поиска везде -->
+    <div class="fab-search" id="fabSearch" onclick="activateGlobalSearch()">🌐</div>
+
     <!-- Подвал -->
     <div class="footer">
-        <div>Версия 1.1 от 05.08.2026</div>
+        <div>Версия 1.1 от 5.08.2026</div>
         <div id="totalRecordsCount">В базе 0 записей</div>
     </div>
 
@@ -1073,6 +1118,54 @@
                     "'": '&#039;'
                 }[m];
             });
+        }
+
+        // --- Логика скрытия панели и плавающей кнопки ---
+        let lastScrollY = window.scrollY;
+        let scrollTimeout;
+        const stickyTop = document.getElementById('stickyTop');
+        const fabSearch = document.getElementById('fabSearch');
+
+        window.addEventListener('scroll', () => {
+            const currentScrollY = window.scrollY;
+
+            // Показываем плавающую кнопку при любой попытке скролла
+            fabSearch.classList.add('visible');
+            
+            // Сбрасываем таймер скрытия кнопки
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                fabSearch.classList.remove('visible');
+            }, 2000); // Прячем через 2 секунды бездействия
+
+            // Скрываем панель поиска/фильтрации при скролле вниз, показываем при скролле вверх
+            if (currentScrollY > lastScrollY && currentScrollY > 100) {
+                stickyTop.classList.add('hidden');
+            } else {
+                stickyTop.classList.remove('hidden');
+            }
+            
+            lastScrollY = currentScrollY;
+        });
+
+        // Функция для вызова глобального поиска по клику на FAB
+        function activateGlobalSearch() {
+            // Сразу скрываем кнопку, чтобы не мешала
+            fabSearch.classList.remove('visible');
+            clearTimeout(scrollTimeout);
+
+            // Показываем панель, если она скрыта
+            stickyTop.classList.remove('hidden');
+            
+            // Плавный скролл наверх
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Фокусируемся на поле "Поиск везде" после небольшой задержки (чтобы скролл завершился)
+            setTimeout(() => {
+                const input = document.getElementById('searchGlobalInput');
+                input.focus();
+                // На мобильных устройствах это может вызвать появление клавиатуры
+            }, 500);
         }
 
         fetchMedications();
