@@ -227,7 +227,8 @@
 
         <!-- Кнопки-ссылки -->
         <div class="list-container">
-            <a href="MyTimeline.html" class="card">
+            <!-- Изменена эта строка: добавлен onclick для показа alert и отмены перехода -->
+            <a href="#" class="card" onclick="event.preventDefault(); alert('Упс...Доступ к странице ограничен офлайн режимом!');">
                 <div class="row-icon">⏳</div>
                 <div class="row-content">
                     <h2>Мой таймлайн</h2>
