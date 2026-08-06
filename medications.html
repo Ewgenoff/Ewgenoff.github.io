@@ -13,7 +13,7 @@
             --text-primary: #1C1C1E;
             --text-secondary: #8E8E93;
             
-            --card-bg-glass: rgba(255, 255, 255, 0.75);
+            --card-bg-glass: rgba(255, 255, 255, 0.85); /* Чуть менее прозрачный для легкости GPU */
             --card-active-bg: rgba(255, 255, 255, 0.9);
             --card-border: rgba(255, 255, 255, 0.8);
             
@@ -29,7 +29,7 @@
 
             --ios-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
             --ios-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-            --ios-shadow-btn: 0 4px 12px rgba(0, 0, 0, 0.12); /* Новая более заметная тень */
+            --ios-shadow-btn: 0 4px 12px rgba(0, 0, 0, 0.12);
             
             --radius-card: 14px;
             --radius-control: 10px;
@@ -44,16 +44,26 @@
             user-select: none;
         }
 
+        /* Оптимизация фиксированного фона */
         body {
             background-color: var(--bg-color);
-            background-image: var(--gradient-tl), var(--gradient-br);
-            background-attachment: fixed;
             color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 12px 16px 20px 16px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: var(--gradient-tl), var(--gradient-br);
+            z-index: -1;
+            pointer-events: none;
         }
 
         .main-container {
@@ -70,17 +80,19 @@
             top: 0;
             z-index: 100;
             width: 100%;
-            background: rgba(242, 242, 247, 0.85);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            background: rgba(242, 242, 247, 0.92); /* Увеличена непрозрачность */
+            backdrop-filter: blur(10px); /* Снижен радиус блюра для GPU */
+            -webkit-backdrop-filter: blur(10px);
             padding-top: 12px;
             padding-bottom: 8px;
             margin-bottom: 8px;
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            transform: translateZ(0); /* Аппаратное ускорение */
+            will-change: transform, opacity;
         }
 
         .sticky-top.hidden {
-            transform: translateY(-110%);
+            transform: translateY(-110%) translateZ(0);
             opacity: 0;
         }
 
@@ -94,189 +106,74 @@
 
         .stat-badge {
             background: var(--card-bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-control);
             padding: 8px 4px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            box-shadow: var(--ios-shadow-btn); /* Обновленная тень */
+            box-shadow: var(--ios-shadow-btn);
             cursor: pointer;
             transition: all 0.2s ease;
+            transform: translateZ(0);
         }
 
-        .stat-badge:active {
-            transform: scale(0.96);
-        }
+        .stat-badge:active { transform: scale(0.96); }
 
-        .stat-badge.active-valid {
-            background: var(--color-success);
-            border-color: var(--color-success);
-        }
-        .stat-badge.active-valid .stat-value,
-        .stat-badge.active-valid .stat-label {
-            color: #FFFFFF !important;
-        }
+        .stat-badge.active-valid { background: var(--color-success); border-color: var(--color-success); }
+        .stat-badge.active-valid .stat-value, .stat-badge.active-valid .stat-label { color: #FFFFFF !important; }
 
-        .stat-badge.active-expired {
-            background: var(--color-danger);
-            border-color: var(--color-danger);
-        }
-        .stat-badge.active-expired .stat-value,
-        .stat-badge.active-expired .stat-label {
-            color: #FFFFFF !important;
-        }
+        .stat-badge.active-expired { background: var(--color-danger); border-color: var(--color-danger); }
+        .stat-badge.active-expired .stat-value, .stat-badge.active-expired .stat-label { color: #FFFFFF !important; }
 
-        .stat-badge.active-soon {
-            background: var(--color-warning);
-            border-color: var(--color-warning);
-        }
-        .stat-badge.active-soon .stat-value,
-        .stat-badge.active-soon .stat-label {
-            color: #FFFFFF !important;
-        }
+        .stat-badge.active-soon { background: var(--color-warning); border-color: var(--color-warning); }
+        .stat-badge.active-soon .stat-value, .stat-badge.active-soon .stat-label { color: #FFFFFF !important; }
 
-        .stat-value {
-            font-size: 1.1rem;
-            font-weight: 700;
-            transition: color 0.2s;
-        }
-
-        .stat-label {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            margin-top: 2px;
-            transition: color 0.2s;
-        }
+        .stat-value { font-size: 1.1rem; font-weight: 700; transition: color 0.2s; }
+        .stat-label { font-size: 0.7rem; color: var(--text-secondary); margin-top: 2px; transition: color 0.2s; }
 
         .text-success { color: var(--color-success); }
         .text-danger { color: var(--color-danger); }
         .text-warning { color: var(--color-warning); }
 
         /* Элементы управления */
-        .controls-container {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .search-row {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-        }
-
-        .search-box {
-            position: relative;
-            flex: 1;
-        }
+        .controls-container { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+        .search-row { display: flex; gap: 8px; width: 100%; }
+        .search-box { position: relative; flex: 1; }
 
         .search-input {
             width: 100%;
             padding: 10px 30px 10px 34px;
             background: var(--card-bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-control);
             font-size: 0.85rem;
             color: var(--text-primary);
-            box-shadow: var(--ios-shadow-btn); /* Обновленная тень */
+            box-shadow: var(--ios-shadow-btn);
             outline: none;
             transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        .search-input::placeholder {
-            color: var(--text-secondary);
-            opacity: 0.8;
-            font-style: italic; /* Наклонный шрифт */
-        }
+        .search-input::placeholder { color: var(--text-secondary); opacity: 0.8; font-style: italic; }
+        .search-input:focus { border-color: var(--color-default); box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2), var(--ios-shadow-btn); }
 
-        .search-input:focus {
-            border-color: var(--color-default);
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2), var(--ios-shadow-btn);
-        }
+        .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; display: flex; align-items: center; justify-content: center; }
+        .clear-icon { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; color: #FFFFFF; background: rgba(142, 142, 147, 0.6); width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; }
 
-        .search-icon {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .clear-icon {
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 0.75rem;
-            color: #FFFFFF;
-            background: rgba(142, 142, 147, 0.6);
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            line-height: 1;
-        }
-
-        /* Кнопка открытия окна сортировки */
-        .sort-trigger {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: var(--card-bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-control);
-            padding: 10px 14px;
-            box-shadow: var(--ios-shadow-btn); /* Обновленная тень */
-            cursor: pointer;
-            transition: transform 0.15s;
-        }
-
-        .sort-trigger:active {
-            transform: scale(0.98);
-        }
-
-        .sort-trigger-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        .sort-trigger-value {
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: var(--color-default);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
+        .sort-trigger { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--card-border); border-radius: var(--radius-control); padding: 10px 14px; box-shadow: var(--ios-shadow-btn); cursor: pointer; transition: transform 0.15s; }
+        .sort-trigger:active { transform: scale(0.98); }
+        .sort-trigger-label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
+        .sort-trigger-value { font-size: 0.88rem; font-weight: 600; color: var(--color-default); display: flex; align-items: center; gap: 4px; }
 
         /* Список лекарств */
-        .med-list {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+        .med-list { width: 100%; display: flex; flex-direction: column; gap: 10px; }
 
         .med-card {
             background: var(--card-bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-card);
             padding: 14px 16px;
@@ -286,129 +183,31 @@
             box-shadow: var(--ios-shadow);
             transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
             cursor: pointer;
+            transform: translateZ(0); /* Ускорение карточек */
         }
 
-        .med-card:active {
-            transform: scale(0.98);
-        }
+        .med-card:active { transform: scale(0.98); }
+        .med-card.grayed { background: var(--color-gray-card) !important; opacity: 0.65; border-color: rgba(142, 142, 147, 0.4) !important; }
+        .med-card.strikethrough .med-name { text-decoration: line-through; color: var(--text-secondary); }
+        .med-card.expired:not(.grayed) { background: var(--color-danger-bg); border: 1px solid var(--color-danger-border); }
+        .med-card.expired:not(.grayed) .med-name { color: var(--color-danger); }
+        .med-card.expired:not(.grayed) .med-date { color: var(--color-danger); font-weight: 700; }
+        .med-card.expiring-soon:not(.expired):not(.grayed) { border: 1px solid var(--color-warning); }
 
-        .med-card.grayed {
-            background: var(--color-gray-card) !important;
-            opacity: 0.65;
-            border-color: rgba(142, 142, 147, 0.4) !important;
-        }
+        .med-info { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; padding-right: 12px; }
+        .med-name { font-size: 1.05rem; font-weight: 600; color: var(--text-primary); letter-spacing: -0.2px; }
+        .med-icons { display: flex; align-items: center; gap: 6px; font-size: 1rem; margin-top: 2px; }
+        .badge-no-child { display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 59, 48, 0.12); border: 1px solid rgba(255, 59, 48, 0.4); border-radius: 6px; padding: 0px 4px; font-size: 0.85rem; line-height: 1.2; }
+        
+        .med-status-badge { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+        .med-date { font-size: 0.9rem; font-weight: 600; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+        .badge { font-size: 0.72rem; padding: 3px 8px; border-radius: 20px; font-weight: 600; letter-spacing: 0.2px; text-transform: uppercase; }
+        .badge-expired { background: rgba(255, 59, 48, 0.2); color: var(--color-danger); }
+        .badge-warning { background: var(--color-warning-bg); color: var(--color-warning); }
+        .badge-valid { background: rgba(52, 199, 89, 0.15); color: var(--color-success); }
+        .badge-none { background: rgba(142, 142, 147, 0.25); color: var(--text-secondary); }
 
-        .med-card.strikethrough .med-name {
-            text-decoration: line-through;
-            color: var(--text-secondary);
-        }
-
-        .med-card.expired:not(.grayed) {
-            background: var(--color-danger-bg);
-            border: 1px solid var(--color-danger-border);
-        }
-
-        .med-card.expired:not(.grayed) .med-name {
-            color: var(--color-danger);
-        }
-
-        .med-card.expired:not(.grayed) .med-date {
-            color: var(--color-danger);
-            font-weight: 700;
-        }
-
-        .med-card.expiring-soon:not(.expired):not(.grayed) {
-            border: 1px solid var(--color-warning);
-        }
-
-        .med-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex-grow: 1;
-            padding-right: 12px;
-        }
-
-        .med-name {
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            letter-spacing: -0.2px;
-        }
-
-        .med-icons {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 1rem;
-            margin-top: 2px;
-        }
-
-        .badge-no-child {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 59, 48, 0.12);
-            border: 1px solid rgba(255, 59, 48, 0.4);
-            border-radius: 6px;
-            padding: 0px 4px;
-            font-size: 0.85rem;
-            line-height: 1.2;
-        }
-
-        .med-status-badge {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-            flex-shrink: 0;
-        }
-
-        .med-date {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-variant-numeric: tabular-nums;
-        }
-
-        .badge {
-            font-size: 0.72rem;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            text-transform: uppercase;
-        }
-
-        .badge-expired {
-            background: rgba(255, 59, 48, 0.2);
-            color: var(--color-danger);
-        }
-
-        .badge-warning {
-            background: var(--color-warning-bg);
-            color: var(--color-warning);
-        }
-
-        .badge-valid {
-            background: rgba(52, 199, 89, 0.15);
-            color: var(--color-success);
-        }
-
-        .badge-none {
-            background: rgba(142, 142, 147, 0.25);
-            color: var(--text-secondary);
-        }
-
-        .loader, .empty-msg {
-            text-align: center;
-            padding: 30px 16px;
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-            background: var(--card-bg-glass);
-            border-radius: var(--radius-card);
-            border: 1px solid var(--card-border);
-        }
+        .loader, .empty-msg { text-align: center; padding: 30px 16px; color: var(--text-secondary); font-size: 0.95rem; background: var(--card-bg-glass); border-radius: var(--radius-card); border: 1px solid var(--card-border); }
 
         /* Плавающая кнопка "Поиск везде" (FAB) */
         .fab-search {
@@ -417,9 +216,9 @@
             right: 20px;
             width: 56px;
             height: 56px;
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.8);
             border-radius: 50%;
             display: flex;
@@ -429,192 +228,44 @@
             cursor: pointer;
             z-index: 90;
             opacity: 0;
-            transform: scale(0.6) translateY(20px);
+            transform: scale(0.6) translateY(20px) translateZ(0);
             transition: opacity 0.3s ease, transform 0.3s ease;
             pointer-events: none;
+            will-change: transform, opacity;
         }
 
-        .fab-search.visible {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-            pointer-events: auto;
-        }
-
-        .fab-search:active {
-            transform: scale(0.9);
-        }
+        .fab-search.visible { opacity: 1; transform: scale(1) translateY(0) translateZ(0); pointer-events: auto; }
+        .fab-search:active { transform: scale(0.9) translateZ(0); }
 
         /* iOS Модальное окно */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.25s ease;
-            padding: 20px;
-        }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; padding: 20px; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .ios-modal { background: var(--card-bg-glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--card-border); border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden; transform: scale(0.9); transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal-overlay.active .ios-modal { transform: scale(1); }
+        .modal-header { padding: 18px 20px 12px; border-bottom: 1px solid var(--card-border); }
+        .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); text-align: center; }
+        .modal-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+        .sort-window { background: rgba(142, 142, 147, 0.2); border-radius: var(--radius-control); overflow: hidden; border: 1px solid var(--card-border); }
+        .sort-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; }
+        .sort-btn { background: var(--card-bg-glass); border: none; padding: 14px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: background-color 0.2s, color 0.2s; min-height: 80px; outline: none; }
+        .sort-btn .sort-emoji { font-size: 1.4rem; line-height: 1; }
+        .sort-btn .sort-text { font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); text-align: center; line-height: 1.2; }
+        .sort-btn.active { background: rgba(0, 122, 255, 0.12); }
+        .sort-btn.active .sort-text { color: var(--color-default); }
+        .sort-btn:active { opacity: 0.7; }
+        .modal-section { display: flex; flex-direction: column; gap: 2px; }
+        .modal-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; }
+        .modal-value { font-size: 0.95rem; color: var(--text-primary); line-height: 1.4; }
+        .modal-footer { padding: 12px 20px; border-top: 1px solid var(--card-border); display: flex; justify-content: center; }
+        .ios-btn { background: var(--color-default); color: white; border: none; border-radius: 10px; padding: 10px 24px; font-size: 0.95rem; font-weight: 600; cursor: pointer; width: 100%; }
 
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .ios-modal {
-            background: var(--card-bg-glass);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid var(--card-border);
-            border-radius: 20px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-            overflow: hidden;
-            transform: scale(0.9);
-            transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        .modal-overlay.active .ios-modal {
-            transform: scale(1);
-        }
-
-        .modal-header {
-            padding: 18px 20px 12px;
-            border-bottom: 1px solid var(--card-border);
-        }
-
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            text-align: center;
-        }
-
-        .modal-body {
-            padding: 16px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        /* Окно сортировки с кнопками iOS Style внутри модалки */
-        .sort-window {
-            background: rgba(142, 142, 147, 0.2);
-            border-radius: var(--radius-control);
-            overflow: hidden;
-            border: 1px solid var(--card-border);
-        }
-
-        .sort-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1px;
-        }
-
-        .sort-btn {
-            background: var(--card-bg-glass);
-            border: none;
-            padding: 14px 4px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            cursor: pointer;
-            transition: background-color 0.2s, color 0.2s;
-            min-height: 80px;
-            outline: none;
-        }
-
-        .sort-btn .sort-emoji {
-            font-size: 1.4rem;
-            line-height: 1;
-        }
-
-        .sort-btn .sort-text {
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-align: center;
-            line-height: 1.2;
-        }
-
-        .sort-btn.active {
-            background: rgba(0, 122, 255, 0.12);
-        }
-
-        .sort-btn.active .sort-text {
-            color: var(--color-default);
-        }
-
-        .sort-btn:active {
-            opacity: 0.7;
-        }
-
-        .modal-section {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .modal-label {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            font-weight: 600;
-        }
-
-        .modal-value {
-            font-size: 0.95rem;
-            color: var(--text-primary);
-            line-height: 1.4;
-        }
-
-        .modal-footer {
-            padding: 12px 20px;
-            border-top: 1px solid var(--card-border);
-            display: flex;
-            justify-content: center;
-        }
-
-        .ios-btn {
-            background: var(--color-default);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 24px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        .footer {
-            text-align: center;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            margin-top: 24px;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
+        .footer { text-align: center; font-size: 0.75rem; color: var(--text-secondary); margin-top: 24px; display: flex; flex-direction: column; gap: 4px; }
     </style>
 </head>
 <body>
-
+    <!-- HTML структура остается БЕЗ ИЗМЕНЕНИЙ -->
     <div class="main-container">
-        <!-- Закрепленный верхний блок -->
         <div class="sticky-top" id="stickyTop">
-            <!-- Статистика -->
             <div class="stats-grid">
                 <div class="stat-badge" id="btn-stat-valid" onclick="toggleStatFilter('valid')">
                     <span id="stat-valid" class="stat-value text-success">0</span>
@@ -630,7 +281,6 @@
                 </div>
             </div>
 
-            <!-- Поиск и Сортировки -->
             <div class="controls-container">
                 <div class="search-row">
                     <div class="search-box">
@@ -649,7 +299,6 @@
                     </div>
                 </div>
                 
-                <!-- Кнопка открытия модалки сортировки -->
                 <div class="sort-trigger" onclick="openSortModal()">
                     <span class="sort-trigger-label">Сортировка</span>
                     <span class="sort-trigger-value">
@@ -660,66 +309,39 @@
             </div>
         </div>
 
-        <!-- Список -->
         <div id="medList" class="med-list">
             <div class="loader">Получение списка лекарств...</div>
         </div>
     </div>
 
-    <!-- Плавающая кнопка Поиска везде -->
     <div class="fab-search" id="fabSearch" onclick="activateGlobalSearch()">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
     </div>
 
-    <!-- Подвал -->
     <div class="footer">
         <div>Версия 1.1 от 5.08.2026</div>
         <div id="totalRecordsCount">В базе 0 записей</div>
     </div>
 
-    <!-- Модальное окно сортировки (iOS Style) -->
     <div class="modal-overlay" id="sortModal" onclick="closeSortModal(event)">
         <div class="ios-modal" onclick="event.stopPropagation()">
-            <div class="modal-header">
-                <div class="modal-title">Выберите сортировку</div>
-            </div>
+            <div class="modal-header"><div class="modal-title">Выберите сортировку</div></div>
             <div class="modal-body">
                 <div class="sort-window">
                     <div class="sort-grid">
-                        <button class="sort-btn active" data-sort="name" data-text="По названию (А - Я)" onclick="handleSortClick(this)">
-                            <span class="sort-emoji">🔤</span>
-                            <span class="sort-text">По названию (А - Я)</span>
-                        </button>
-                        <button class="sort-btn" data-sort="locationFridge" data-text="В холодильнике" onclick="handleSortClick(this)">
-                            <span class="sort-emoji">🧊</span>
-                            <span class="sort-text">В холодильнике</span>
-                        </button>
-                        <button class="sort-btn" data-sort="locationCabinet" data-text="В шкафу" onclick="handleSortClick(this)">
-                            <span class="sort-emoji">🗄️</span>
-                            <span class="sort-text">В шкафу</span>
-                        </button>
-                        <button class="sort-btn" data-sort="underChildAge" id="sortChildAgeBtn" data-text="Нельзя детям" onclick="handleSortClick(this)">
-                            <span class="sort-emoji">👶🚫</span>
-                            <span class="sort-text">Нельзя детям</span>
-                        </button>
-                        <button class="sort-btn" data-sort="tempCold" data-text="Хранение < 24°C" onclick="handleSortClick(this)">
-                            <span class="sort-emoji">❄️</span>
-                            <span class="sort-text">Хранение &lt; 24°C</span>
-                        </button>
-                        <button class="sort-btn" data-sort="finished" data-text="Закончились" onclick="handleSortClick(this)">
-                            <span class="sort-emoji">❌</span>
-                            <span class="sort-text">Закончились</span>
-                        </button>
+                        <button class="sort-btn active" data-sort="name" data-text="По названию (А - Я)" onclick="handleSortClick(this)"><span class="sort-emoji">🔤</span><span class="sort-text">По названию (А - Я)</span></button>
+                        <button class="sort-btn" data-sort="locationFridge" data-text="В холодильнике" onclick="handleSortClick(this)"><span class="sort-emoji">🧊</span><span class="sort-text">В холодильнике</span></button>
+                        <button class="sort-btn" data-sort="locationCabinet" data-text="В шкафу" onclick="handleSortClick(this)"><span class="sort-emoji">🗄️</span><span class="sort-text">В шкафу</span></button>
+                        <button class="sort-btn" data-sort="underChildAge" id="sortChildAgeBtn" data-text="Нельзя детям" onclick="handleSortClick(this)"><span class="sort-emoji">👶🚫</span><span class="sort-text">Нельзя детям</span></button>
+                        <button class="sort-btn" data-sort="tempCold" data-text="Хранение < 24°C" onclick="handleSortClick(this)"><span class="sort-emoji">❄️</span><span class="sort-text">Хранение &lt; 24°C</span></button>
+                        <button class="sort-btn" data-sort="finished" data-text="Закончились" onclick="handleSortClick(this)"><span class="sort-emoji">❌</span><span class="sort-text">Закончились</span></button>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="ios-btn" onclick="closeSortModal()">Отмена</button>
-            </div>
+            <div class="modal-footer"><button class="ios-btn" onclick="closeSortModal()">Отмена</button></div>
         </div>
     </div>
 
-    <!-- Модальное окно информации о лекарстве (iOS Style) -->
     <div class="modal-overlay" id="iosModal" onclick="closeModal(event)">
         <div class="ios-modal" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -727,22 +349,11 @@
                 <div class="modal-group" id="m-group" style="font-size: 0.85rem; color: var(--color-default); font-weight: 600; margin-top: 2px;">Группа</div>
             </div>
             <div class="modal-body">
-                <div class="modal-section">
-                    <span class="modal-label">Описание / Назначение</span>
-                    <span class="modal-value" id="m-desc">—</span>
-                </div>
-                <div class="modal-section">
-                    <span class="modal-label">Температура хранения</span>
-                    <span class="modal-value" id="m-temp">—</span>
-                </div>
-                <div class="modal-section">
-                    <span class="modal-label">Разрешенный возраст</span>
-                    <span class="modal-value" id="m-age">—</span>
-                </div>
+                <div class="modal-section"><span class="modal-label">Описание / Назначение</span><span class="modal-value" id="m-desc">—</span></div>
+                <div class="modal-section"><span class="modal-label">Температура хранения</span><span class="modal-value" id="m-temp">—</span></div>
+                <div class="modal-section"><span class="modal-label">Разрешенный возраст</span><span class="modal-value" id="m-age">—</span></div>
             </div>
-            <div class="modal-footer">
-                <button class="ios-btn" onclick="closeModal()">Закрыть</button>
-            </div>
+            <div class="modal-footer"><button class="ios-btn" onclick="closeModal()">Закрыть</button></div>
         </div>
     </div>
 
@@ -757,16 +368,11 @@
             const now = new Date();
             const year = now.getFullYear();
             const month = now.getMonth();
-
             let age = year - 2022;
-            if (month < 7) { 
-                age -= 1; 
-            }
-
+            if (month < 7) { age -= 1; }
             let threshold = age + 2; 
             if (threshold < 6) threshold = 6;
             if (threshold > 18) threshold = 18;
-
             return threshold;
         }
 
@@ -943,10 +549,7 @@
             filterAndRender();
         }
 
-        function openSortModal() {
-            document.getElementById('sortModal').classList.add('active');
-        }
-
+        function openSortModal() { document.getElementById('sortModal').classList.add('active'); }
         function closeSortModal(event) {
             if(event) event.stopPropagation();
             document.getElementById('sortModal').classList.remove('active');
@@ -964,7 +567,6 @@
             activeStatFilter = null;
             updateStatButtonsUI();
             filterAndRender();
-            
             document.getElementById('sortModal').classList.remove('active');
         }
 
@@ -977,13 +579,9 @@
             btnExpired.classList.remove('active-expired');
             btnSoon.classList.remove('active-soon');
 
-            if (activeStatFilter === 'valid') {
-                btnValid.classList.add('active-valid');
-            } else if (activeStatFilter === 'expired') {
-                btnExpired.classList.add('active-expired');
-            } else if (activeStatFilter === 'soon') {
-                btnSoon.classList.add('active-soon');
-            }
+            if (activeStatFilter === 'valid') btnValid.classList.add('active-valid');
+            else if (activeStatFilter === 'expired') btnExpired.classList.add('active-expired');
+            else if (activeStatFilter === 'soon') btnSoon.classList.add('active-soon');
         }
 
         function handleSearchInput(inputId, clearBtnId) {
@@ -994,8 +592,7 @@
         }
 
         function clearSearch(inputId, clearBtnId) {
-            const input = document.getElementById(inputId);
-            input.value = '';
+            document.getElementById(inputId).value = '';
             document.getElementById(clearBtnId).style.display = 'none';
             filterAndRender();
         }
@@ -1013,44 +610,20 @@
 
             if (activeStatFilter === 'valid') {
                 filtered = filtered.filter(m => !m.isNo && !m.isExpired);
-                filtered.sort((a, b) => {
-                    if (!a.expiryDate) return 1;
-                    if (!b.expiryDate) return -1;
-                    return a.expiryDate - b.expiryDate;
-                });
+                filtered.sort((a, b) => { if (!a.expiryDate) return 1; if (!b.expiryDate) return -1; return a.expiryDate - b.expiryDate; });
             } else if (activeStatFilter === 'expired') {
                 filtered = filtered.filter(m => !m.isNo && m.isExpired);
-                filtered.sort((a, b) => {
-                    if (!a.expiryDate) return 1;
-                    if (!b.expiryDate) return -1;
-                    return a.expiryDate - b.expiryDate;
-                });
+                filtered.sort((a, b) => { if (!a.expiryDate) return 1; if (!b.expiryDate) return -1; return a.expiryDate - b.expiryDate; });
             } else if (activeStatFilter === 'soon') {
                 filtered = filtered.filter(m => !m.isNo && m.isExpiringSoon);
-                filtered.sort((a, b) => {
-                    if (!a.expiryDate) return 1;
-                    if (!b.expiryDate) return -1;
-                    return a.expiryDate - b.expiryDate;
-                });
+                filtered.sort((a, b) => { if (!a.expiryDate) return 1; if (!b.expiryDate) return -1; return a.expiryDate - b.expiryDate; });
             } else {
-                if (sortVal === 'locationFridge') {
-                    filtered = filtered.filter(m => m.isFridge);
-                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
-                } else if (sortVal === 'locationCabinet') {
-                    filtered = filtered.filter(m => m.isCabinet);
-                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
-                } else if (sortVal === 'underChildAge') {
-                    filtered = filtered.filter(m => m.isNoChild);
-                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
-                } else if (sortVal === 'tempCold') {
-                    filtered = filtered.filter(m => m.isSnowflake);
-                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
-                } else if (sortVal === 'finished') {
-                    filtered = filtered.filter(m => m.isNo);
-                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
-                } else {
-                    filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
-                }
+                if (sortVal === 'locationFridge') { filtered = filtered.filter(m => m.isFridge); filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru')); } 
+                else if (sortVal === 'locationCabinet') { filtered = filtered.filter(m => m.isCabinet); filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru')); } 
+                else if (sortVal === 'underChildAge') { filtered = filtered.filter(m => m.isNoChild); filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru')); } 
+                else if (sortVal === 'tempCold') { filtered = filtered.filter(m => m.isSnowflake); filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru')); } 
+                else if (sortVal === 'finished') { filtered = filtered.filter(m => m.isNo); filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru')); } 
+                else { filtered.sort((a, b) => a.name.localeCompare(b.name, 'ru')); }
             }
 
             const container = document.getElementById('medList');
@@ -1072,15 +645,10 @@
                 if (item.isNoChild) iconsHtml += `<span class="badge-no-child" title="Нельзя детям до ${childAgeThreshold} лет">👶🚫</span>`;
 
                 let badgeHtml = '';
-                if (item.isNo) {
-                    badgeHtml = `<span class="badge badge-none">НЕТ</span>`;
-                } else if (item.isExpired) {
-                    badgeHtml = `<span class="badge badge-expired">Просрочено</span>`;
-                } else if (item.isExpiringSoon) {
-                    badgeHtml = `<span class="badge badge-warning">Скоро</span>`;
-                } else {
-                    badgeHtml = `<span class="badge badge-valid">Годен</span>`;
-                }
+                if (item.isNo) badgeHtml = `<span class="badge badge-none">НЕТ</span>`;
+                else if (item.isExpired) badgeHtml = `<span class="badge badge-expired">Просрочено</span>`;
+                else if (item.isExpiringSoon) badgeHtml = `<span class="badge badge-warning">Скоро</span>`;
+                else badgeHtml = `<span class="badge badge-valid">Годен</span>`;
 
                 return `
                     <div class="${classList.join(' ')}" onclick="openModal(${item.id})">
@@ -1100,13 +668,11 @@
         function openModal(id) {
             const med = medicines.find(m => m.id === id);
             if (!med) return;
-
             document.getElementById('m-name').textContent = med.name;
             document.getElementById('m-group').textContent = med.group || 'Группа не указана';
             document.getElementById('m-desc').textContent = med.desc || 'Нет описания';
             document.getElementById('m-temp').textContent = med.tempRaw || 'Не указана';
             document.getElementById('m-age').textContent = med.ageRaw || 'Любой возраст';
-
             document.getElementById('iosModal').classList.add('active');
         }
 
@@ -1117,52 +683,69 @@
 
         function escapeHtml(str) {
             return str.replace(/[&<>"']/g, function(m) {
-                return {
-                    '&': '&amp;',
-                    '<': '&lt;',
-                    '>': '&gt;',
-                    '"': '&quot;',
-                    "'": '&#039;'
-                }[m];
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
             });
         }
 
-        // --- Логика скрытия панели и плавающей кнопки ---
+        // --- ОПТИМИЗИРОВАННАЯ Логика скрытия панели ---
         let lastScrollY = window.scrollY;
         let scrollTimeout;
+        let ticking = false;
+        let isStickyHidden = false;
+        let isFabVisible = false;
         const stickyTop = document.getElementById('stickyTop');
         const fabSearch = document.getElementById('fabSearch');
 
-        window.addEventListener('scroll', () => {
+        function updateScrollUI() {
             const currentScrollY = window.scrollY;
 
-            fabSearch.classList.add('visible');
+            if (!isFabVisible) {
+                fabSearch.classList.add('visible');
+                isFabVisible = true;
+            }
             
             clearTimeout(scrollTimeout);
             scrollTimeout = setTimeout(() => {
                 fabSearch.classList.remove('visible');
+                isFabVisible = false;
             }, 2000);
 
+            // Меняем класс только если состояние изменилось
             if (currentScrollY > lastScrollY && currentScrollY > 100) {
-                stickyTop.classList.add('hidden');
+                if (!isStickyHidden) {
+                    stickyTop.classList.add('hidden');
+                    isStickyHidden = true;
+                }
             } else {
-                stickyTop.classList.remove('hidden');
+                if (isStickyHidden) {
+                    stickyTop.classList.remove('hidden');
+                    isStickyHidden = false;
+                }
             }
             
             lastScrollY = currentScrollY;
-        });
+            ticking = false;
+        }
+
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                window.requestAnimationFrame(updateScrollUI);
+                ticking = true;
+            }
+        }, { passive: true }); // passive: true улучшает производительность скролла
 
         function activateGlobalSearch() {
             fabSearch.classList.remove('visible');
+            isFabVisible = false;
             clearTimeout(scrollTimeout);
 
             stickyTop.classList.remove('hidden');
+            isStickyHidden = false;
             
             window.scrollTo({ top: 0, behavior: 'smooth' });
             
             setTimeout(() => {
-                const input = document.getElementById('searchGlobalInput');
-                input.focus();
+                document.getElementById('searchGlobalInput').focus();
             }, 500);
         }
 
