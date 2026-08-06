@@ -6,24 +6,24 @@
     <title>Главная</title>
     <style>
         :root {
-            /* Светлая тема */
-            --bg-color: #F2F2F7;
-            --gradient-tl: radial-gradient(at 0% 0%, rgba(0, 122, 255, 0.05) 0px, transparent 50%);
-            --gradient-br: radial-gradient(at 100% 100%, rgba(255, 45, 85, 0.04) 0px, transparent 50%);
+            /* Светлая тема с природным нежным фоном iOS */
+            --bg-color: #E8ECE9;
+            --bg-image-url: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1920&auto=format&fit=crop');
             
             --text-primary: #1C1C1E;
-            --text-secondary: #8E8E93;
+            --text-secondary: #636366;
             
-            --card-bg-glass: rgba(255, 255, 255, 0.75);
-            --card-active-bg: rgba(255, 255, 255, 0.9);
-            --card-border: rgba(255, 255, 255, 0.8);
+            /* Эффект матового стекла (Frosted Glass iOS) */
+            --card-bg-glass: rgba(255, 255, 255, 0.65);
+            --card-active-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(255, 255, 255, 0.5);
             
             --color-default: #007AFF;
             --ios-font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-            --ios-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+            --ios-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
             
-            --radius-card: 12px;
-            --radius-control: 10px;
+            --radius-card: 16px;
+            --radius-control: 12px;
         }
 
         * {
@@ -36,9 +36,12 @@
 
         body {
             background-color: var(--bg-color);
-            background-image: var(--gradient-tl), var(--gradient-br);
+            background-image: 
+                linear-gradient(180deg, rgba(255, 255, 255, 0.2) 0%, rgba(242, 244, 247, 0.4) 100%),
+                var(--bg-image-url);
             background-attachment: fixed;
             background-size: cover;
+            background-position: center center;
             background-repeat: no-repeat;
             color: var(--text-primary);
             min-height: 100vh;
@@ -46,7 +49,7 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            padding: 32px 16px 20px 16px;
+            padding: 36px 16px 24px 16px;
         }
 
         .main-container {
@@ -60,16 +63,17 @@
         /* Шапка */
         .header {
             text-align: center;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
             width: 100%;
         }
 
         .header h1 {
-            font-size: 1.75rem;
+            font-size: 1.85rem;
             font-weight: 700;
-            letter-spacing: -0.4px;
+            letter-spacing: -0.5px;
             color: var(--text-primary);
-            margin-bottom: 16px;
+            margin-bottom: 18px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.6);
         }
 
         /* Плашки даты и времени */
@@ -83,11 +87,11 @@
 
         .chip {
             background: var(--card-bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-control);
-            padding: 8px 14px;
+            padding: 9px 15px;
             font-size: 0.88rem;
             font-weight: 500;
             color: var(--text-primary);
@@ -113,8 +117,8 @@
         /* Карточка-кнопка с эффектом стекла */
         .card {
             background: var(--card-bg-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-card);
             padding: 16px 20px;
@@ -122,7 +126,7 @@
             align-items: center;
             text-decoration: none;
             box-shadow: var(--ios-shadow);
-            transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -133,8 +137,8 @@
 
         /* Иконка */
         .row-icon {
-            width: 38px;
-            height: 38px;
+            width: 40px;
+            height: 40px;
             border-radius: var(--radius-control);
             display: flex;
             align-items: center;
@@ -142,8 +146,9 @@
             font-size: 20px;
             margin-right: 14px;
             flex-shrink: 0;
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid var(--card-border);
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8);
         }
 
         /* Контент и цвет текста */
@@ -164,7 +169,7 @@
             font-size: 1.2rem;
             font-weight: 600;
             margin-left: 8px;
-            opacity: 0.8;
+            opacity: 0.7;
         }
 
         /* Контейнер для двух кнопок в ряд */
@@ -183,8 +188,8 @@
         }
 
         .card-small .row-icon {
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             font-size: 16px;
             margin-right: 10px;
         }
@@ -203,10 +208,11 @@
         /* Подвал */
         .footer {
             text-align: center;
-            font-size: 0.75rem;
+            font-size: 0.78rem;
             color: var(--text-secondary);
             margin-top: 24px;
-            font-weight: 400;
+            font-weight: 500;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
         }
 
         /* === IOS MODAL (ALERT) STYLES === */
@@ -216,9 +222,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -234,9 +240,9 @@
         }
 
         .ios-modal {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            background: rgba(255, 255, 255, 0.82);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
             width: 80%;
             max-width: 300px;
             border-radius: 14px;
@@ -360,7 +366,7 @@
 
     <!-- Подвал -->
     <div class="footer">
-        Версия 1.3 (by Ewgenoff 05.08.2026)
+        Версия 1.4 (by Ewgenoff 06.08.2026)
     </div>
 
     <!-- HTML СТРУКТУРА МОДАЛЬНОГО ОКНА -->
@@ -383,14 +389,13 @@
         }
 
         function hideIosAlert(event) {
-            // Закрываем либо по клику на кнопку, либо по клику на фон (overlay)
             if (event) event.preventDefault();
             document.getElementById('iosAlertOverlay').classList.remove('active');
         }
 
         function updateWidget() {
             const now = new Date();
-            const month = now.getMonth(); // 0-11 (Июль = 6)
+            const month = now.getMonth();
             const day = now.getDate();
             const hours = now.getHours();
 
@@ -418,7 +423,7 @@
             const dateStr = now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
             document.getElementById('chip-date').textContent = dateStr;
 
-            // 4. Время (без буквы "в")
+            // 4. Время
             const timeStr = now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             document.getElementById('chip-time').textContent = timeStr;
         }
