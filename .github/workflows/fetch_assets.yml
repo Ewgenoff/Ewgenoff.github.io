@@ -1,0 +1,143 @@
+name: Fetch Game Grids and Logos
+
+on:
+  workflow_dispatch: # Позволяет запускать экшн вручную через вкладку Actions
+
+jobs:
+  download-assets:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Разрешение на запись (коммит и пуш файлов)
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      - name: Download and Process Assets
+        env:
+          SGDB_API_KEY: 'be1607741ba8a817f6cc65a415d196c1'
+          CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTAaoLfMXIHoBoXTb16tXL_yabaMQThgsWGGrziE5InfpyEf3MIPkVkHD58xCapuR6IPeIRp6lnqLCl/pub?gid=0&single=true&output=csv'
+        run: |
+          python - << 'EOF'
+          import os
+          import csv
+          import urllib.parse
+          import requests
+          import time
+          import re
+
+          # Настройки
+          API_KEY = os.environ.get('SGDB_API_KEY')
+          CSV_URL = os.environ.get('CSV_URL')
+          GRIDS_DIR = 'GAME_GRIDS'
+          LOGOS_DIR = 'GAME_LOGO'
+
+          # Создаем папки, если их нет
+          os.makedirs(GRIDS_DIR, exist_ok=True)
+          os.makedirs(LOGOS_DIR, exist_ok=True)
+
+          headers = {
+              'Authorization': f'Bearer {API_KEY}'
+          }
+
+          def sanitize_filename(filename):
+              """Удаляет символы, недопустимые в именах файлов."""
+              return re.sub(r'[\\/*?:"<>|]', "", filename).strip()
+
+          def get_game_id(game_title):
+              encoded_title = urllib.parse.quote(game_title)
+              url = f"https://www.steamgriddb.com/api/v2/search/autocomplete/{encoded_title}"
+              res = requests.get(url, headers=headers)
+              if res.status_code == 200:
+                  data = res.json()
+                  if data.get('success') and data.get('data'):
+                      return data['data'][0]['id']
+              return None
+
+          def download_asset(game_id, asset_type, target_path):
+              url = f"https://www.steamgriddb.com/api/v2/{asset_type}/game/{game_id}"
+              res = requests.get(url, headers=headers)
+              if res.status_code == 200:
+                  data = res.json()
+                  if data.get('success') and data.get('data'):
+                      asset_url = data['data'][0]['url']
+                      # Скачиваем саму картинку
+                      img_res = requests.get(asset_url)
+                      if img_res.status_code == 200:
+                          # Определяем расширение файла из URL (по умолчанию .png)
+                          ext = os.path.splitext(asset_url.split('?')[0])[1] or '.png'
+                          full_path = f"{target_path}{ext}"
+                          with open(full_path, 'wb') as f:
+                              f.write(img_res.content)
+                          print(f"  [+] Сохранен {asset_type}: {full_path}")
+                          return True
+              print(f"  [-] Не удалось скачать {asset_type}")
+              return False
+
+          # Скачиваем CSV
+          print("Скачивание CSV таблицы...")
+          csv_res = requests.get(CSV_URL)
+          if csv_res.status_code != 200:
+              print(f"Ошибка скачивания CSV: {csv_res.status_code}")
+              exit(1)
+
+          # Читаем CSV
+          lines = csv_res.text.splitlines()
+          reader = csv.reader(lines)
+          
+          # Пропускаем заголовок (первую строку)
+          next(reader, None)
+
+          for row in reader:
+              # Столбец B — это индекс 1 в Python
+              if len(row) < 2:
+                  continue
+              
+              raw_game_title = row[1].strip()
+              if not raw_game_title:
+                  continue
+
+              clean_title = sanitize_filename(raw_game_title)
+              print(f"\nОбработка: \"{raw_game_title}\"")
+
+              # Проверяем, есть ли уже файлы, чтобы не скачивать повторно
+              grid_exists = any(f.startswith(clean_title) for f in os.listdir(GRIDS_DIR))
+              logo_exists = any(f.startswith(clean_title) for f in os.listdir(LOGOS_DIR))
+
+              if grid_exists and logo_exists:
+                  print("  [=] Картинки уже существуют, пропуск.")
+                  continue
+
+              game_id = get_game_id(raw_game_title)
+              if not game_id:
+                  print("  [-] Игра не найдена на SteamGridDB")
+                  continue
+
+              if not grid_exists:
+                  download_asset(game_id, 'grids', os.path.join(GRIDS_DIR, clean_title))
+              
+              if not logo_exists:
+                  download_asset(game_id, 'logos', os.path.join(LOGOS_DIR, clean_title))
+
+              time.sleep(0.5)
+
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add GAME_GRIDS/ GAME_LOGO/
+          git status
+          git diff-index --quiet HEAD || (git commit -m "Автоматическая загрузка обложек и логотипов из SteamGridDB" && git push)
