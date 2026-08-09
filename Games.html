@@ -64,7 +64,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
-            padding-top: 130px;
+            padding-top: 140px; /* Немного увеличил отступ, чтобы шапка точно не перекрывала контент на узких экранах */
             padding-bottom: 20px;
             display: flex;
             flex-direction: column;
@@ -132,6 +132,7 @@
             color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s ease;
+            min-width: 0; /* Защита от выхода за экран */
         }
 
         .counter-btn.active {
@@ -162,7 +163,8 @@
         }
 
         .search-input {
-            flex: 1;
+            flex: 1 1 0; /* Позволяет корректно сжиматься */
+            min-width: 0; /* Запрещает выход за рамки флекс-контейнера */
             background: var(--badge-bg);
             border: none;
             border-radius: 10px;
@@ -172,21 +174,9 @@
             outline: none;
         }
 
-        .reset-btn {
+        .reset-btn, .sort-btn {
             background: var(--badge-bg);
             color: var(--text-primary);
-            border: none;
-            border-radius: 10px;
-            padding: 0 12px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .sort-btn {
-            background: var(--accent-blue);
-            color: #ffffff;
             border: none;
             border-radius: 10px;
             padding: 0 14px;
@@ -194,6 +184,16 @@
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
+            flex-shrink: 0; /* Запрещает сжиматься кнопкам */
+            height: 36px; /* Фиксированная высота для выравнивания */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sort-btn {
+            background: var(--accent-blue);
+            color: #ffffff;
         }
 
         /* Список карточек */
@@ -320,13 +320,10 @@
             background-color: var(--badge-bg);
             color: var(--badge-text);
             line-height: 1.1;
-        }
-
-        .pub-country-pill {
             cursor: pointer;
         }
 
-        .pub-country-pill:hover {
+        .ios-pill:hover {
             opacity: 0.8;
         }
 
@@ -363,12 +360,7 @@
 
         .status-passed { color: var(--status-passed); background: var(--status-passed-bg); }
         .status-playing { color: #d97706; background: var(--status-playing-bg); }
-        
-        /* Фикс: Плашка Не играл теперь строго серого цвета */
-        .status-not-played { 
-            color: var(--status-not-played) !important; 
-            background: var(--status-not-played-bg) !important; 
-        }
+        .status-not-played { color: var(--status-not-played) !important; background: var(--status-not-played-bg) !important; }
 
         .time-pill { background-color: var(--badge-bg); color: var(--text-primary); }
         .date-pill { background-color: var(--badge-bg); color: var(--text-secondary); font-size: 10px; }
@@ -584,6 +576,13 @@
             color: var(--text-secondary);
             font-weight: 600;
         }
+
+        /* Микро-адаптация для очень узких экранов */
+        @media (max-width: 360px) {
+            .reset-btn { padding: 0 10px; font-size: 12px; }
+            .sort-btn { padding: 0 10px; font-size: 12px; }
+            .search-input { font-size: 13px; padding: 8px 10px; }
+        }
     </style>
 </head>
 <body>
@@ -599,9 +598,9 @@
         </div>
         <!-- Поиск, Сброс и Сортировка -->
         <div class="controls-bar">
-            <input type="text" id="search-input" class="search-input" placeholder="Поиск по названию или жанру...">
+            <input type="text" id="search-input" class="search-input" placeholder="Поиск...">
             <button class="reset-btn" id="reset-btn" onclick="resetAllFilters()">Сброс</button>
-            <button class="sort-btn" id="open-sort-btn">Сортировка</button>
+            <button class="sort-btn" id="open-sort-btn">Сорт.</button>
         </div>
     </div>
 </header>
@@ -656,6 +655,13 @@
     <button class="sheet-btn sheet-btn-cancel" onclick="closePubCountrySheet()">Отмена</button>
 </div>
 
+<!-- Модалка фильтра Жанры -->
+<div class="ios-action-sheet" id="genre-sheet">
+    <div class="sheet-title">Фильтр по жанрам</div>
+    <div class="filter-list" id="genre-list"></div>
+    <button class="sheet-btn sheet-btn-cancel" onclick="closeGenreSheet()">Отмена</button>
+</div>
+
 <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTAaoLfMXIHoBoXTb16tXL_yabaMQThgsWGGrziE5InfpyEf3MIPkVkHD58xCapuR6IPeIRp6lnqLCl/pub?gid=0&single=true&output=csv';
 
@@ -664,6 +670,7 @@
     let selectedStatusFilter = null;
     let selectedPublisherFilter = null;
     let selectedCountryFilter = null;
+    let selectedGenreFilter = null;
     let currentPubCountryTab = 'pub';
 
     // Парсер CSV
@@ -714,18 +721,24 @@
         return cleaned ? cleaned + 'ч' : val + 'ч';
     }
 
+    // Функция для безопасного определения статуса
+    // Решает проблему, когда "Не играл" содержит подстроку "играл"
+    function getGameStatus(statusNorm) {
+        if (!statusNorm) return 'not-played';
+        if (statusNorm.includes('не играл') || statusNorm.includes('неиграл')) return 'not-played';
+        if (statusNorm.includes('прошел') || statusNorm.includes('пройдено') || statusNorm.includes('готово')) return 'passed';
+        if (statusNorm.includes('играл') || statusNorm.includes('в процессе') || statusNorm.includes('играю')) return 'playing';
+        return 'not-played';
+    }
+
     // Подсчет количества игр
     function updateCounters(data) {
         let passed = 0, playing = 0, notPlayed = 0;
         data.forEach(item => {
-            let st = item.statusNorm;
-            if (st.includes('прошел') || st.includes('пройдено') || st.includes('готово')) {
-                passed++;
-            } else if (st.includes('играл') || st.includes('в процессе') || st.includes('играю')) {
-                playing++;
-            } else {
-                notPlayed++;
-            }
+            const status = getGameStatus(item.statusNorm);
+            if (status === 'passed') passed++;
+            else if (status === 'playing') playing++;
+            else notPlayed++;
         });
 
         document.getElementById('count-passed').textContent = passed;
@@ -756,6 +769,7 @@
         selectedStatusFilter = null;
         selectedPublisherFilter = null;
         selectedCountryFilter = null;
+        selectedGenreFilter = null;
         
         document.getElementById('search-input').value = '';
         document.querySelectorAll('.counter-btn').forEach(btn => btn.classList.remove('active'));
@@ -779,12 +793,9 @@
                 if (!matchSearch) return false;
             }
 
-            // Фильтр по статусу
+            // Фильтр по статусу (используем новую функцию)
             if (selectedStatusFilter) {
-                let st = item.statusNorm;
-                if (selectedStatusFilter === 'passed' && !(st.includes('прошел') || st.includes('пройдено') || st.includes('готово'))) return false;
-                if (selectedStatusFilter === 'playing' && !(st.includes('играл') || st.includes('в процессе') || st.includes('играю'))) return false;
-                if (selectedStatusFilter === 'not-played' && (st.includes('прошел') || st.includes('пройдено') || st.includes('готово') || st.includes('играл') || st.includes('в процессе') || st.includes('играю'))) return false;
+                if (getGameStatus(item.statusNorm) !== selectedStatusFilter) return false;
             }
 
             // Фильтр по издателю
@@ -792,6 +803,12 @@
 
             // Фильтр по стране
             if (selectedCountryFilter && item.country !== selectedCountryFilter) return false;
+
+            // Фильтр по жанру
+            if (selectedGenreFilter) {
+                const genres = item.genre ? item.genre.split(',').map(g => g.trim()) : [];
+                if (!genres.includes(selectedGenreFilter)) return false;
+            }
 
             return true;
         });
@@ -802,16 +819,9 @@
         }
 
         filtered.forEach(item => {
-            let statusClass = 'status-not-played';
-            let borderClass = 'border-not-played';
-            
-            if (item.statusNorm.includes('прошел') || item.statusNorm.includes('пройдено') || item.statusNorm.includes('готово')) {
-                statusClass = 'status-passed';
-                borderClass = 'border-passed';
-            } else if (item.statusNorm.includes('играл') || item.statusNorm.includes('в процессе') || item.statusNorm.includes('играю')) {
-                statusClass = 'status-playing';
-                borderClass = 'border-playing';
-            }
+            const status = getGameStatus(item.statusNorm);
+            let statusClass = `status-${status}`;
+            let borderClass = `border-${status}`;
 
             // Оценка
             let scoreClass = 'score-low';
@@ -846,8 +856,8 @@
                         ${item.titleRu ? `<div class="title-divider"></div><div class="title-ru">${item.titleRu}</div>` : ''}
                     </div>
                     <div class="mid-col-bottom">
-                        ${pubCountry ? `<span class="ios-pill pub-country-pill" onclick="event.stopPropagation(); openPubCountrySheet()">${pubCountry}</span>` : ''}
-                        ${item.genre ? `<span class="ios-pill genre-pill">${item.genre}</span>` : ''}
+                        ${pubCountry ? `<span class="ios-pill" onclick="event.stopPropagation(); openPubCountrySheet()">${pubCountry}</span>` : ''}
+                        ${item.genre ? `<span class="ios-pill genre-pill" onclick="event.stopPropagation(); openGenreSheet()">${item.genre}</span>` : ''}
                     </div>
                 </div>
 
@@ -971,6 +981,7 @@
     sortOverlay.onclick = () => {
         closeSortSheet();
         closePubCountrySheet();
+        closeGenreSheet();
     };
 
     // СОРТИРОВКА
@@ -1015,7 +1026,10 @@
 
     function closePubCountrySheet() {
         pubCountrySheet.classList.remove('active');
-        sortOverlay.classList.remove('active');
+        // Оверлей закрывается централизованно, чтобы не было конфликта
+        if (!sortSheet.classList.contains('active') && !genreSheet.classList.contains('active')) {
+            sortOverlay.classList.remove('active');
+        }
     }
 
     function switchPubCountryTab(tab) {
@@ -1053,6 +1067,54 @@
                 }
                 renderCards(gamesData);
                 closePubCountrySheet();
+            };
+            listContainer.appendChild(btn);
+        });
+    }
+
+    // МОДАЛКА ФИЛЬТРА «ЖАНРЫ»
+    const genreSheet = document.getElementById('genre-sheet');
+
+    function openGenreSheet() {
+        sortOverlay.classList.add('active');
+        genreSheet.classList.add('active');
+        renderGenreList();
+    }
+
+    function closeGenreSheet() {
+        genreSheet.classList.remove('active');
+        if (!sortSheet.classList.contains('active') && !pubCountrySheet.classList.contains('active')) {
+            sortOverlay.classList.remove('active');
+        }
+    }
+
+    function renderGenreList() {
+        const listContainer = document.getElementById('genre-list');
+        listContainer.innerHTML = '';
+
+        const counts = {};
+        gamesData.forEach(item => {
+            if (item.genre) {
+                // На случай если жанр состоит из нескольких, разделенных запятой
+                item.genre.split(',').forEach(g => {
+                    const trimmedG = g.trim();
+                    if (trimmedG) {
+                        counts[trimmedG] = (counts[trimmedG] || 0) + 1;
+                    }
+                });
+            }
+        });
+
+        const sortedKeys = Object.keys(counts).sort((a, b) => a.localeCompare(b, 'ru'));
+
+        sortedKeys.forEach(key => {
+            const btn = document.createElement('button');
+            btn.className = 'filter-item-btn';
+            btn.innerHTML = `${key} <span>(${counts[key]})</span>`;
+            btn.onclick = () => {
+                selectedGenreFilter = key;
+                renderCards(gamesData);
+                closeGenreSheet();
             };
             listContainer.appendChild(btn);
         });
