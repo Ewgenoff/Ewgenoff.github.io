@@ -975,7 +975,7 @@
                     genre: row[9] || '',
                     timeMain: row[11] || '',
                     timeFull: row[12] || '',
-                    image: row[13] || '', // Столбец N (индекс 13)
+                    image: row[18] || '', // Столбец S (индекс 18)
                     link: row[14] || '',
                     description: row[15] || ''
                 };
@@ -1048,7 +1048,7 @@
             modalLink.style.display = 'none';
         }
 
-        // Подставляем картинку из столбца N
+        // Подставляем картинку из столбца S
         if (item.image) {
             modalImage.src = item.image;
             // Если есть ссылка на статью, используем её, иначе просто открываем картинку
@@ -1231,4 +1231,3 @@
 
 </body>
 </html>
-```
