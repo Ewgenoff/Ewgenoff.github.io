@@ -241,29 +241,51 @@
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
+            width: 48px;
             height: 69px;
         }
 
-        .score-badge, .audio-badge {
+        /* Объединенная плашка Оценки и Флага */
+        .combined-badge {
             width: 48px;
-            height: 32px;
-            border-radius: 8px;
+            padding: 2px 4px;
+            border-radius: 6px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
+            gap: 1px;
+        }
+
+        .combined-score {
+            font-size: 11.5px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .combined-flag {
+            font-size: 11px;
+            line-height: 1;
         }
 
         .score-high { color: var(--score-high); background: var(--score-high-bg); }
         .score-mid { color: var(--score-mid); background: var(--score-mid-bg); }
         .score-low { color: var(--score-low); background: var(--score-low-bg); }
 
-        .audio-badge {
-            background-color: var(--badge-bg);
-            color: var(--badge-text);
-            font-size: 18px; 
-            font-weight: 600;
+        /* Логотип игры */
+        .game-logo-container {
+            width: 48px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .game-logo {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
         }
 
         /* Центральная колонка */
@@ -430,13 +452,6 @@
             transform: rotateY(0deg) scale(1);
         }
 
-        .modal-header {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
         /* КАРТИНКА ИЗ ТАБЛИЦЫ (Во весь рост) */
         .modal-image-container {
             width: 100%;
@@ -466,21 +481,6 @@
             display: block;
         }
 
-        .btn-wiki {
-            display: block;
-            width: max-content;
-            margin: 0 auto 16px auto;
-            background: var(--badge-bg);
-            color: var(--accent-blue);
-            text-decoration: none;
-            padding: 8px 24px;
-            border-radius: 10px;
-            font-size: 13px;
-            font-weight: 600;
-            text-align: center;
-            border: 1px solid var(--card-border);
-        }
-
         .modal-desc {
             font-size: 14px;
             color: var(--text-secondary);
@@ -492,6 +492,7 @@
             display: flex;
             gap: 10px;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .modal-btn {
@@ -714,10 +715,9 @@
                 <img id="modal-image" src="" alt="Обложка игры">
             </a>
         </div>
-        <a href="#" target="_blank" class="btn-wiki" id="modal-wiki-link" style="display: none;">Wiki.ru</a>
-        <div class="modal-header" id="modal-title">Название игры</div>
         <div class="modal-desc" id="modal-desc">Описание отсутствует.</div>
         <div class="modal-actions">
+            <a href="#" target="_blank" class="modal-btn btn-link" id="modal-wiki-link" style="display: none;">Wiki.ru</a>
             <a href="#" target="_blank" class="modal-btn btn-link" id="modal-link">IGDB.com</a>
             <button class="modal-btn btn-close" id="modal-close">Закрыть</button>
         </div>
@@ -923,8 +923,7 @@
             if (item.scoreNum > 80) scoreClass = 'score-high';
             else if (item.scoreNum >= 65) scoreClass = 'score-mid';
 
-            // Замена текста на флаги
-            let audioBadgeText = item.voiceover.includes('есть') ? '🇷🇺' : '🇺🇸';
+            let flagEmoji = item.voiceover.includes('есть') ? '🇷🇺' : '🇺🇸';
 
             let timeStr = '';
             if (item.timeMain || item.timeFull) {
@@ -938,8 +937,13 @@
 
             card.innerHTML = `
                 <div class="left-col">
-                    <div class="score-badge ${scoreClass}">${item.scoreText}</div>
-                    <div class="audio-badge">${audioBadgeText}</div>
+                    <div class="combined-badge ${scoreClass}">
+                        <div class="combined-score">${item.scoreText}</div>
+                        <div class="combined-flag">${flagEmoji}</div>
+                    </div>
+                    <div class="game-logo-container">
+                        ${item.logo ? `<img src="${item.logo}" alt="Logo" class="game-logo" loading="lazy">` : ''}
+                    </div>
                 </div>
 
                 <div class="mid-col" onclick="openFlipModalByItem('${item.id}')">
@@ -996,6 +1000,7 @@
                     link: row[14] || '',
                     description: row[15] || '',
                     image: row[18] || '', // Столбец S
+                    logo: row[19] || '',  // Столбец T
                     wiki: row[20] || ''   // Столбец U
                 };
             }).filter(Boolean);
@@ -1042,13 +1047,12 @@
 
     // Обработка клика по FAB
     fabSearch.addEventListener('click', () => {
-        header.classList.remove('header-hidden'); // Открываем шапку, если она скрыта
-        searchInput.focus(); // Ставим курсор в поле поиска
+        header.classList.remove('header-hidden');
+        searchInput.focus();
     });
 
     // МОДАЛКА ПЕРЕВОРОТА (FLIP)
     const flipOverlay = document.getElementById('flip-modal-overlay');
-    const modalTitle = document.getElementById('modal-title');
     const modalDesc = document.getElementById('modal-desc');
     const modalLink = document.getElementById('modal-link');
     const modalClose = document.getElementById('modal-close');
@@ -1058,7 +1062,6 @@
     const modalWikiLink = document.getElementById('modal-wiki-link');
 
     function openFlipModal(item) {
-        modalTitle.textContent = item.titleEn + (item.titleRu ? ` (${item.titleRu})` : '');
         modalDesc.textContent = item.description || 'Описание не заполнено.';
         
         // Обработка обычной ссылки (IGDB.com)
@@ -1072,7 +1075,7 @@
         // Обработка ссылки на Wiki
         if (item.wiki) {
             modalWikiLink.href = item.wiki;
-            modalWikiLink.style.display = 'block';
+            modalWikiLink.style.display = 'inline-flex';
         } else {
             modalWikiLink.style.display = 'none';
         }
