@@ -6,19 +6,20 @@
     <title>Карточки игр</title>
     <style>
         :root {
-            --bg-color: #f2f2f7;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --card-border: rgba(60, 60, 67, 0.12);
-            --text-primary: #000000;
-            --text-secondary: #8e8e93;
-            --text-muted: #aeaeb2;
+            /* Тёмная тема по умолчанию для всех устройств */
+            --bg-color: #000000;
+            --card-bg: rgba(28, 28, 30, 0.9);
+            --card-border: rgba(84, 84, 88, 0.35);
+            --text-primary: #ffffff;
+            --text-secondary: #98989d;
+            --text-muted: #636366;
             
             --status-passed: #34c759;
-            --status-passed-bg: rgba(52, 199, 89, 0.15);
+            --status-passed-bg: rgba(52, 199, 89, 0.22);
             --status-playing: #ffcc00;
-            --status-playing-bg: rgba(255, 204, 0, 0.18);
+            --status-playing-bg: rgba(255, 204, 0, 0.22);
             --status-not-played: #8e8e93;
-            --status-not-played-bg: rgba(142, 142, 147, 0.15);
+            --status-not-played-bg: rgba(142, 142, 147, 0.22);
             
             --score-high: #34c759;
             --score-high-bg: rgba(52, 199, 89, 0.12);
@@ -27,30 +28,10 @@
             --score-low: #ff3b30;
             --score-low-bg: rgba(255, 59, 48, 0.12);
 
-            --badge-bg: #e5e5ea;
-            --badge-text: #3a3a3c;
-            --accent-blue: #007aff;
-            --line-color: rgba(60, 60, 67, 0.15);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #000000;
-                --card-bg: rgba(28, 28, 30, 0.9);
-                --card-border: rgba(84, 84, 88, 0.35);
-                --text-primary: #ffffff;
-                --text-secondary: #98989d;
-                --text-muted: #636366;
-                
-                --badge-bg: #2c2c2e;
-                --badge-text: #d1d1d6;
-
-                --status-passed-bg: rgba(52, 199, 89, 0.22);
-                --status-playing-bg: rgba(255, 204, 0, 0.22);
-                --status-not-played-bg: rgba(142, 142, 147, 0.22);
-                --accent-blue: #0a84ff;
-                --line-color: rgba(255, 255, 255, 0.15);
-            }
+            --badge-bg: #2c2c2e;
+            --badge-text: #d1d1d6;
+            --accent-blue: #0a84ff;
+            --line-color: rgba(255, 255, 255, 0.15);
         }
 
         * {
@@ -91,7 +72,7 @@
             -webkit-backdrop-filter: blur(20px);
             padding: 10px 16px;
             transition: transform 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -209,7 +190,7 @@
             gap: 12px;
         }
 
-        /* КАРТОЧКА ГЕЙМА */
+        /* КАРТОЧКА ИГРЫ */
         .game-card {
             background-color: var(--card-bg);
             backdrop-filter: blur(20px);
@@ -221,7 +202,7 @@
             display: flex;
             gap: 10px;
             align-items: stretch;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
             cursor: pointer;
             transition: transform 0.15s ease;
         }
@@ -286,6 +267,7 @@
             max-height: 100%;
             object-fit: contain;
             display: block;
+            cursor: pointer;
         }
 
         /* Центральная колонка */
@@ -416,7 +398,7 @@
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             display: flex;
@@ -440,19 +422,20 @@
             max-width: 440px;
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             transform: rotateY(90deg) scale(0.8);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             backface-visibility: hidden;
             max-height: 90vh;
             overflow-y: auto;
+            cursor: pointer; /* Указываем, что карточка кликабельна для закрытия */
         }
 
         .modal-overlay.active .flip-modal {
             transform: rotateY(0deg) scale(1);
         }
 
-        /* КАРТИНКА ИЗ ТАБЛИЦЫ (Во весь рост) */
+        /* КАРТИНКА ИЗ ТАБЛИЦЫ */
         .modal-image-container {
             width: 100%;
             max-width: 300px;
@@ -476,8 +459,6 @@
             height: auto;
             max-height: 70vh;
             object-fit: contain;
-            cursor: pointer;
-            transition: opacity 0.3s;
             display: block;
         }
 
@@ -522,7 +503,7 @@
             border: none;
             border-radius: 50%;
             color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
             cursor: pointer;
             z-index: 90;
             display: flex;
@@ -545,7 +526,7 @@
             height: 24px;
         }
 
-        /* ОКНО СОРТИРОВКИ И ФИЛЬТРА РАЗРАБОТЧИКОВ В СТИЛЕ IOS */
+        /* ОКНО СОРТИРОВКИ И ФИЛЬТРА В СТИЛЕ IOS */
         .ios-action-sheet {
             position: fixed;
             bottom: -100%;
@@ -558,7 +539,7 @@
             -webkit-backdrop-filter: blur(20px);
             border-radius: 16px;
             padding: 12px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
             z-index: 300;
             transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
             display: flex;
@@ -631,7 +612,7 @@
         .segment-btn.active {
             background: var(--card-bg);
             color: var(--text-primary);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
         }
 
         .filter-list {
@@ -661,6 +642,37 @@
         .filter-item-btn span {
             color: var(--text-secondary);
             font-weight: 600;
+        }
+
+        /* МОДАЛКА ЛОГОТИПА (ПОЛНЫЙ РАЗМЕР) */
+        .logo-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 400;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+
+        .logo-modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .logo-modal-img {
+            max-width: 90vw;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            transition: transform 0.3s ease;
         }
 
         @media (max-width: 360px) {
@@ -709,11 +721,11 @@
 
 <!-- Модалка описания (Flip Card) -->
 <div class="modal-overlay" id="flip-modal-overlay">
-    <div class="flip-modal">
+    <div class="flip-modal" id="flip-modal-card">
         <div class="modal-image-container" id="modal-image-container">
-            <a href="#" target="_blank" class="modal-image-link" id="modal-image-link">
+            <div class="modal-image-link" id="modal-image-link">
                 <img id="modal-image" src="" alt="Обложка игры">
-            </a>
+            </div>
         </div>
         <div class="modal-desc" id="modal-desc">Описание отсутствует.</div>
         <div class="modal-actions">
@@ -722,6 +734,11 @@
             <button class="modal-btn btn-close" id="modal-close">Закрыть</button>
         </div>
     </div>
+</div>
+
+<!-- Модалка полноэкранного логотипа -->
+<div class="logo-modal-overlay" id="logo-modal-overlay">
+    <img id="logo-modal-img" class="logo-modal-img" src="" alt="Логотип игры">
 </div>
 
 <!-- Модалка сортировки (iOS Style) -->
@@ -942,7 +959,7 @@
                         <div class="combined-flag">${flagEmoji}</div>
                     </div>
                     <div class="game-logo-container">
-                        ${item.logo ? `<img src="${item.logo}" alt="Logo" class="game-logo" loading="lazy">` : ''}
+                        ${item.logo ? `<img src="${item.logo}" alt="Logo" class="game-logo" loading="lazy" onclick="event.stopPropagation(); openLogoModal('${item.logo}')">` : ''}
                     </div>
                 </div>
 
@@ -1035,36 +1052,32 @@
         }
         lastScrollY = window.scrollY;
 
-        // Показываем FAB при скролле
         fabSearch.classList.add('active');
         
-        // Скрываем через 2 секунды после остановки скролла
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
             fabSearch.classList.remove('active');
         }, 2000);
     });
 
-    // Обработка клика по FAB
     fabSearch.addEventListener('click', () => {
         header.classList.remove('header-hidden');
         searchInput.focus();
     });
 
-    // МОДАЛКА ПЕРЕВОРОТА (FLIP)
+    // МОДАЛКА ПЕРЕВОРОТА (FLIP) И КЛОЗ ПО КЛИКУ
     const flipOverlay = document.getElementById('flip-modal-overlay');
+    const flipModalCard = document.getElementById('flip-modal-card');
     const modalDesc = document.getElementById('modal-desc');
     const modalLink = document.getElementById('modal-link');
     const modalClose = document.getElementById('modal-close');
     const modalImageContainer = document.getElementById('modal-image-container');
     const modalImage = document.getElementById('modal-image');
-    const modalImageLink = document.getElementById('modal-image-link');
     const modalWikiLink = document.getElementById('modal-wiki-link');
 
     function openFlipModal(item) {
         modalDesc.textContent = item.description || 'Описание не заполнено.';
         
-        // Обработка обычной ссылки (IGDB.com)
         if (item.link) {
             modalLink.href = item.link;
             modalLink.style.display = 'inline-flex';
@@ -1072,7 +1085,6 @@
             modalLink.style.display = 'none';
         }
 
-        // Обработка ссылки на Wiki
         if (item.wiki) {
             modalWikiLink.href = item.wiki;
             modalWikiLink.style.display = 'inline-flex';
@@ -1080,10 +1092,8 @@
             modalWikiLink.style.display = 'none';
         }
 
-        // Подставляем картинку
         if (item.image) {
             modalImage.src = item.image;
-            modalImageLink.href = item.link || item.image; 
             modalImageContainer.style.display = 'flex';
         } else {
             modalImageContainer.style.display = 'none';
@@ -1092,9 +1102,38 @@
         flipOverlay.classList.add('active');
     }
 
-    modalClose.onclick = () => flipOverlay.classList.remove('active');
-    flipOverlay.onclick = (e) => {
-        if (e.target === flipOverlay) flipOverlay.classList.remove('active');
+    function closeFlipModal() {
+        flipOverlay.classList.remove('active');
+    }
+
+    modalClose.onclick = (e) => {
+        e.stopPropagation();
+        closeFlipModal();
+    };
+
+    flipOverlay.onclick = () => closeFlipModal();
+
+    // Закрытие при клике в любое место карточки, КРОМЕ ссылок и кнопок
+    flipModalCard.onclick = (e) => {
+        const isInteractive = e.target.closest('a, button');
+        if (!isInteractive) {
+            closeFlipModal();
+        } else {
+            e.stopPropagation();
+        }
+    };
+
+    // МОДАЛКА ПОЛНОЭКРАННОГО ЛОГОТИПА
+    const logoOverlay = document.getElementById('logo-modal-overlay');
+    const logoImg = document.getElementById('logo-modal-img');
+
+    function openLogoModal(src) {
+        logoImg.src = src;
+        logoOverlay.classList.add('active');
+    }
+
+    logoOverlay.onclick = () => {
+        logoOverlay.classList.remove('active');
     };
 
     // МОДАЛКА СОРТИРОВКИ
