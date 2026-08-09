@@ -64,7 +64,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
-            padding-top: 140px; /* Немного увеличил отступ, чтобы шапка точно не перекрывала контент на узких экранах */
+            padding-top: 140px;
             padding-bottom: 20px;
             display: flex;
             flex-direction: column;
@@ -132,7 +132,7 @@
             color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s ease;
-            min-width: 0; /* Защита от выхода за экран */
+            min-width: 0;
         }
 
         .counter-btn.active {
@@ -163,8 +163,8 @@
         }
 
         .search-input {
-            flex: 1 1 0; /* Позволяет корректно сжиматься */
-            min-width: 0; /* Запрещает выход за рамки флекс-контейнера */
+            flex: 1 1 0;
+            min-width: 0;
             background: var(--badge-bg);
             border: none;
             border-radius: 10px;
@@ -184,16 +184,16 @@
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
-            flex-shrink: 0; /* Запрещает сжиматься кнопкам */
-            height: 36px; /* Фиксированная высота для выравнивания */
+            flex-shrink: 0;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.2s ease;
         }
 
-        /* НОВЫЙ СТИЛЬ ДЛЯ КРАСНОЙ КНОПКИ СБРОСА ПРИ СОРТИРОВКЕ */
-        .reset-btn.sorted {
+        /* КРАСНАЯ КНОПКА СБРОСА ПРИ СОРТИРОВКЕ ИЛИ ФИЛЬТРАЦИИ */
+        .reset-btn.active {
             background: #ff3b30;
             color: #ffffff;
         }
@@ -221,7 +221,7 @@
             padding: 10px 12px;
             display: flex;
             gap: 10px;
-            align-items: stretch; /* Растягивание колонок по высоте */
+            align-items: stretch;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             cursor: pointer;
             transition: transform 0.15s ease;
@@ -242,7 +242,7 @@
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
-            height: 69px; /* Зафиксированная высота под совпадение плашек */
+            height: 69px;
         }
 
         .score-badge, .audio-badge {
@@ -347,7 +347,7 @@
             justify-content: space-between;
             align-items: flex-end;
             flex-shrink: 0;
-            height: 69px; /* Строгая синхронизация границ с левой колонкой */
+            height: 69px;
         }
 
         .right-pill {
@@ -370,7 +370,9 @@
         .status-not-played { color: var(--status-not-played) !important; background: var(--status-not-played-bg) !important; }
 
         .time-pill { background-color: var(--badge-bg); color: var(--text-primary); }
-        .date-pill { background-color: var(--badge-bg); color: var(--text-secondary); font-size: 10px; }
+        
+        /* ИЗМЕНЕН ЦВЕТ ДАТЫ НА ЧЕРНЫЙ (В ТЕМНОЙ ТЕМЕ БУДЕТ БЕЛЫМ) */
+        .date-pill { background-color: var(--badge-bg); color: var(--text-primary); font-size: 10px; }
 
         .loading {
             text-align: center;
@@ -423,6 +425,8 @@
             transform: rotateY(90deg) scale(0.8);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             backface-visibility: hidden;
+            max-height: 85vh;
+            overflow-y: auto;
         }
 
         .modal-overlay.active .flip-modal {
@@ -435,12 +439,31 @@
             margin-bottom: 10px;
         }
 
+        /* КАРТИНКА ИЗ ВИКИПЕДИИ */
+        .modal-image-container {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--badge-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: opacity 0.3s;
+        }
+
         .modal-desc {
             font-size: 14px;
             color: var(--text-secondary);
             line-height: 1.4;
-            max-height: 250px;
-            overflow-y: auto;
             margin-bottom: 16px;
         }
 
@@ -627,6 +650,11 @@
 <!-- Модалка описания (Flip Card) -->
 <div class="modal-overlay" id="flip-modal-overlay">
     <div class="flip-modal">
+        <div class="modal-image-container" id="modal-image-container" style="display: none;">
+            <a href="#" target="_blank" id="modal-image-link">
+                <img id="modal-image" src="" alt="Обложка игры">
+            </a>
+        </div>
         <div class="modal-header" id="modal-title">Название игры</div>
         <div class="modal-desc" id="modal-desc">Описание отсутствует.</div>
         <div class="modal-actions">
@@ -679,6 +707,7 @@
     let selectedCountryFilter = null;
     let selectedGenreFilter = null;
     let currentPubCountryTab = 'dev';
+    let isSorted = false; // Флаг, была ли применена сортировка
 
     // Парсер CSV
     function parseCSV(text) {
@@ -728,8 +757,6 @@
         return cleaned ? cleaned + 'ч' : val + 'ч';
     }
 
-    // Функция для безопасного определения статуса
-    // Решает проблему, когда "Не играл" содержит подстроку "играл"
     function getGameStatus(statusNorm) {
         if (!statusNorm) return 'not-played';
         if (statusNorm.includes('не играл') || statusNorm.includes('неиграл')) return 'not-played';
@@ -738,7 +765,6 @@
         return 'not-played';
     }
 
-    // Подсчет количества игр
     function updateCounters(data) {
         let passed = 0, playing = 0, notPlayed = 0;
         data.forEach(item => {
@@ -752,6 +778,18 @@
         document.getElementById('count-playing').textContent = playing;
         document.getElementById('count-not-played').textContent = notPlayed;
         document.getElementById('total-count').textContent = data.length;
+    }
+
+    // Проверка активности фильтров для подсветки кнопки Сброс
+    function checkResetButtonState() {
+        const hasFilters = currentFilterText || selectedStatusFilter || selectedDeveloperFilter || selectedCountryFilter || selectedGenreFilter;
+        const resetBtn = document.getElementById('reset-btn');
+        
+        if (hasFilters || isSorted) {
+            resetBtn.classList.add('active');
+        } else {
+            resetBtn.classList.remove('active');
+        }
     }
 
     // Фильтрация по статусу из шапки
@@ -777,21 +815,24 @@
         selectedDeveloperFilter = null;
         selectedCountryFilter = null;
         selectedGenreFilter = null;
+        isSorted = false; // Сбрасываем флаг сортировки
         
         document.getElementById('search-input').value = '';
         document.querySelectorAll('.counter-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById('reset-btn').classList.remove('sorted'); // Убираем красный цвет
+        document.getElementById('reset-btn').classList.remove('active');
         
         renderCards(gamesData);
     }
 
-    // Отрисовка
+    // Отрисовка карточек
     function renderCards(data) {
         const container = document.getElementById('cards-container');
         container.innerHTML = '';
+        
+        // Обновляем состояние кнопки сброса при каждой отрисовке
+        checkResetButtonState();
 
         const filtered = data.filter(item => {
-            // Текстовый поиск
             if (currentFilterText) {
                 const term = currentFilterText.toLowerCase();
                 const matchSearch = item.titleEn.toLowerCase().includes(term) ||
@@ -801,18 +842,13 @@
                 if (!matchSearch) return false;
             }
 
-            // Фильтр по статусу (используем новую функцию)
             if (selectedStatusFilter) {
                 if (getGameStatus(item.statusNorm) !== selectedStatusFilter) return false;
             }
 
-            // Фильтр по разработчику
             if (selectedDeveloperFilter && item.developer !== selectedDeveloperFilter) return false;
-
-            // Фильтр по стране
             if (selectedCountryFilter && item.country !== selectedCountryFilter) return false;
 
-            // Фильтр по жанру
             if (selectedGenreFilter) {
                 const genres = item.genre ? item.genre.split(',').map(g => g.trim()) : [];
                 if (!genres.includes(selectedGenreFilter)) return false;
@@ -831,15 +867,12 @@
             let statusClass = `status-${status}`;
             let borderClass = `border-${status}`;
 
-            // Оценка
             let scoreClass = 'score-low';
             if (item.scoreNum > 80) scoreClass = 'score-high';
             else if (item.scoreNum >= 65) scoreClass = 'score-mid';
 
-            // Озвучка
             let audioBadgeText = item.voiceover.includes('есть') ? 'RUS' : 'ENG';
 
-            // Время с иконкой геймпада
             let timeStr = '';
             if (item.timeMain || item.timeFull) {
                 timeStr = `🎮 ${formatHours(item.timeMain)}/${formatHours(item.timeFull)}`;
@@ -851,13 +884,11 @@
             card.className = `game-card ${borderClass}`;
 
             card.innerHTML = `
-                <!-- Левая колонка -->
                 <div class="left-col">
                     <div class="score-badge ${scoreClass}">${item.scoreText}</div>
                     <div class="audio-badge">${audioBadgeText}</div>
                 </div>
 
-                <!-- Центральная колонка -->
                 <div class="mid-col" onclick="openFlipModalByItem('${item.id}')">
                     <div class="titles-block">
                         <div class="title-en">${item.titleEn}</div>
@@ -869,7 +900,6 @@
                     </div>
                 </div>
 
-                <!-- Правая колонка -->
                 <div class="right-col" onclick="openFlipModalByItem('${item.id}')">
                     <div class="right-pill ${statusClass}">${item.status || 'Не играл'}</div>
                     ${timeStr ? `<div class="right-pill time-pill">${timeStr}</div>` : ''}
@@ -886,7 +916,7 @@
         if (item) openFlipModal(item);
     }
 
-    // Загрузка
+    // ЗАГРУЗКА ДАННЫХ
     fetch(CSV_URL)
         .then(res => res.text())
         .then(csvText => {
@@ -949,6 +979,36 @@
     const modalDesc = document.getElementById('modal-desc');
     const modalLink = document.getElementById('modal-link');
     const modalClose = document.getElementById('modal-close');
+    const modalImageContainer = document.getElementById('modal-image-container');
+    const modalImage = document.getElementById('modal-image');
+    const modalImageLink = document.getElementById('modal-image-link');
+
+    // Функция запроса картинки из Wikipedia (сначала RU, потом EN)
+    async function fetchWikipediaImage(item) {
+        const titlesToTry = [];
+        if (item.titleRu) titlesToTry.push({ lang: 'ru', title: item.titleRu });
+        if (item.titleEn) titlesToTry.push({ lang: 'en', title: item.titleEn });
+
+        for (const t of titlesToTry) {
+            const apiUrl = `https://${t.lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages|info&inprop=url&piprop=thumbnail&pithumbsize=500&titles=${encodeURIComponent(t.title)}&redirects=1&origin=*`;
+            
+            try {
+                const res = await fetch(apiUrl);
+                const data = await res.json();
+                const pages = data.query.pages;
+                const pageId = Object.keys(pages)[0];
+                const page = pages[pageId];
+                
+                // Если страница существует и есть картинка
+                if (page.missing === undefined && page.thumbnail && page.fullurl) {
+                    return { imgSrc: page.thumbnail.source, wikiUrl: page.fullurl };
+                }
+            } catch (e) {
+                console.error("Wikipedia API Error:", e);
+            }
+        }
+        return null; // Если ничего не найдено
+    }
 
     function openFlipModal(item) {
         modalTitle.textContent = item.titleEn + (item.titleRu ? ` (${item.titleRu})` : '');
@@ -960,6 +1020,18 @@
         } else {
             modalLink.style.display = 'none';
         }
+
+        // Скрываем контейнер картинки перед загрузкой
+        modalImageContainer.style.display = 'none';
+        
+        // Запрашиваем картинку
+        fetchWikipediaImage(item).then(wikiData => {
+            if (wikiData) {
+                modalImage.src = wikiData.imgSrc;
+                modalImageLink.href = wikiData.wikiUrl;
+                modalImageContainer.style.display = 'block';
+            }
+        });
 
         flipOverlay.classList.add('active');
     }
@@ -996,8 +1068,8 @@
     document.querySelectorAll('.sheet-btn[data-sort]').forEach(btn => {
         btn.onclick = () => {
             const type = btn.getAttribute('data-sort');
+            isSorted = true; // Устанавливаем флаг, что сортировка применена
             
-            // Вспомогательная функция для конвертации даты ДД.ММ.ГГГГ в число ГГГГММДД
             const dateToNum = (dateStr) => {
                 if (!dateStr) return 0;
                 const parts = dateStr.toString().split(/[.,\/]/).map(p => p.trim());
@@ -1007,33 +1079,21 @@
                     const year = parts[2];
                     return parseInt(`${year}${month}${day}`, 10);
                 }
-                return 0; // Если дата не распознана, кидаем в конец
+                return 0;
             };
 
             gamesData.sort((a, b) => {
                 switch(type) {
-                    case 'title':
-                        return a.titleEn.localeCompare(b.titleEn);
-                    case 'year':
-                        // От новой к самой старой (используем числовое сравнение)
-                        return dateToNum(b.releaseDate) - dateToNum(a.releaseDate);
-                    case 'score':
-                        return b.scoreNum - a.scoreNum;
-                    case 'developer':
-                        return a.developer.localeCompare(b.developer);
-                    case 'country':
-                        return a.country.localeCompare(b.country);
-                    case 'voice':
-                        return a.voiceover.localeCompare(b.voiceover);
-                    case 'time':
-                        return (parseInt(b.timeMain)||0) - (parseInt(a.timeMain)||0);
-                    default:
-                        return 0;
+                    case 'title': return a.titleEn.localeCompare(b.titleEn);
+                    case 'year': return dateToNum(b.releaseDate) - dateToNum(a.releaseDate);
+                    case 'score': return b.scoreNum - a.scoreNum;
+                    case 'developer': return a.developer.localeCompare(b.developer);
+                    case 'country': return a.country.localeCompare(b.country);
+                    case 'voice': return a.voiceover.localeCompare(b.voiceover);
+                    case 'time': return (parseInt(b.timeMain)||0) - (parseInt(a.timeMain)||0);
+                    default: return 0;
                 }
             });
-
-            // Добавляем красный цвет кнопке Сброс
-            document.getElementById('reset-btn').classList.add('sorted');
 
             renderCards(gamesData);
             closeSortSheet();
@@ -1051,7 +1111,6 @@
 
     function closePubCountrySheet() {
         pubCountrySheet.classList.remove('active');
-        // Оверлей закрывается централизованно, чтобы не было конфликта
         if (!sortSheet.classList.contains('active') && !genreSheet.classList.contains('active')) {
             sortOverlay.classList.remove('active');
         }
@@ -1120,7 +1179,6 @@
         const counts = {};
         gamesData.forEach(item => {
             if (item.genre) {
-                // На случай если жанр состоит из нескольких, разделенных запятой
                 item.genre.split(',').forEach(g => {
                     const trimmedG = g.trim();
                     if (trimmedG) {
