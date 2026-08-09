@@ -262,7 +262,7 @@
         .audio-badge {
             background-color: var(--badge-bg);
             color: var(--badge-text);
-            font-size: 18px; /* Увеличено для красивого отображения флагов */
+            font-size: 18px; 
             font-weight: 600;
         }
 
@@ -422,7 +422,7 @@
             transform: rotateY(90deg) scale(0.8);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             backface-visibility: hidden;
-            max-height: 85vh;
+            max-height: 90vh;
             overflow-y: auto;
         }
 
@@ -434,13 +434,14 @@
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 10px;
+            text-align: center;
         }
 
-        /* КАРТИНКА ИЗ ТАБЛИЦЫ */
+        /* КАРТИНКА ИЗ ТАБЛИЦЫ (Во весь рост) */
         .modal-image-container {
             width: 100%;
-            height: 200px;
-            margin-bottom: 16px;
+            max-width: 300px;
+            margin: 0 auto 16px auto;
             border-radius: 12px;
             overflow: hidden;
             background: var(--badge-bg);
@@ -453,15 +454,31 @@
         .modal-image-link {
             display: block;
             width: 100%;
-            height: 100%;
         }
 
         .modal-image-link img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
+            max-height: 70vh;
+            object-fit: contain;
             cursor: pointer;
             transition: opacity 0.3s;
+            display: block;
+        }
+
+        .btn-wiki {
+            display: block;
+            width: max-content;
+            margin: 0 auto 16px auto;
+            background: var(--badge-bg);
+            color: var(--accent-blue);
+            text-decoration: none;
+            padding: 8px 24px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid var(--card-border);
         }
 
         .modal-desc {
@@ -474,7 +491,7 @@
         .modal-actions {
             display: flex;
             gap: 10px;
-            justify-content: flex-end;
+            justify-content: center;
         }
 
         .modal-btn {
@@ -697,10 +714,11 @@
                 <img id="modal-image" src="" alt="Обложка игры">
             </a>
         </div>
+        <a href="#" target="_blank" class="btn-wiki" id="modal-wiki-link" style="display: none;">Wiki.ru</a>
         <div class="modal-header" id="modal-title">Название игры</div>
         <div class="modal-desc" id="modal-desc">Описание отсутствует.</div>
         <div class="modal-actions">
-            <a href="#" target="_blank" class="modal-btn btn-link" id="modal-link">Открыть ссылку</a>
+            <a href="#" target="_blank" class="modal-btn btn-link" id="modal-link">IGDB.com</a>
             <button class="modal-btn btn-close" id="modal-close">Закрыть</button>
         </div>
     </div>
@@ -975,9 +993,10 @@
                     genre: row[9] || '',
                     timeMain: row[11] || '',
                     timeFull: row[12] || '',
-                    image: row[18] || '', // Столбец S (индекс 18)
                     link: row[14] || '',
-                    description: row[15] || ''
+                    description: row[15] || '',
+                    image: row[18] || '', // Столбец S
+                    wiki: row[20] || ''   // Столбец U
                 };
             }).filter(Boolean);
 
@@ -1036,11 +1055,13 @@
     const modalImageContainer = document.getElementById('modal-image-container');
     const modalImage = document.getElementById('modal-image');
     const modalImageLink = document.getElementById('modal-image-link');
+    const modalWikiLink = document.getElementById('modal-wiki-link');
 
     function openFlipModal(item) {
         modalTitle.textContent = item.titleEn + (item.titleRu ? ` (${item.titleRu})` : '');
         modalDesc.textContent = item.description || 'Описание не заполнено.';
         
+        // Обработка обычной ссылки (IGDB.com)
         if (item.link) {
             modalLink.href = item.link;
             modalLink.style.display = 'inline-flex';
@@ -1048,10 +1069,17 @@
             modalLink.style.display = 'none';
         }
 
-        // Подставляем картинку из столбца S
+        // Обработка ссылки на Wiki
+        if (item.wiki) {
+            modalWikiLink.href = item.wiki;
+            modalWikiLink.style.display = 'block';
+        } else {
+            modalWikiLink.style.display = 'none';
+        }
+
+        // Подставляем картинку
         if (item.image) {
             modalImage.src = item.image;
-            // Если есть ссылка на статью, используем её, иначе просто открываем картинку
             modalImageLink.href = item.link || item.image; 
             modalImageContainer.style.display = 'flex';
         } else {
