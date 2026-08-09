@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -262,7 +263,7 @@
         .audio-badge {
             background-color: var(--badge-bg);
             color: var(--badge-text);
-            font-size: 11px;
+            font-size: 18px; /* Увеличено для красивого отображения флагов */
             font-weight: 600;
         }
 
@@ -436,7 +437,7 @@
             margin-bottom: 10px;
         }
 
-        /* КАРТИНКА ИЗ ВИКИПЕДИИ */
+        /* КАРТИНКА ИЗ ТАБЛИЦЫ */
         .modal-image-container {
             width: 100%;
             height: 200px;
@@ -444,16 +445,10 @@
             border-radius: 12px;
             overflow: hidden;
             background: var(--badge-bg);
-            display: none; /* Изначально скрыто */
+            display: none; 
             align-items: center;
             justify-content: center;
             position: relative;
-        }
-
-        .img-loader {
-            position: absolute;
-            font-size: 13px;
-            color: var(--text-secondary);
         }
 
         .modal-image-link {
@@ -498,6 +493,40 @@
 
         .btn-link { background: var(--accent-blue); color: #fff; }
         .btn-close { background: var(--badge-bg); color: var(--text-primary); }
+
+        /* ПЛАВАЮЩАЯ КНОПКА ПОИСКА (FAB) */
+        .fab-search {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: var(--accent-blue);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 90;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transform: scale(0);
+            pointer-events: none;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .fab-search.active {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .fab-search svg {
+            width: 24px;
+            height: 24px;
+        }
 
         /* ОКНО СОРТИРОВКИ И ФИЛЬТРА РАЗРАБОТЧИКОВ В СТИЛЕ IOS */
         .ios-action-sheet {
@@ -653,12 +682,19 @@
     <div>Версия 1.0 (by Ewgenoff 09.08.2026)</div>
 </footer>
 
+<!-- ПЛАВАЮЩАЯ КНОПКА ПОИСКА -->
+<button id="fab-search" class="fab-search" aria-label="Поиск">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    </svg>
+</button>
+
 <!-- Модалка описания (Flip Card) -->
 <div class="modal-overlay" id="flip-modal-overlay">
     <div class="flip-modal">
         <div class="modal-image-container" id="modal-image-container">
-            <div class="img-loader" id="img-loader">Загрузка картинки...</div>
-            <a href="#" target="_blank" class="modal-image-link" id="modal-image-link" style="display: none;">
+            <a href="#" target="_blank" class="modal-image-link" id="modal-image-link">
                 <img id="modal-image" src="" alt="Обложка игры">
             </a>
         </div>
@@ -870,7 +906,8 @@
             if (item.scoreNum > 80) scoreClass = 'score-high';
             else if (item.scoreNum >= 65) scoreClass = 'score-mid';
 
-            let audioBadgeText = item.voiceover.includes('есть') ? 'RUS' : 'ENG';
+            // Замена текста на флаги
+            let audioBadgeText = item.voiceover.includes('есть') ? '🇷🇺' : '🇺🇸';
 
             let timeStr = '';
             if (item.timeMain || item.timeFull) {
@@ -915,6 +952,7 @@
         if (item) openFlipModal(item);
     }
 
+    // ЗАГРУЗКА ДАННЫХ
     fetch(CSV_URL)
         .then(res => res.text())
         .then(csvText => {
@@ -938,6 +976,7 @@
                     genre: row[9] || '',
                     timeMain: row[11] || '',
                     timeFull: row[12] || '',
+                    image: row[13] || '', // Столбец N (индекс 13)
                     link: row[14] || '',
                     description: row[15] || ''
                 };
@@ -952,13 +991,18 @@
                 <div class="loading" style="color: #ff3b30;">Ошибка загрузки данных Таблицы</div>`;
         });
 
-    document.getElementById('search-input').addEventListener('input', (e) => {
+    // ПОИСК
+    const searchInput = document.getElementById('search-input');
+    searchInput.addEventListener('input', (e) => {
         currentFilterText = e.target.value;
         renderCards(gamesData);
     });
 
+    // АВТОСКРЫТИЕ ШАПКИ ПРИ СКРОЛЛЕ + ЛОГИКА FAB
     let lastScrollY = window.scrollY;
     const header = document.getElementById('header');
+    const fabSearch = document.getElementById('fab-search');
+    let scrollTimeout;
 
     window.addEventListener('scroll', () => {
         if (window.scrollY > lastScrollY && window.scrollY > 80) {
@@ -967,8 +1011,24 @@
             header.classList.remove('header-hidden');
         }
         lastScrollY = window.scrollY;
+
+        // Показываем FAB при скролле
+        fabSearch.classList.add('active');
+        
+        // Скрываем через 2 секунды после остановки скролла
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+            fabSearch.classList.remove('active');
+        }, 2000);
     });
 
+    // Обработка клика по FAB
+    fabSearch.addEventListener('click', () => {
+        header.classList.remove('header-hidden'); // Открываем шапку, если она скрыта
+        searchInput.focus(); // Ставим курсор в поле поиска
+    });
+
+    // МОДАЛКА ПЕРЕВОРОТА (FLIP)
     const flipOverlay = document.getElementById('flip-modal-overlay');
     const modalTitle = document.getElementById('modal-title');
     const modalDesc = document.getElementById('modal-desc');
@@ -977,40 +1037,6 @@
     const modalImageContainer = document.getElementById('modal-image-container');
     const modalImage = document.getElementById('modal-image');
     const modalImageLink = document.getElementById('modal-image-link');
-    const imgLoader = document.getElementById('img-loader');
-
-    // Функция запроса картинки из Wikipedia (сначала RU, потом EN)
-    async function fetchWikipediaImage(item) {
-        const titlesToTry = [];
-        if (item.titleRu) titlesToTry.push({ lang: 'ru', title: item.titleRu });
-        if (item.titleEn) titlesToTry.push({ lang: 'en', title: item.titleEn });
-
-        for (const t of titlesToTry) {
-            // ДОБАВЛЕН ПАРАМЕТР pilicense=any ДЛЯ ПОЛУЧЕНИЯ НЕСВОБОДНЫХ ИЗОБРАЖЕНИЙ (ОБЛОЖЕК ИГР)
-            const apiUrl = `https://${t.lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages|info&inprop=url&piprop=thumbnail&pithumbsize=500&pilicense=any&titles=${encodeURIComponent(t.title)}&redirects=1&origin=*`;
-            
-            try {
-                const res = await fetch(apiUrl);
-                const data = await res.json();
-                if (data.query && data.query.pages) {
-                    const pages = data.query.pages;
-                    const pageId = Object.keys(pages)[0];
-                    const page = pages[pageId];
-                    
-                    if (page.missing === undefined && page.thumbnail && page.fullurl) {
-                        // ПРИНУДИТЕЛЬНО МЕНЯЕМ http НА https ДЛЯ КАРТИНОК
-                        return { 
-                            imgSrc: page.thumbnail.source.replace('http://', 'https://'), 
-                            wikiUrl: page.fullurl.replace('http://', 'https://') 
-                        };
-                    }
-                }
-            } catch (e) {
-                console.error("Wikipedia API Error:", e);
-            }
-        }
-        return null;
-    }
 
     function openFlipModal(item) {
         modalTitle.textContent = item.titleEn + (item.titleRu ? ` (${item.titleRu})` : '');
@@ -1023,24 +1049,15 @@
             modalLink.style.display = 'none';
         }
 
-        // Показываем контейнер и лоадер перед загрузкой
-        modalImageContainer.style.display = 'flex';
-        imgLoader.style.display = 'block';
-        imgLoader.textContent = 'Загрузка картинки...';
-        modalImageLink.style.display = 'none';
-        
-        // Запрашиваем картинку
-        fetchWikipediaImage(item).then(wikiData => {
-            if (wikiData) {
-                modalImage.src = wikiData.imgSrc;
-                modalImageLink.href = wikiData.wikiUrl;
-                imgLoader.style.display = 'none';
-                modalImageLink.style.display = 'block';
-            } else {
-                // Если картинки нет
-                imgLoader.textContent = 'Нет изображения';
-            }
-        });
+        // Подставляем картинку из столбца N
+        if (item.image) {
+            modalImage.src = item.image;
+            // Если есть ссылка на статью, используем её, иначе просто открываем картинку
+            modalImageLink.href = item.link || item.image; 
+            modalImageContainer.style.display = 'flex';
+        } else {
+            modalImageContainer.style.display = 'none';
+        }
 
         flipOverlay.classList.add('active');
     }
@@ -1050,6 +1067,7 @@
         if (e.target === flipOverlay) flipOverlay.classList.remove('active');
     };
 
+    // МОДАЛКА СОРТИРОВКИ
     const sortOverlay = document.getElementById('sort-overlay');
     const sortSheet = document.getElementById('sort-sheet');
     const openSortBtn = document.getElementById('open-sort-btn');
@@ -1072,6 +1090,7 @@
         closeGenreSheet();
     };
 
+    // СОРТИРОВКА
     document.querySelectorAll('.sheet-btn[data-sort]').forEach(btn => {
         btn.onclick = () => {
             const type = btn.getAttribute('data-sort');
@@ -1107,6 +1126,7 @@
         };
     });
 
+    // МОДАЛКА ФИЛЬТРА «РАЗРАБОТЧИК / СТРАНА»
     const pubCountrySheet = document.getElementById('pub-country-sheet');
 
     function openPubCountrySheet() {
@@ -1162,6 +1182,7 @@
         });
     }
 
+    // МОДАЛКА ФИЛЬТРА «ЖАНРЫ»
     const genreSheet = document.getElementById('genre-sheet');
 
     function openGenreSheet() {
@@ -1211,3 +1232,4 @@
 
 </body>
 </html>
+```
