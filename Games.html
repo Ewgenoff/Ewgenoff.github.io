@@ -989,12 +989,26 @@
         btn.onclick = () => {
             const type = btn.getAttribute('data-sort');
             
+            // Вспомогательная функция для конвертации даты ДД.ММ.ГГГГ в число ГГГГММДД
+            const dateToNum = (dateStr) => {
+                if (!dateStr) return 0;
+                const parts = dateStr.toString().split(/[.,\/]/).map(p => p.trim());
+                if (parts.length === 3) {
+                    const day = parts[0].padStart(2, '0');
+                    const month = parts[1].padStart(2, '0');
+                    const year = parts[2];
+                    return parseInt(`${year}${month}${day}`, 10);
+                }
+                return 0; // Если дата не распознана, кидаем в конец
+            };
+
             gamesData.sort((a, b) => {
                 switch(type) {
                     case 'title':
                         return a.titleEn.localeCompare(b.titleEn);
                     case 'year':
-                        return b.releaseDate.localeCompare(a.releaseDate); // От новой к самой старой
+                        // От новой к самой старой (используем числовое сравнение)
+                        return dateToNum(b.releaseDate) - dateToNum(a.releaseDate);
                     case 'score':
                         return b.scoreNum - a.scoreNum;
                     case 'publisher':
