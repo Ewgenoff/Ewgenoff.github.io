@@ -189,6 +189,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        /* НОВЫЙ СТИЛЬ ДЛЯ КРАСНОЙ КНОПКИ СБРОСА ПРИ СОРТИРОВКЕ */
+        .reset-btn.sorted {
+            background: #ff3b30;
+            color: #ffffff;
         }
 
         .sort-btn {
@@ -459,7 +466,7 @@
         .btn-link { background: var(--accent-blue); color: #fff; }
         .btn-close { background: var(--badge-bg); color: var(--text-primary); }
 
-        /* ОКНО СОРТИРОВКИ И ФИЛЬТРА ИЗДАТЕЛЕЙ В СТИЛЕ IOS */
+        /* ОКНО СОРТИРОВКИ И ФИЛЬТРА РАЗРАБОТЧИКОВ В СТИЛЕ IOS */
         .ios-action-sheet {
             position: fixed;
             bottom: -100%;
@@ -522,7 +529,7 @@
             margin-top: 4px;
         }
 
-        /* Переключатель Издатель / Страна */
+        /* Переключатель Разработчик / Страна */
         .segment-control {
             display: flex;
             background: var(--badge-bg);
@@ -637,7 +644,7 @@
         <button class="sheet-btn" data-sort="title">А-Я</button>
         <button class="sheet-btn" data-sort="year">Год</button>
         <button class="sheet-btn" data-sort="score">Оценка</button>
-        <button class="sheet-btn" data-sort="publisher">Издатель</button>
+        <button class="sheet-btn" data-sort="developer">Разработчик</button>
         <button class="sheet-btn" data-sort="country">Страна</button>
         <button class="sheet-btn" data-sort="voice">Озвучка</button>
         <button class="sheet-btn" data-sort="time">Время</button>
@@ -645,10 +652,10 @@
     <button class="sheet-btn sheet-btn-cancel" id="close-sort-btn">Отмена</button>
 </div>
 
-<!-- Модалка фильтра Издатель / Страна -->
+<!-- Модалка фильтра Разработчик / Страна -->
 <div class="ios-action-sheet" id="pub-country-sheet">
     <div class="segment-control">
-        <button class="segment-btn active" id="seg-pub" onclick="switchPubCountryTab('pub')">Издатель</button>
+        <button class="segment-btn active" id="seg-dev" onclick="switchPubCountryTab('dev')">Разработчик</button>
         <button class="segment-btn" id="seg-country" onclick="switchPubCountryTab('country')">Страна</button>
     </div>
     <div class="filter-list" id="pub-country-list"></div>
@@ -668,10 +675,10 @@
     let gamesData = [];
     let currentFilterText = '';
     let selectedStatusFilter = null;
-    let selectedPublisherFilter = null;
+    let selectedDeveloperFilter = null;
     let selectedCountryFilter = null;
     let selectedGenreFilter = null;
-    let currentPubCountryTab = 'pub';
+    let currentPubCountryTab = 'dev';
 
     // Парсер CSV
     function parseCSV(text) {
@@ -767,12 +774,13 @@
     function resetAllFilters() {
         currentFilterText = '';
         selectedStatusFilter = null;
-        selectedPublisherFilter = null;
+        selectedDeveloperFilter = null;
         selectedCountryFilter = null;
         selectedGenreFilter = null;
         
         document.getElementById('search-input').value = '';
         document.querySelectorAll('.counter-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('reset-btn').classList.remove('sorted'); // Убираем красный цвет
         
         renderCards(gamesData);
     }
@@ -789,7 +797,7 @@
                 const matchSearch = item.titleEn.toLowerCase().includes(term) ||
                                    item.titleRu.toLowerCase().includes(term) ||
                                    item.genre.toLowerCase().includes(term) ||
-                                   item.publisher.toLowerCase().includes(term);
+                                   item.developer.toLowerCase().includes(term);
                 if (!matchSearch) return false;
             }
 
@@ -798,8 +806,8 @@
                 if (getGameStatus(item.statusNorm) !== selectedStatusFilter) return false;
             }
 
-            // Фильтр по издателю
-            if (selectedPublisherFilter && item.publisher !== selectedPublisherFilter) return false;
+            // Фильтр по разработчику
+            if (selectedDeveloperFilter && item.developer !== selectedDeveloperFilter) return false;
 
             // Фильтр по стране
             if (selectedCountryFilter && item.country !== selectedCountryFilter) return false;
@@ -837,7 +845,7 @@
                 timeStr = `🎮 ${formatHours(item.timeMain)}/${formatHours(item.timeFull)}`;
             }
 
-            let pubCountry = [item.publisher, item.country].filter(Boolean).join(' / ');
+            let devCountry = [item.developer, item.country].filter(Boolean).join(' / ');
 
             const card = document.createElement('div');
             card.className = `game-card ${borderClass}`;
@@ -856,7 +864,7 @@
                         ${item.titleRu ? `<div class="title-divider"></div><div class="title-ru">${item.titleRu}</div>` : ''}
                     </div>
                     <div class="mid-col-bottom">
-                        ${pubCountry ? `<span class="ios-pill" onclick="event.stopPropagation(); openPubCountrySheet()">${pubCountry}</span>` : ''}
+                        ${devCountry ? `<span class="ios-pill" onclick="event.stopPropagation(); openPubCountrySheet()">${devCountry}</span>` : ''}
                         ${item.genre ? `<span class="ios-pill genre-pill" onclick="event.stopPropagation(); openGenreSheet()">${item.genre}</span>` : ''}
                     </div>
                 </div>
@@ -896,7 +904,7 @@
                     releaseDate: row[4] || '',
                     scoreNum: parseFloat(row[5]) || 0,
                     scoreText: row[5] || '—',
-                    publisher: row[6] || '',
+                    developer: row[6] || '',
                     country: row[7] || '',
                     voiceover: (row[8] || '').trim().toLowerCase(),
                     genre: row[9] || '',
@@ -1011,8 +1019,8 @@
                         return dateToNum(b.releaseDate) - dateToNum(a.releaseDate);
                     case 'score':
                         return b.scoreNum - a.scoreNum;
-                    case 'publisher':
-                        return a.publisher.localeCompare(b.publisher);
+                    case 'developer':
+                        return a.developer.localeCompare(b.developer);
                     case 'country':
                         return a.country.localeCompare(b.country);
                     case 'voice':
@@ -1024,12 +1032,15 @@
                 }
             });
 
+            // Добавляем красный цвет кнопке Сброс
+            document.getElementById('reset-btn').classList.add('sorted');
+
             renderCards(gamesData);
             closeSortSheet();
         };
     });
 
-    // МОДАЛКА ФИЛЬТРА «ИЗДАТЕЛЬ / СТРАНА»
+    // МОДАЛКА ФИЛЬТРА «РАЗРАБОТЧИК / СТРАНА»
     const pubCountrySheet = document.getElementById('pub-country-sheet');
 
     function openPubCountrySheet() {
@@ -1048,7 +1059,7 @@
 
     function switchPubCountryTab(tab) {
         currentPubCountryTab = tab;
-        document.getElementById('seg-pub').classList.toggle('active', tab === 'pub');
+        document.getElementById('seg-dev').classList.toggle('active', tab === 'dev');
         document.getElementById('seg-country').classList.toggle('active', tab === 'country');
         renderPubCountryList();
     }
@@ -1059,7 +1070,7 @@
 
         const counts = {};
         gamesData.forEach(item => {
-            const val = currentPubCountryTab === 'pub' ? item.publisher : item.country;
+            const val = currentPubCountryTab === 'dev' ? item.developer : item.country;
             if (val) {
                 counts[val] = (counts[val] || 0) + 1;
             }
@@ -1072,12 +1083,12 @@
             btn.className = 'filter-item-btn';
             btn.innerHTML = `${key} <span>(${counts[key]})</span>`;
             btn.onclick = () => {
-                if (currentPubCountryTab === 'pub') {
-                    selectedPublisherFilter = key;
+                if (currentPubCountryTab === 'dev') {
+                    selectedDeveloperFilter = key;
                     selectedCountryFilter = null;
                 } else {
                     selectedCountryFilter = key;
-                    selectedPublisherFilter = null;
+                    selectedDeveloperFilter = null;
                 }
                 renderCards(gamesData);
                 closePubCountrySheet();
