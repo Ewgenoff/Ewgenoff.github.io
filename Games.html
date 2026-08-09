@@ -64,16 +64,19 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
-            padding-top: 130px; /* Отступ под фиксированную шапку */
+            padding-top: 130px;
             padding-bottom: 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
         }
 
         .container {
             width: 100%;
             max-width: 680px;
             padding: 0 10px;
+            flex: 1;
         }
 
         /* АВТОСКРЫВАЮЩАЯСЯ ШАПКА */
@@ -127,6 +130,12 @@
             font-size: 11px;
             font-weight: 600;
             color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .counter-btn.active {
+            box-shadow: 0 0 0 2px var(--accent-blue);
         }
 
         .counter-btn span {
@@ -145,7 +154,7 @@
         .counter-btn.not-played { border-color: rgba(142, 142, 147, 0.4); }
         .counter-btn.not-played span { color: var(--status-not-played); }
 
-        /* Поиск и Сортировка */
+        /* Поиск, Сброс и Сортировка */
         .controls-bar {
             display: flex;
             gap: 8px;
@@ -161,6 +170,18 @@
             font-size: 14px;
             color: var(--text-primary);
             outline: none;
+        }
+
+        .reset-btn {
+            background: var(--badge-bg);
+            color: var(--text-primary);
+            border: none;
+            border-radius: 10px;
+            padding: 0 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
         }
 
         .sort-btn {
@@ -193,7 +214,7 @@
             padding: 10px 12px;
             display: flex;
             gap: 10px;
-            align-items: center;
+            align-items: stretch; /* Растягивание колонок по высоте */
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             cursor: pointer;
             transition: transform 0.15s ease;
@@ -203,7 +224,6 @@
             transform: scale(0.98);
         }
 
-        /* Динамические границы статусов */
         .border-passed { border-color: var(--status-passed) !important; }
         .border-playing { border-color: var(--status-playing) !important; }
         .border-not-played { border-color: var(--status-not-played) !important; }
@@ -212,9 +232,10 @@
         .left-col {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
+            height: 69px; /* Зафиксированная высота под совпадение плашек */
         }
 
         .score-badge, .audio-badge {
@@ -260,13 +281,12 @@
             color: var(--text-primary);
             line-height: 1.2;
             display: -webkit-box;
-            -webkit-line-clamp: 2; /* Ограничение в 2 строки с переносом */
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             word-break: break-word;
         }
 
-        /* Тонкая бледная линия разделения */
         .title-divider {
             height: 1px;
             background-color: var(--line-color);
@@ -302,6 +322,14 @@
             line-height: 1.1;
         }
 
+        .pub-country-pill {
+            cursor: pointer;
+        }
+
+        .pub-country-pill:hover {
+            opacity: 0.8;
+        }
+
         .genre-pill {
             background-color: rgba(0, 122, 255, 0.12);
             color: var(--accent-blue);
@@ -312,9 +340,10 @@
         .right-col {
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            align-items: flex-end; /* Выравнивание по правому краю */
+            justify-content: space-between;
+            align-items: flex-end;
             flex-shrink: 0;
+            height: 69px; /* Строгая синхронизация границ с левой колонкой */
         }
 
         .right-pill {
@@ -323,15 +352,23 @@
             font-size: 10.5px;
             font-weight: 600;
             white-space: nowrap;
-            width: max-content; /* Ширина строго по тексту */
+            width: max-content;
             max-width: 130px;
             text-align: right;
             line-height: 1.2;
+            display: flex;
+            align-items: center;
+            gap: 3px;
         }
 
         .status-passed { color: var(--status-passed); background: var(--status-passed-bg); }
         .status-playing { color: #d97706; background: var(--status-playing-bg); }
-        .status-not-played { color: var(--status-not-played); background: var(--status-not-played-bg); }
+        
+        /* Фикс: Плашка Не играл теперь строго серого цвета */
+        .status-not-played { 
+            color: var(--status-not-played) !important; 
+            background: var(--status-not-played-bg) !important; 
+        }
 
         .time-pill { background-color: var(--badge-bg); color: var(--text-primary); }
         .date-pill { background-color: var(--badge-bg); color: var(--text-secondary); font-size: 10px; }
@@ -341,6 +378,18 @@
             padding: 40px;
             color: var(--text-secondary);
             font-size: 15px;
+        }
+
+        /* ПОДВАЛ */
+        footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding-bottom: 12px;
         }
 
         /* МОДАЛЬНЫЕ ОКНА И АНИМАЦИЯ ПЕРЕВОРОТА */
@@ -364,7 +413,6 @@
             pointer-events: auto;
         }
 
-        /* Эффект переворота 3D */
         .flip-modal {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -419,7 +467,7 @@
         .btn-link { background: var(--accent-blue); color: #fff; }
         .btn-close { background: var(--badge-bg); color: var(--text-primary); }
 
-        /* ОКНО СОРТИРОВКИ В СТИЛЕ IOS */
+        /* ОКНО СОРТИРОВКИ И ФИЛЬТРА ИЗДАТЕЛЕЙ В СТИЛЕ IOS */
         .ios-action-sheet {
             position: fixed;
             bottom: -100%;
@@ -437,7 +485,8 @@
             transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
+            max-height: 80vh;
         }
 
         .ios-action-sheet.active {
@@ -480,6 +529,61 @@
             color: #ff3b30;
             margin-top: 4px;
         }
+
+        /* Переключатель Издатель / Страна */
+        .segment-control {
+            display: flex;
+            background: var(--badge-bg);
+            border-radius: 8px;
+            padding: 2px;
+        }
+
+        .segment-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            cursor: pointer;
+        }
+
+        .segment-btn.active {
+            background: var(--card-bg);
+            color: var(--text-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .filter-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            overflow-y: auto;
+            max-height: 300px;
+            padding-right: 4px;
+        }
+
+        .filter-item-btn {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--badge-bg);
+            border-radius: 8px;
+            border: none;
+            color: var(--text-primary);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .filter-item-btn span {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -489,13 +593,14 @@
     <div class="header-content">
         <!-- Счётчики -->
         <div class="counters-bar">
-            <div class="counter-btn passed">Прошел <span id="count-passed">0</span></div>
-            <div class="counter-btn playing">Играл <span id="count-playing">0</span></div>
-            <div class="counter-btn not-played">Не играл <span id="count-not-played">0</span></div>
+            <div class="counter-btn passed" id="btn-count-passed" onclick="filterByStatus('passed')">Прошел <span id="count-passed">0</span></div>
+            <div class="counter-btn playing" id="btn-count-playing" onclick="filterByStatus('playing')">Играл <span id="count-playing">0</span></div>
+            <div class="counter-btn not-played" id="btn-count-not-played" onclick="filterByStatus('not-played')">Не играл <span id="count-not-played">0</span></div>
         </div>
-        <!-- Поиск и Сортировка -->
+        <!-- Поиск, Сброс и Сортировка -->
         <div class="controls-bar">
             <input type="text" id="search-input" class="search-input" placeholder="Поиск по названию или жанру...">
+            <button class="reset-btn" id="reset-btn" onclick="resetAllFilters()">Сброс</button>
             <button class="sort-btn" id="open-sort-btn">Сортировка</button>
         </div>
     </div>
@@ -506,6 +611,12 @@
         <div class="loading">Загрузка данных...</div>
     </div>
 </div>
+
+<!-- ПОДВАЛ -->
+<footer>
+    <div>Общее кол-во записей: <strong id="total-count">0</strong></div>
+    <div>Версия 1.0 (by Ewgenoff 09.08.2026)</div>
+</footer>
 
 <!-- Модалка описания (Flip Card) -->
 <div class="modal-overlay" id="flip-modal-overlay">
@@ -526,7 +637,6 @@
     <div class="sheet-grid">
         <button class="sheet-btn" data-sort="title">А-Я</button>
         <button class="sheet-btn" data-sort="year">Год</button>
-        <button class="sheet-btn" data-sort="release">Релиз</button>
         <button class="sheet-btn" data-sort="score">Оценка</button>
         <button class="sheet-btn" data-sort="publisher">Издатель</button>
         <button class="sheet-btn" data-sort="country">Страна</button>
@@ -536,11 +646,25 @@
     <button class="sheet-btn sheet-btn-cancel" id="close-sort-btn">Отмена</button>
 </div>
 
+<!-- Модалка фильтра Издатель / Страна -->
+<div class="ios-action-sheet" id="pub-country-sheet">
+    <div class="segment-control">
+        <button class="segment-btn active" id="seg-pub" onclick="switchPubCountryTab('pub')">Издатель</button>
+        <button class="segment-btn" id="seg-country" onclick="switchPubCountryTab('country')">Страна</button>
+    </div>
+    <div class="filter-list" id="pub-country-list"></div>
+    <button class="sheet-btn sheet-btn-cancel" onclick="closePubCountrySheet()">Отмена</button>
+</div>
+
 <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTAaoLfMXIHoBoXTb16tXL_yabaMQThgsWGGrziE5InfpyEf3MIPkVkHD58xCapuR6IPeIRp6lnqLCl/pub?gid=0&single=true&output=csv';
 
     let gamesData = [];
     let currentFilterText = '';
+    let selectedStatusFilter = null;
+    let selectedPublisherFilter = null;
+    let selectedCountryFilter = null;
+    let currentPubCountryTab = 'pub';
 
     // Парсер CSV
     function parseCSV(text) {
@@ -607,6 +731,36 @@
         document.getElementById('count-passed').textContent = passed;
         document.getElementById('count-playing').textContent = playing;
         document.getElementById('count-not-played').textContent = notPlayed;
+        document.getElementById('total-count').textContent = data.length;
+    }
+
+    // Фильтрация по статусу из шапки
+    function filterByStatus(type) {
+        if (selectedStatusFilter === type) {
+            selectedStatusFilter = null;
+        } else {
+            selectedStatusFilter = type;
+        }
+
+        document.querySelectorAll('.counter-btn').forEach(btn => btn.classList.remove('active'));
+        if (selectedStatusFilter) {
+            document.getElementById(`btn-count-${selectedStatusFilter}`).classList.add('active');
+        }
+
+        renderCards(gamesData);
+    }
+
+    // Сброс всех фильтров
+    function resetAllFilters() {
+        currentFilterText = '';
+        selectedStatusFilter = null;
+        selectedPublisherFilter = null;
+        selectedCountryFilter = null;
+        
+        document.getElementById('search-input').value = '';
+        document.querySelectorAll('.counter-btn').forEach(btn => btn.classList.remove('active'));
+        
+        renderCards(gamesData);
     }
 
     // Отрисовка
@@ -615,12 +769,31 @@
         container.innerHTML = '';
 
         const filtered = data.filter(item => {
-            if (!currentFilterText) return true;
-            const term = currentFilterText.toLowerCase();
-            return item.titleEn.toLowerCase().includes(term) ||
-                   item.titleRu.toLowerCase().includes(term) ||
-                   item.genre.toLowerCase().includes(term) ||
-                   item.publisher.toLowerCase().includes(term);
+            // Текстовый поиск
+            if (currentFilterText) {
+                const term = currentFilterText.toLowerCase();
+                const matchSearch = item.titleEn.toLowerCase().includes(term) ||
+                                   item.titleRu.toLowerCase().includes(term) ||
+                                   item.genre.toLowerCase().includes(term) ||
+                                   item.publisher.toLowerCase().includes(term);
+                if (!matchSearch) return false;
+            }
+
+            // Фильтр по статусу
+            if (selectedStatusFilter) {
+                let st = item.statusNorm;
+                if (selectedStatusFilter === 'passed' && !(st.includes('прошел') || st.includes('пройдено') || st.includes('готово'))) return false;
+                if (selectedStatusFilter === 'playing' && !(st.includes('играл') || st.includes('в процессе') || st.includes('играю'))) return false;
+                if (selectedStatusFilter === 'not-played' && (st.includes('прошел') || st.includes('пройдено') || st.includes('готово') || st.includes('играл') || st.includes('в процессе') || st.includes('играю'))) return false;
+            }
+
+            // Фильтр по издателю
+            if (selectedPublisherFilter && item.publisher !== selectedPublisherFilter) return false;
+
+            // Фильтр по стране
+            if (selectedCountryFilter && item.country !== selectedCountryFilter) return false;
+
+            return true;
         });
 
         if (filtered.length === 0) {
@@ -629,7 +802,6 @@
         }
 
         filtered.forEach(item => {
-            // Классы статуса и рамок
             let statusClass = 'status-not-played';
             let borderClass = 'border-not-played';
             
@@ -646,20 +818,19 @@
             if (item.scoreNum > 80) scoreClass = 'score-high';
             else if (item.scoreNum >= 65) scoreClass = 'score-mid';
 
-            // Озвучка (Столбец I / индекс 8)
+            // Озвучка
             let audioBadgeText = item.voiceover.includes('есть') ? 'RUS' : 'ENG';
 
-            // Время
+            // Время с иконкой геймпада
             let timeStr = '';
             if (item.timeMain || item.timeFull) {
-                timeStr = `${formatHours(item.timeMain)}/${formatHours(item.timeFull)}`;
+                timeStr = `🎮 ${formatHours(item.timeMain)}/${formatHours(item.timeFull)}`;
             }
 
             let pubCountry = [item.publisher, item.country].filter(Boolean).join(' / ');
 
             const card = document.createElement('div');
             card.className = `game-card ${borderClass}`;
-            card.onclick = () => openFlipModal(item);
 
             card.innerHTML = `
                 <!-- Левая колонка -->
@@ -669,19 +840,19 @@
                 </div>
 
                 <!-- Центральная колонка -->
-                <div class="mid-col">
+                <div class="mid-col" onclick="openFlipModalByItem('${item.id}')">
                     <div class="titles-block">
                         <div class="title-en">${item.titleEn}</div>
                         ${item.titleRu ? `<div class="title-divider"></div><div class="title-ru">${item.titleRu}</div>` : ''}
                     </div>
                     <div class="mid-col-bottom">
-                        ${pubCountry ? `<span class="ios-pill">${pubCountry}</span>` : ''}
+                        ${pubCountry ? `<span class="ios-pill pub-country-pill" onclick="event.stopPropagation(); openPubCountrySheet()">${pubCountry}</span>` : ''}
                         ${item.genre ? `<span class="ios-pill genre-pill">${item.genre}</span>` : ''}
                     </div>
                 </div>
 
                 <!-- Правая колонка -->
-                <div class="right-col">
+                <div class="right-col" onclick="openFlipModalByItem('${item.id}')">
                     <div class="right-pill ${statusClass}">${item.status || 'Не играл'}</div>
                     ${timeStr ? `<div class="right-pill time-pill">${timeStr}</div>` : ''}
                     ${item.releaseDate ? `<div class="right-pill date-pill">${item.releaseDate}</div>` : ''}
@@ -692,6 +863,11 @@
         });
     }
 
+    function openFlipModalByItem(id) {
+        const item = gamesData.find(g => g.id === id);
+        if (item) openFlipModal(item);
+    }
+
     // Загрузка
     fetch(CSV_URL)
         .then(res => res.text())
@@ -699,9 +875,10 @@
             const parsed = parseCSV(csvText);
             const rows = parsed.slice(1);
 
-            gamesData = rows.map(row => {
+            gamesData = rows.map((row, index) => {
                 if (!row || row.length < 2 || !row[1]) return null;
                 return {
+                    id: 'game_' + index,
                     titleEn: row[1] || 'Без названия',
                     titleRu: row[2] || '',
                     status: (row[3] || '').trim(),
@@ -711,12 +888,12 @@
                     scoreText: row[5] || '—',
                     publisher: row[6] || '',
                     country: row[7] || '',
-                    voiceover: (row[8] || '').trim().toLowerCase(), // Столбец I
+                    voiceover: (row[8] || '').trim().toLowerCase(),
                     genre: row[9] || '',
                     timeMain: row[11] || '',
                     timeFull: row[12] || '',
-                    link: row[14] || '', // Столбец O (индекс 14)
-                    description: row[15] || '' // Столбец P (индекс 15)
+                    link: row[14] || '',
+                    description: row[15] || ''
                 };
             }).filter(Boolean);
 
@@ -774,7 +951,7 @@
         if (e.target === flipOverlay) flipOverlay.classList.remove('active');
     };
 
-    // МОДАЛКА СОРТИРОВКИ (iOS STYLE)
+    // МОДАЛКА СОРТИРОВКИ
     const sortOverlay = document.getElementById('sort-overlay');
     const sortSheet = document.getElementById('sort-sheet');
     const openSortBtn = document.getElementById('open-sort-btn');
@@ -791,7 +968,10 @@
     }
 
     closeSortBtn.onclick = closeSortSheet;
-    sortOverlay.onclick = closeSortSheet;
+    sortOverlay.onclick = () => {
+        closeSortSheet();
+        closePubCountrySheet();
+    };
 
     // СОРТИРОВКА
     document.querySelectorAll('.sheet-btn[data-sort]').forEach(btn => {
@@ -803,8 +983,7 @@
                     case 'title':
                         return a.titleEn.localeCompare(b.titleEn);
                     case 'year':
-                    case 'release':
-                        return b.releaseDate.localeCompare(a.releaseDate);
+                        return b.releaseDate.localeCompare(a.releaseDate); // От новой к самой старой
                     case 'score':
                         return b.scoreNum - a.scoreNum;
                     case 'publisher':
@@ -824,6 +1003,60 @@
             closeSortSheet();
         };
     });
+
+    // МОДАЛКА ФИЛЬТРА «ИЗДАТЕЛЬ / СТРАНА»
+    const pubCountrySheet = document.getElementById('pub-country-sheet');
+
+    function openPubCountrySheet() {
+        sortOverlay.classList.add('active');
+        pubCountrySheet.classList.add('active');
+        renderPubCountryList();
+    }
+
+    function closePubCountrySheet() {
+        pubCountrySheet.classList.remove('active');
+        sortOverlay.classList.remove('active');
+    }
+
+    function switchPubCountryTab(tab) {
+        currentPubCountryTab = tab;
+        document.getElementById('seg-pub').classList.toggle('active', tab === 'pub');
+        document.getElementById('seg-country').classList.toggle('active', tab === 'country');
+        renderPubCountryList();
+    }
+
+    function renderPubCountryList() {
+        const listContainer = document.getElementById('pub-country-list');
+        listContainer.innerHTML = '';
+
+        const counts = {};
+        gamesData.forEach(item => {
+            const val = currentPubCountryTab === 'pub' ? item.publisher : item.country;
+            if (val) {
+                counts[val] = (counts[val] || 0) + 1;
+            }
+        });
+
+        const sortedKeys = Object.keys(counts).sort((a, b) => a.localeCompare(b, 'ru'));
+
+        sortedKeys.forEach(key => {
+            const btn = document.createElement('button');
+            btn.className = 'filter-item-btn';
+            btn.innerHTML = `${key} <span>(${counts[key]})</span>`;
+            btn.onclick = () => {
+                if (currentPubCountryTab === 'pub') {
+                    selectedPublisherFilter = key;
+                    selectedCountryFilter = null;
+                } else {
+                    selectedCountryFilter = key;
+                    selectedPublisherFilter = null;
+                }
+                renderCards(gamesData);
+                closePubCountrySheet();
+            };
+            listContainer.appendChild(btn);
+        });
+    }
 </script>
 
 </body>
