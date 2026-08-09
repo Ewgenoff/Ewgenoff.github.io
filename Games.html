@@ -192,7 +192,6 @@
             transition: all 0.2s ease;
         }
 
-        /* КРАСНАЯ КНОПКА СБРОСА ПРИ СОРТИРОВКЕ ИЛИ ФИЛЬТРАЦИИ */
         .reset-btn.active {
             background: #ff3b30;
             color: #ffffff;
@@ -370,8 +369,6 @@
         .status-not-played { color: var(--status-not-played) !important; background: var(--status-not-played-bg) !important; }
 
         .time-pill { background-color: var(--badge-bg); color: var(--text-primary); }
-        
-        /* ИЗМЕНЕН ЦВЕТ ДАТЫ НА ЧЕРНЫЙ (В ТЕМНОЙ ТЕМЕ БУДЕТ БЕЛЫМ) */
         .date-pill { background-color: var(--badge-bg); color: var(--text-primary); font-size: 10px; }
 
         .loading {
@@ -447,12 +444,25 @@
             border-radius: 12px;
             overflow: hidden;
             background: var(--badge-bg);
-            display: flex;
+            display: none; /* Изначально скрыто */
             align-items: center;
             justify-content: center;
+            position: relative;
         }
 
-        .modal-image-container img {
+        .img-loader {
+            position: absolute;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .modal-image-link {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .modal-image-link img {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -607,7 +617,6 @@
             font-weight: 600;
         }
 
-        /* Микро-адаптация для очень узких экранов */
         @media (max-width: 360px) {
             .reset-btn { padding: 0 10px; font-size: 12px; }
             .sort-btn { padding: 0 10px; font-size: 12px; }
@@ -620,13 +629,11 @@
 <!-- ШАПКА -->
 <header class="sticky-header" id="header">
     <div class="header-content">
-        <!-- Счётчики -->
         <div class="counters-bar">
             <div class="counter-btn passed" id="btn-count-passed" onclick="filterByStatus('passed')">Прошел <span id="count-passed">0</span></div>
             <div class="counter-btn playing" id="btn-count-playing" onclick="filterByStatus('playing')">Играл <span id="count-playing">0</span></div>
             <div class="counter-btn not-played" id="btn-count-not-played" onclick="filterByStatus('not-played')">Не играл <span id="count-not-played">0</span></div>
         </div>
-        <!-- Поиск, Сброс и Сортировка -->
         <div class="controls-bar">
             <input type="text" id="search-input" class="search-input" placeholder="Поиск...">
             <button class="reset-btn" id="reset-btn" onclick="resetAllFilters()">Сброс</button>
@@ -641,7 +648,6 @@
     </div>
 </div>
 
-<!-- ПОДВАЛ -->
 <footer>
     <div>Общее кол-во записей: <strong id="total-count">0</strong></div>
     <div>Версия 1.0 (by Ewgenoff 09.08.2026)</div>
@@ -650,8 +656,9 @@
 <!-- Модалка описания (Flip Card) -->
 <div class="modal-overlay" id="flip-modal-overlay">
     <div class="flip-modal">
-        <div class="modal-image-container" id="modal-image-container" style="display: none;">
-            <a href="#" target="_blank" id="modal-image-link">
+        <div class="modal-image-container" id="modal-image-container">
+            <div class="img-loader" id="img-loader">Загрузка картинки...</div>
+            <a href="#" target="_blank" class="modal-image-link" id="modal-image-link" style="display: none;">
                 <img id="modal-image" src="" alt="Обложка игры">
             </a>
         </div>
@@ -707,9 +714,8 @@
     let selectedCountryFilter = null;
     let selectedGenreFilter = null;
     let currentPubCountryTab = 'dev';
-    let isSorted = false; // Флаг, была ли применена сортировка
+    let isSorted = false;
 
-    // Парсер CSV
     function parseCSV(text) {
         let lines = [];
         let row = [];
@@ -780,11 +786,9 @@
         document.getElementById('total-count').textContent = data.length;
     }
 
-    // Проверка активности фильтров для подсветки кнопки Сброс
     function checkResetButtonState() {
         const hasFilters = currentFilterText || selectedStatusFilter || selectedDeveloperFilter || selectedCountryFilter || selectedGenreFilter;
         const resetBtn = document.getElementById('reset-btn');
-        
         if (hasFilters || isSorted) {
             resetBtn.classList.add('active');
         } else {
@@ -792,7 +796,6 @@
         }
     }
 
-    // Фильтрация по статусу из шапки
     function filterByStatus(type) {
         if (selectedStatusFilter === type) {
             selectedStatusFilter = null;
@@ -808,14 +811,13 @@
         renderCards(gamesData);
     }
 
-    // Сброс всех фильтров
     function resetAllFilters() {
         currentFilterText = '';
         selectedStatusFilter = null;
         selectedDeveloperFilter = null;
         selectedCountryFilter = null;
         selectedGenreFilter = null;
-        isSorted = false; // Сбрасываем флаг сортировки
+        isSorted = false;
         
         document.getElementById('search-input').value = '';
         document.querySelectorAll('.counter-btn').forEach(btn => btn.classList.remove('active'));
@@ -824,12 +826,9 @@
         renderCards(gamesData);
     }
 
-    // Отрисовка карточек
     function renderCards(data) {
         const container = document.getElementById('cards-container');
         container.innerHTML = '';
-        
-        // Обновляем состояние кнопки сброса при каждой отрисовке
         checkResetButtonState();
 
         const filtered = data.filter(item => {
@@ -916,7 +915,6 @@
         if (item) openFlipModal(item);
     }
 
-    // ЗАГРУЗКА ДАННЫХ
     fetch(CSV_URL)
         .then(res => res.text())
         .then(csvText => {
@@ -954,13 +952,11 @@
                 <div class="loading" style="color: #ff3b30;">Ошибка загрузки данных Таблицы</div>`;
         });
 
-    // ПОИСК
     document.getElementById('search-input').addEventListener('input', (e) => {
         currentFilterText = e.target.value;
         renderCards(gamesData);
     });
 
-    // АВТОСКРЫТИЕ ШАПКИ ПРИ СКРОЛЛЕ
     let lastScrollY = window.scrollY;
     const header = document.getElementById('header');
 
@@ -973,7 +969,6 @@
         lastScrollY = window.scrollY;
     });
 
-    // МОДАЛКА ПЕРЕВОРОТА (FLIP)
     const flipOverlay = document.getElementById('flip-modal-overlay');
     const modalTitle = document.getElementById('modal-title');
     const modalDesc = document.getElementById('modal-desc');
@@ -982,6 +977,7 @@
     const modalImageContainer = document.getElementById('modal-image-container');
     const modalImage = document.getElementById('modal-image');
     const modalImageLink = document.getElementById('modal-image-link');
+    const imgLoader = document.getElementById('img-loader');
 
     // Функция запроса картинки из Wikipedia (сначала RU, потом EN)
     async function fetchWikipediaImage(item) {
@@ -990,24 +986,30 @@
         if (item.titleEn) titlesToTry.push({ lang: 'en', title: item.titleEn });
 
         for (const t of titlesToTry) {
-            const apiUrl = `https://${t.lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages|info&inprop=url&piprop=thumbnail&pithumbsize=500&titles=${encodeURIComponent(t.title)}&redirects=1&origin=*`;
+            // ДОБАВЛЕН ПАРАМЕТР pilicense=any ДЛЯ ПОЛУЧЕНИЯ НЕСВОБОДНЫХ ИЗОБРАЖЕНИЙ (ОБЛОЖЕК ИГР)
+            const apiUrl = `https://${t.lang}.wikipedia.org/w/api.php?action=query&format=json&prop=pageimages|info&inprop=url&piprop=thumbnail&pithumbsize=500&pilicense=any&titles=${encodeURIComponent(t.title)}&redirects=1&origin=*`;
             
             try {
                 const res = await fetch(apiUrl);
                 const data = await res.json();
-                const pages = data.query.pages;
-                const pageId = Object.keys(pages)[0];
-                const page = pages[pageId];
-                
-                // Если страница существует и есть картинка
-                if (page.missing === undefined && page.thumbnail && page.fullurl) {
-                    return { imgSrc: page.thumbnail.source, wikiUrl: page.fullurl };
+                if (data.query && data.query.pages) {
+                    const pages = data.query.pages;
+                    const pageId = Object.keys(pages)[0];
+                    const page = pages[pageId];
+                    
+                    if (page.missing === undefined && page.thumbnail && page.fullurl) {
+                        // ПРИНУДИТЕЛЬНО МЕНЯЕМ http НА https ДЛЯ КАРТИНОК
+                        return { 
+                            imgSrc: page.thumbnail.source.replace('http://', 'https://'), 
+                            wikiUrl: page.fullurl.replace('http://', 'https://') 
+                        };
+                    }
                 }
             } catch (e) {
                 console.error("Wikipedia API Error:", e);
             }
         }
-        return null; // Если ничего не найдено
+        return null;
     }
 
     function openFlipModal(item) {
@@ -1021,15 +1023,22 @@
             modalLink.style.display = 'none';
         }
 
-        // Скрываем контейнер картинки перед загрузкой
-        modalImageContainer.style.display = 'none';
+        // Показываем контейнер и лоадер перед загрузкой
+        modalImageContainer.style.display = 'flex';
+        imgLoader.style.display = 'block';
+        imgLoader.textContent = 'Загрузка картинки...';
+        modalImageLink.style.display = 'none';
         
         // Запрашиваем картинку
         fetchWikipediaImage(item).then(wikiData => {
             if (wikiData) {
                 modalImage.src = wikiData.imgSrc;
                 modalImageLink.href = wikiData.wikiUrl;
-                modalImageContainer.style.display = 'block';
+                imgLoader.style.display = 'none';
+                modalImageLink.style.display = 'block';
+            } else {
+                // Если картинки нет
+                imgLoader.textContent = 'Нет изображения';
             }
         });
 
@@ -1041,7 +1050,6 @@
         if (e.target === flipOverlay) flipOverlay.classList.remove('active');
     };
 
-    // МОДАЛКА СОРТИРОВКИ
     const sortOverlay = document.getElementById('sort-overlay');
     const sortSheet = document.getElementById('sort-sheet');
     const openSortBtn = document.getElementById('open-sort-btn');
@@ -1064,11 +1072,10 @@
         closeGenreSheet();
     };
 
-    // СОРТИРОВКА
     document.querySelectorAll('.sheet-btn[data-sort]').forEach(btn => {
         btn.onclick = () => {
             const type = btn.getAttribute('data-sort');
-            isSorted = true; // Устанавливаем флаг, что сортировка применена
+            isSorted = true;
             
             const dateToNum = (dateStr) => {
                 if (!dateStr) return 0;
@@ -1100,7 +1107,6 @@
         };
     });
 
-    // МОДАЛКА ФИЛЬТРА «РАЗРАБОТЧИК / СТРАНА»
     const pubCountrySheet = document.getElementById('pub-country-sheet');
 
     function openPubCountrySheet() {
@@ -1156,7 +1162,6 @@
         });
     }
 
-    // МОДАЛКА ФИЛЬТРА «ЖАНРЫ»
     const genreSheet = document.getElementById('genre-sheet');
 
     function openGenreSheet() {
