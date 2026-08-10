@@ -6,7 +6,7 @@
     <title>Карточки игр</title>
     <style>
         :root {
-            /* Тёмная тема по умолчанию для всех устройств */
+            /* Тёмная тема по умолчанию */
             --bg-color: #000000;
             --card-bg: rgba(28, 28, 30, 0.9);
             --card-border: rgba(84, 84, 88, 0.35);
@@ -32,6 +32,37 @@
             --badge-text: #d1d1d6;
             --accent-blue: #0a84ff;
             --line-color: rgba(255, 255, 255, 0.15);
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+
+        /* Светлая тема */
+        [data-theme="light"] {
+            --bg-color: #f2f2f7;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(60, 60, 67, 0.18);
+            --text-primary: #000000;
+            --text-secondary: #6c6c70;
+            --text-muted: #8e8e93;
+            
+            --status-passed: #248a3d;
+            --status-passed-bg: rgba(52, 199, 89, 0.15);
+            --status-playing: #b45309;
+            --status-playing-bg: rgba(255, 204, 0, 0.25);
+            --status-not-played: #6c6c70;
+            --status-not-played-bg: rgba(142, 142, 147, 0.18);
+            
+            --score-high: #248a3d;
+            --score-high-bg: rgba(52, 199, 89, 0.15);
+            --score-mid: #c2410c;
+            --score-mid-bg: rgba(255, 149, 0, 0.15);
+            --score-low: #d97706;
+            --score-low-bg: rgba(255, 59, 48, 0.15);
+
+            --badge-bg: #e5e5ea;
+            --badge-text: #1c1c1e;
+            --accent-blue: #007aff;
+            --line-color: rgba(60, 60, 67, 0.12);
+            --shadow-color: rgba(0, 0, 0, 0.1);
         }
 
         * {
@@ -51,6 +82,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -71,8 +103,8 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             padding: 10px 16px;
-            transition: transform 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            box-shadow: 0 4px 12px var(--shadow-color);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -131,12 +163,12 @@
         .counter-btn.passed span { color: var(--status-passed); }
 
         .counter-btn.playing { border-color: rgba(255, 204, 0, 0.5); }
-        .counter-btn.playing span { color: #d97706; }
+        .counter-btn.playing span { color: var(--status-playing); }
 
         .counter-btn.not-played { border-color: rgba(142, 142, 147, 0.4); }
         .counter-btn.not-played span { color: var(--status-not-played); }
 
-        /* Поиск, Сброс и Сортировка */
+        /* Поиск, Переключатель темы, Сброс и Сортировка */
         .controls-bar {
             display: flex;
             gap: 8px;
@@ -153,6 +185,21 @@
             font-size: 14px;
             color: var(--text-primary);
             outline: none;
+        }
+
+        .theme-toggle-btn {
+            background: var(--badge-bg);
+            border: none;
+            border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            flex-shrink: 0;
+            transition: all 0.2s ease;
         }
 
         .reset-btn, .sort-btn {
@@ -202,9 +249,9 @@
             display: flex;
             gap: 10px;
             align-items: stretch;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 2px 8px var(--shadow-color);
             cursor: pointer;
-            transition: transform 0.15s ease;
+            transition: transform 0.15s ease, background-color 0.3s ease;
         }
 
         .game-card:active {
@@ -337,12 +384,6 @@
             opacity: 0.8;
         }
 
-        .genre-pill {
-            background-color: rgba(0, 122, 255, 0.12);
-            color: var(--accent-blue);
-            font-weight: 600;
-        }
-
         /* Правая колонка */
         .right-col {
             display: flex;
@@ -369,7 +410,7 @@
         }
 
         .status-passed { color: var(--status-passed); background: var(--status-passed-bg); }
-        .status-playing { color: #d97706; background: var(--status-playing-bg); }
+        .status-playing { color: var(--status-playing); background: var(--status-playing-bg); }
         .status-not-played { color: var(--status-not-played) !important; background: var(--status-not-played-bg) !important; }
 
         .time-pill { background-color: var(--badge-bg); color: var(--text-primary); }
@@ -408,6 +449,7 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
+            touch-action: pan-y;
         }
 
         .modal-overlay.active {
@@ -422,13 +464,14 @@
             max-width: 440px;
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px var(--shadow-color);
             transform: rotateY(90deg) scale(0.8);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             backface-visibility: hidden;
             max-height: 90vh;
             overflow-y: auto;
-            cursor: pointer; /* Указываем, что карточка кликабельна для закрытия */
+            cursor: pointer;
+            user-select: none;
         }
 
         .modal-overlay.active .flip-modal {
@@ -503,7 +546,7 @@
             border: none;
             border-radius: 50%;
             color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 12px var(--shadow-color);
             cursor: pointer;
             z-index: 90;
             display: flex;
@@ -539,7 +582,7 @@
             -webkit-backdrop-filter: blur(20px);
             border-radius: 16px;
             padding: 12px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 -4px 20px var(--shadow-color);
             z-index: 300;
             transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
             display: flex;
@@ -659,6 +702,7 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
             cursor: pointer;
+            touch-action: pan-y;
         }
 
         .logo-modal-overlay.active {
@@ -673,6 +717,7 @@
             border-radius: 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
             transition: transform 0.3s ease;
+            user-select: none;
         }
 
         @media (max-width: 360px) {
@@ -689,11 +734,12 @@
     <div class="header-content">
         <div class="counters-bar">
             <div class="counter-btn passed" id="btn-count-passed" onclick="filterByStatus('passed')">Прошел <span id="count-passed">0</span></div>
-            <div class="counter-btn playing" id="btn-count-playing" onclick="filterByStatus('playing')">Играл <span id="count-playing">0</span></div>
-            <div class="counter-btn not-played" id="btn-count-not-played" onclick="filterByStatus('not-played')">Не играл <span id="count-not-played">0</span></div>
+            <div class="counter-btn playing" id="btn-count-playing" onclick="filterByStatus('playing')">Не закончил <span id="count-playing">0</span></div>
+            <div class="counter-btn not-played" id="btn-count-not-played" onclick="filterByStatus('not-played')">В планах <span id="count-not-played">0</span></div>
         </div>
         <div class="controls-bar">
             <input type="text" id="search-input" class="search-input" placeholder="Поиск...">
+            <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Смена темы">☀️</button>
             <button class="reset-btn" id="reset-btn" onclick="resetAllFilters()">Сброс</button>
             <button class="sort-btn" id="open-sort-btn">Сорт.</button>
         </div>
@@ -747,12 +793,12 @@
     <div class="sheet-title">Сортировка игр</div>
     <div class="sheet-grid">
         <button class="sheet-btn" data-sort="title">А-Я</button>
-        <button class="sheet-btn" data-sort="year">Год</button>
+        <button class="sheet-btn" data-sort="year">Дата релиза (PC)</button>
         <button class="sheet-btn" data-sort="score">Оценка</button>
         <button class="sheet-btn" data-sort="developer">Разработчик</button>
         <button class="sheet-btn" data-sort="country">Страна</button>
         <button class="sheet-btn" data-sort="voice">Озвучка</button>
-        <button class="sheet-btn" data-sort="time">Время</button>
+        <button class="sheet-btn" data-sort="time">Время прохождения</button>
     </div>
     <button class="sheet-btn sheet-btn-cancel" id="close-sort-btn">Отмена</button>
 </div>
@@ -778,6 +824,10 @@
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTAaoLfMXIHoBoXTb16tXL_yabaMQThgsWGGrziE5InfpyEf3MIPkVkHD58xCapuR6IPeIRp6lnqLCl/pub?gid=0&single=true&output=csv';
 
     let gamesData = [];
+    let filteredGamesData = [];
+    let currentModalIndex = -1;
+    let currentLogoModalIndex = -1;
+
     let currentFilterText = '';
     let selectedStatusFilter = null;
     let selectedDeveloperFilter = null;
@@ -785,6 +835,19 @@
     let selectedGenreFilter = null;
     let currentPubCountryTab = 'dev';
     let isSorted = false;
+
+    // СМЕНА ТЕМЫ
+    function toggleTheme() {
+        const body = document.documentElement;
+        const btn = document.getElementById('theme-toggle-btn');
+        if (body.getAttribute('data-theme') === 'light') {
+            body.removeAttribute('data-theme');
+            btn.textContent = '☀️';
+        } else {
+            body.setAttribute('data-theme', 'light');
+            btn.textContent = '🌙';
+        }
+    }
 
     function parseCSV(text) {
         let lines = [];
@@ -901,7 +964,7 @@
         container.innerHTML = '';
         checkResetButtonState();
 
-        const filtered = data.filter(item => {
+        filteredGamesData = data.filter(item => {
             if (currentFilterText) {
                 const term = currentFilterText.toLowerCase();
                 const matchSearch = item.titleEn.toLowerCase().includes(term) ||
@@ -926,12 +989,12 @@
             return true;
         });
 
-        if (filtered.length === 0) {
+        if (filteredGamesData.length === 0) {
             container.innerHTML = `<div class="loading">Ничего не найдено</div>`;
             return;
         }
 
-        filtered.forEach(item => {
+        filteredGamesData.forEach((item, index) => {
             const status = getGameStatus(item.statusNorm);
             let statusClass = `status-${status}`;
             let borderClass = `border-${status}`;
@@ -959,23 +1022,23 @@
                         <div class="combined-flag">🔈 ${flagEmoji}</div>
                     </div>
                     <div class="game-logo-container">
-                        ${item.logo ? `<img src="${item.logo}" alt="Logo" class="game-logo" loading="lazy" onclick="event.stopPropagation(); openLogoModal('${item.logo}')">` : ''}
+                        ${item.logo ? `<img src="${item.logo}" alt="Logo" class="game-logo" loading="lazy" onclick="event.stopPropagation(); openLogoModalByIndex(${index})">` : ''}
                     </div>
                 </div>
 
-                <div class="mid-col" onclick="openFlipModalByItem('${item.id}')">
+                <div class="mid-col" onclick="openFlipModalByIndex(${index})">
                     <div class="titles-block">
                         <div class="title-en">${item.titleEn}</div>
                         ${item.titleRu ? `<div class="title-divider"></div><div class="title-ru">${item.titleRu}</div>` : ''}
                     </div>
                     <div class="mid-col-bottom">
                         ${devCountry ? `<span class="ios-pill" onclick="event.stopPropagation(); openPubCountrySheet()">${devCountry}</span>` : ''}
-                        ${item.genre ? `<span class="ios-pill genre-pill" onclick="event.stopPropagation(); openGenreSheet()">${item.genre}</span>` : ''}
+                        ${item.genre ? `<span class="ios-pill" onclick="event.stopPropagation(); openGenreSheet()">${item.genre}</span>` : ''}
                     </div>
                 </div>
 
-                <div class="right-col" onclick="openFlipModalByItem('${item.id}')">
-                    <div class="right-pill ${statusClass}">${item.status || 'Не играл'}</div>
+                <div class="right-col" onclick="openFlipModalByIndex(${index})">
+                    <div class="right-pill ${statusClass}">${item.status || 'В планах'}</div>
                     ${timeStr ? `<div class="right-pill time-pill">${timeStr}</div>` : ''}
                     ${item.releaseDate ? `<div class="right-pill date-pill">${item.releaseDate}</div>` : ''}
                 </div>
@@ -985,9 +1048,16 @@
         });
     }
 
-    function openFlipModalByItem(id) {
-        const item = gamesData.find(g => g.id === id);
+    function openFlipModalByIndex(index) {
+        currentModalIndex = index;
+        const item = filteredGamesData[index];
         if (item) openFlipModal(item);
+    }
+
+    function openLogoModalByIndex(index) {
+        currentLogoModalIndex = index;
+        const item = filteredGamesData[index];
+        if (item && item.logo) openLogoModal(item.logo);
     }
 
     // ЗАГРУЗКА ДАННЫХ
@@ -1065,7 +1135,7 @@
         searchInput.focus();
     });
 
-    // МОДАЛКА ПЕРЕВОРОТА (FLIP) И КЛОЗ ПО КЛИКУ
+    // МОДАЛКА ПЕРЕВОРОТА (FLIP) И СВАЙП КАРТОЧЕК
     const flipOverlay = document.getElementById('flip-modal-overlay');
     const flipModalCard = document.getElementById('flip-modal-card');
     const modalDesc = document.getElementById('modal-desc');
@@ -1113,17 +1183,51 @@
 
     flipOverlay.onclick = () => closeFlipModal();
 
-    // Закрытие при клике в любое место карточки, КРОМЕ ссылок и кнопок
+    let cardStartX = 0, cardEndX = 0;
+    flipOverlay.addEventListener('touchstart', (e) => {
+        cardStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    flipOverlay.addEventListener('touchend', (e) => {
+        cardEndX = e.changedTouches[0].screenX;
+        handleCardSwipe();
+    }, false);
+
+    flipModalCard.addEventListener('mousedown', (e) => {
+        cardStartX = e.clientX;
+    });
+
+    flipModalCard.addEventListener('mouseup', (e) => {
+        cardEndX = e.clientX;
+        handleCardSwipe();
+    });
+
+    function handleCardSwipe() {
+        const threshold = 50;
+        if (cardEndX < cardStartX - threshold) {
+            // Свайп влево -> следующая карточка
+            if (currentModalIndex < filteredGamesData.length - 1) {
+                openFlipModalByIndex(currentModalIndex + 1);
+            }
+        }
+        if (cardEndX > cardStartX + threshold) {
+            // Свайп вправо -> предыдущая карточка
+            if (currentModalIndex > 0) {
+                openFlipModalByIndex(currentModalIndex - 1);
+            }
+        }
+    }
+
     flipModalCard.onclick = (e) => {
         const isInteractive = e.target.closest('a, button');
-        if (!isInteractive) {
+        if (!isInteractive && Math.abs(cardEndX - cardStartX) < 10) {
             closeFlipModal();
         } else {
             e.stopPropagation();
         }
     };
 
-    // МОДАЛКА ПОЛНОЭКРАННОГО ЛОГОТИПА
+    // МОДАЛКА ПОЛНОЭКРАННОГО ЛОГОТИПА И СВАЙП ЛОГОТИПОВ
     const logoOverlay = document.getElementById('logo-modal-overlay');
     const logoImg = document.getElementById('logo-modal-img');
 
@@ -1132,9 +1236,48 @@
         logoOverlay.classList.add('active');
     }
 
-    logoOverlay.onclick = () => {
-        logoOverlay.classList.remove('active');
-    };
+    let logoStartX = 0, logoEndX = 0;
+    logoOverlay.addEventListener('touchstart', (e) => {
+        logoStartX = e.changedTouches[0].screenX;
+    }, false);
+
+    logoOverlay.addEventListener('touchend', (e) => {
+        logoEndX = e.changedTouches[0].screenX;
+        handleLogoSwipe();
+    }, false);
+
+    logoOverlay.addEventListener('mousedown', (e) => {
+        logoStartX = e.clientX;
+    });
+
+    logoOverlay.addEventListener('mouseup', (e) => {
+        logoEndX = e.clientX;
+        handleLogoSwipe();
+    });
+
+    function handleLogoSwipe() {
+        const threshold = 50;
+        if (logoEndX < logoStartX - threshold) {
+            // Влево -> Следующий логотип
+            findNextLogo(1);
+        } else if (logoEndX > logoStartX + threshold) {
+            // Вправо -> Предыдущий логотип
+            findNextLogo(-1);
+        } else {
+            logoOverlay.classList.remove('active');
+        }
+    }
+
+    function findNextLogo(direction) {
+        let idx = currentLogoModalIndex + direction;
+        while (idx >= 0 && idx < filteredGamesData.length) {
+            if (filteredGamesData[idx].logo) {
+                openLogoModalByIndex(idx);
+                return;
+            }
+            idx += direction;
+        }
+    }
 
     // МОДАЛКА СОРТИРОВКИ
     const sortOverlay = document.getElementById('sort-overlay');
