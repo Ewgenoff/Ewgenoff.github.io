@@ -33,6 +33,12 @@
             --accent-blue: #0a84ff;
             --line-color: rgba(255, 255, 255, 0.15);
             --shadow-color: rgba(0, 0, 0, 0.5);
+
+            /* Новые стили плашек */
+            --genre-bg: #007aff;
+            --genre-text: #ffffff;
+            --dev-bg: #af52de;
+            --dev-text: #ffffff;
         }
 
         /* Светлая тема */
@@ -63,6 +69,11 @@
             --accent-blue: #007aff;
             --line-color: rgba(60, 60, 67, 0.12);
             --shadow-color: rgba(0, 0, 0, 0.1);
+
+            --genre-bg: #007aff;
+            --genre-text: #ffffff;
+            --dev-bg: #af52de;
+            --dev-text: #ffffff;
         }
 
         * {
@@ -371,17 +382,26 @@
 
         .ios-pill {
             font-size: 10.5px;
-            font-weight: 500;
+            font-weight: 600;
             padding: 3px 6px;
             border-radius: 6px;
-            background-color: var(--badge-bg);
-            color: var(--badge-text);
             line-height: 1.1;
             cursor: pointer;
         }
 
         .ios-pill:hover {
-            opacity: 0.8;
+            opacity: 0.85;
+        }
+
+        /* Стилизация синей и фиолетовой плашек */
+        .dev-pill {
+            background-color: var(--dev-bg);
+            color: var(--dev-text);
+        }
+
+        .genre-pill {
+            background-color: var(--genre-bg);
+            color: var(--genre-text);
         }
 
         /* Правая колонка */
@@ -466,7 +486,7 @@
             padding: 20px;
             box-shadow: 0 10px 30px var(--shadow-color);
             transform: rotateY(90deg) scale(0.8);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease;
             backface-visibility: hidden;
             max-height: 90vh;
             overflow-y: auto;
@@ -476,6 +496,26 @@
 
         .modal-overlay.active .flip-modal {
             transform: rotateY(0deg) scale(1);
+            opacity: 1;
+        }
+
+        /* АНИМАЦИИ iOS СВАЙПА ДЛЯ КАРТОЧЕК */
+        .flip-modal.slide-left {
+            animation: iosSlideLeft 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .flip-modal.slide-right {
+            animation: iosSlideRight 0.28s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        @keyframes iosSlideLeft {
+            0% { transform: translateX(60px) scale(0.95); opacity: 0.3; }
+            100% { transform: translateX(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes iosSlideRight {
+            0% { transform: translateX(-60px) scale(0.95); opacity: 0.3; }
+            100% { transform: translateX(0) scale(1); opacity: 1; }
         }
 
         /* КАРТИНКА ИЗ ТАБЛИЦЫ */
@@ -1032,8 +1072,8 @@
                         ${item.titleRu ? `<div class="title-divider"></div><div class="title-ru">${item.titleRu}</div>` : ''}
                     </div>
                     <div class="mid-col-bottom">
-                        ${devCountry ? `<span class="ios-pill" onclick="event.stopPropagation(); openPubCountrySheet()">${devCountry}</span>` : ''}
-                        ${item.genre ? `<span class="ios-pill" onclick="event.stopPropagation(); openGenreSheet()">${item.genre}</span>` : ''}
+                        ${devCountry ? `<span class="ios-pill dev-pill" onclick="event.stopPropagation(); openPubCountrySheet()">${devCountry}</span>` : ''}
+                        ${item.genre ? `<span class="ios-pill genre-pill" onclick="event.stopPropagation(); openGenreSheet()">${item.genre}</span>` : ''}
                     </div>
                 </div>
 
@@ -1048,10 +1088,10 @@
         });
     }
 
-    function openFlipModalByIndex(index) {
+    function openFlipModalByIndex(index, animClass = '') {
         currentModalIndex = index;
         const item = filteredGamesData[index];
-        if (item) openFlipModal(item);
+        if (item) openFlipModal(item, animClass);
     }
 
     function openLogoModalByIndex(index) {
@@ -1145,7 +1185,7 @@
     const modalImage = document.getElementById('modal-image');
     const modalWikiLink = document.getElementById('modal-wiki-link');
 
-    function openFlipModal(item) {
+    function openFlipModal(item, animClass = '') {
         modalDesc.textContent = item.description || 'Описание не заполнено.';
         
         if (item.link) {
@@ -1169,11 +1209,18 @@
             modalImageContainer.style.display = 'none';
         }
 
+        flipModalCard.classList.remove('slide-left', 'slide-right');
+        if (animClass) {
+            void flipModalCard.offsetWidth; // Триггер reflow для перезапуска анимации
+            flipModalCard.classList.add(animClass);
+        }
+
         flipOverlay.classList.add('active');
     }
 
     function closeFlipModal() {
         flipOverlay.classList.remove('active');
+        flipModalCard.classList.remove('slide-left', 'slide-right');
     }
 
     modalClose.onclick = (e) => {
@@ -1205,15 +1252,15 @@
     function handleCardSwipe() {
         const threshold = 50;
         if (cardEndX < cardStartX - threshold) {
-            // Свайп влево -> следующая карточка
+            // Свайп влево -> следующая карточка (анимация захода справа налево)
             if (currentModalIndex < filteredGamesData.length - 1) {
-                openFlipModalByIndex(currentModalIndex + 1);
+                openFlipModalByIndex(currentModalIndex + 1, 'slide-left');
             }
         }
         if (cardEndX > cardStartX + threshold) {
-            // Свайп вправо -> предыдущая карточка
+            // Свайп вправо -> предыдущая карточка (анимация захода слева направо)
             if (currentModalIndex > 0) {
-                openFlipModalByIndex(currentModalIndex - 1);
+                openFlipModalByIndex(currentModalIndex - 1, 'slide-right');
             }
         }
     }
@@ -1227,7 +1274,7 @@
         }
     };
 
-    // МОДАЛКА ПОЛНОЭКРАННОГО ЛОГОТИПА И СВАЙП ЛОГОТИПОВ
+    // МОДАЛКА ПОЛНОЭКРАННОГО ЛОГОТИПА И СВАЙП ЛОГОТИПОВ (БЕЗ АНИМАЦИИ СВАЙПА)
     const logoOverlay = document.getElementById('logo-modal-overlay');
     const logoImg = document.getElementById('logo-modal-img');
 
