@@ -6,20 +6,19 @@
     <title>Карточки игр</title>
     <style>
         :root {
-            /* Тёмная тема по умолчанию */
-            --bg-color: #000000;
-            --card-bg: rgba(28, 28, 30, 0.9);
-            --card-border: rgba(84, 84, 88, 0.35);
-            --text-primary: #ffffff;
-            --text-secondary: #98989d;
-            --text-muted: #636366;
+            --bg-color: #f2f2f7;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(60, 60, 67, 0.12);
+            --text-primary: #000000;
+            --text-secondary: #8e8e93;
+            --text-muted: #aeaeb2;
             
             --status-passed: #34c759;
-            --status-passed-bg: rgba(52, 199, 89, 0.22);
+            --status-passed-bg: rgba(52, 199, 89, 0.15);
             --status-playing: #ffcc00;
-            --status-playing-bg: rgba(255, 204, 0, 0.22);
+            --status-playing-bg: rgba(255, 204, 0, 0.18);
             --status-not-played: #8e8e93;
-            --status-not-played-bg: rgba(142, 142, 147, 0.22);
+            --status-not-played-bg: rgba(142, 142, 147, 0.15);
             
             --score-high: #34c759;
             --score-high-bg: rgba(52, 199, 89, 0.12);
@@ -28,52 +27,30 @@
             --score-low: #ff3b30;
             --score-low-bg: rgba(255, 59, 48, 0.12);
 
-            --badge-bg: #2c2c2e;
-            --badge-text: #d1d1d6;
-            --accent-blue: #0a84ff;
-            --line-color: rgba(255, 255, 255, 0.15);
-            --shadow-color: rgba(0, 0, 0, 0.5);
-
-            /* Новые стили плашек */
-            --genre-bg: #007aff;
-            --genre-text: #ffffff;
-            --dev-bg: #af52de;
-            --dev-text: #ffffff;
+            --badge-bg: #e5e5ea;
+            --badge-text: #3a3a3c;
+            --accent-blue: #007aff;
+            --line-color: rgba(60, 60, 67, 0.15);
         }
 
-        /* Светлая тема */
-        [data-theme="light"] {
-            --bg-color: #f2f2f7;
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --card-border: rgba(60, 60, 67, 0.18);
-            --text-primary: #000000;
-            --text-secondary: #6c6c70;
-            --text-muted: #8e8e93;
-            
-            --status-passed: #248a3d;
-            --status-passed-bg: rgba(52, 199, 89, 0.15);
-            --status-playing: #b45309;
-            --status-playing-bg: rgba(255, 204, 0, 0.25);
-            --status-not-played: #6c6c70;
-            --status-not-played-bg: rgba(142, 142, 147, 0.18);
-            
-            --score-high: #248a3d;
-            --score-high-bg: rgba(52, 199, 89, 0.15);
-            --score-mid: #c2410c;
-            --score-mid-bg: rgba(255, 149, 0, 0.15);
-            --score-low: #d97706;
-            --score-low-bg: rgba(255, 59, 48, 0.15);
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --card-bg: rgba(28, 28, 30, 0.9);
+                --card-border: rgba(84, 84, 88, 0.35);
+                --text-primary: #ffffff;
+                --text-secondary: #98989d;
+                --text-muted: #636366;
+                
+                --badge-bg: #2c2c2e;
+                --badge-text: #d1d1d6;
 
-            --badge-bg: #e5e5ea;
-            --badge-text: #1c1c1e;
-            --accent-blue: #007aff;
-            --line-color: rgba(60, 60, 67, 0.12);
-            --shadow-color: rgba(0, 0, 0, 0.1);
-
-            --genre-bg: #007aff;
-            --genre-text: #ffffff;
-            --dev-bg: #af52de;
-            --dev-text: #ffffff;
+                --status-passed-bg: rgba(52, 199, 89, 0.22);
+                --status-playing-bg: rgba(255, 204, 0, 0.22);
+                --status-not-played-bg: rgba(142, 142, 147, 0.22);
+                --accent-blue: #0a84ff;
+                --line-color: rgba(255, 255, 255, 0.15);
+            }
         }
 
         * {
@@ -93,7 +70,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
         }
 
         .container {
@@ -114,8 +91,8 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             padding: 10px 16px;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-            box-shadow: 0 4px 12px var(--shadow-color);
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -174,12 +151,12 @@
         .counter-btn.passed span { color: var(--status-passed); }
 
         .counter-btn.playing { border-color: rgba(255, 204, 0, 0.5); }
-        .counter-btn.playing span { color: var(--status-playing); }
+        .counter-btn.playing span { color: #d97706; }
 
         .counter-btn.not-played { border-color: rgba(142, 142, 147, 0.4); }
         .counter-btn.not-played span { color: var(--status-not-played); }
 
-        /* Поиск, Переключатель темы, Сброс и Сортировка */
+        /* Поиск, Сброс и Сортировка */
         .controls-bar {
             display: flex;
             gap: 8px;
@@ -196,21 +173,6 @@
             font-size: 14px;
             color: var(--text-primary);
             outline: none;
-        }
-
-        .theme-toggle-btn {
-            background: var(--badge-bg);
-            border: none;
-            border-radius: 10px;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 16px;
-            flex-shrink: 0;
-            transition: all 0.2s ease;
         }
 
         .reset-btn, .sort-btn {
@@ -246,9 +208,10 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            position: relative;
         }
 
-        /* КАРТОЧКА ИГРЫ */
+        /* КАРТОЧКА ГЕЙМА */
         .game-card {
             background-color: var(--card-bg);
             backdrop-filter: blur(20px);
@@ -260,13 +223,11 @@
             display: flex;
             gap: 10px;
             align-items: stretch;
-            box-shadow: 0 2px 8px var(--shadow-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             cursor: pointer;
-            transition: transform 0.15s ease, background-color 0.3s ease;
-        }
-
-        .game-card:active {
-            transform: scale(0.98);
+            user-select: none;
+            touch-action: pan-y;
+            will-change: transform, opacity;
         }
 
         .border-passed { border-color: var(--status-passed) !important; }
@@ -280,52 +241,29 @@
             justify-content: space-between;
             align-items: center;
             flex-shrink: 0;
-            width: 48px;
             height: 69px;
         }
 
-        /* Объединенная плашка Оценки и Флага */
-        .combined-badge {
+        .score-badge, .audio-badge {
             width: 48px;
-            padding: 2px 4px;
-            border-radius: 6px;
+            height: 32px;
+            border-radius: 8px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 1px;
-        }
-
-        .combined-score {
-            font-size: 11.5px;
-            font-weight: 800;
-            line-height: 1;
-        }
-
-        .combined-flag {
-            font-size: 11px;
-            line-height: 1;
+            font-size: 13px;
+            font-weight: 700;
         }
 
         .score-high { color: var(--score-high); background: var(--score-high-bg); }
         .score-mid { color: var(--score-mid); background: var(--score-mid-bg); }
         .score-low { color: var(--score-low); background: var(--score-low-bg); }
 
-        /* Логотип игры */
-        .game-logo-container {
-            width: 48px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .game-logo {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-            display: block;
-            cursor: pointer;
+        .audio-badge {
+            background-color: var(--badge-bg);
+            color: var(--badge-text);
+            font-size: 18px; 
+            font-weight: 600;
         }
 
         /* Центральная колонка */
@@ -380,28 +318,34 @@
             flex-wrap: wrap;
         }
 
+        /* Обновленное приглушенное оформление плашек Разработчик/Страна и Жанр */
         .ios-pill {
             font-size: 10.5px;
-            font-weight: 600;
+            font-weight: 500;
             padding: 3px 6px;
             border-radius: 6px;
             line-height: 1.1;
             cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+
+        .dev-pill,
+        .genre-pill {
+            background-color: rgba(0, 122, 255, 0.12);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .dev-pill,
+            .genre-pill {
+                background-color: rgba(10, 132, 255, 0.18);
+                color: var(--accent-blue);
+            }
         }
 
         .ios-pill:hover {
-            opacity: 0.85;
-        }
-
-        /* Стилизация синей и фиолетовой плашек */
-        .dev-pill {
-            background-color: var(--dev-bg);
-            color: var(--dev-text);
-        }
-
-        .genre-pill {
-            background-color: var(--genre-bg);
-            color: var(--genre-text);
+            opacity: 0.8;
         }
 
         /* Правая колонка */
@@ -430,7 +374,7 @@
         }
 
         .status-passed { color: var(--status-passed); background: var(--status-passed-bg); }
-        .status-playing { color: var(--status-playing); background: var(--status-playing-bg); }
+        .status-playing { color: #d97706; background: var(--status-playing-bg); }
         .status-not-played { color: var(--status-not-played) !important; background: var(--status-not-played-bg) !important; }
 
         .time-pill { background-color: var(--badge-bg); color: var(--text-primary); }
@@ -459,7 +403,7 @@
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             display: flex;
@@ -469,7 +413,6 @@
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
-            touch-action: pan-y;
         }
 
         .modal-overlay.active {
@@ -477,48 +420,35 @@
             pointer-events: auto;
         }
 
+        /* Интерактивное перелистывание карточки в модалке */
+        .flip-modal-container {
+            width: 90%;
+            max-width: 440px;
+            position: relative;
+            perspective: 1000px;
+        }
+
         .flip-modal {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            width: 90%;
-            max-width: 440px;
+            width: 100%;
             border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 10px 30px var(--shadow-color);
-            transform: rotateY(90deg) scale(0.8);
-            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.25s ease;
-            backface-visibility: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             max-height: 90vh;
             overflow-y: auto;
-            cursor: pointer;
-            user-select: none;
+            transform-style: preserve-3d;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            will-change: transform;
         }
 
-        .modal-overlay.active .flip-modal {
-            transform: rotateY(0deg) scale(1);
-            opacity: 1;
+        .modal-header {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
         }
 
-        /* АНИМАЦИИ iOS СВАЙПА ДЛЯ КАРТОЧЕК */
-        .flip-modal.slide-left {
-            animation: iosSlideLeft 0.28s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-
-        .flip-modal.slide-right {
-            animation: iosSlideRight 0.28s cubic-bezier(0.25, 1, 0.5, 1);
-        }
-
-        @keyframes iosSlideLeft {
-            0% { transform: translateX(60px) scale(0.95); opacity: 0.3; }
-            100% { transform: translateX(0) scale(1); opacity: 1; }
-        }
-
-        @keyframes iosSlideRight {
-            0% { transform: translateX(-60px) scale(0.95); opacity: 0.3; }
-            100% { transform: translateX(0) scale(1); opacity: 1; }
-        }
-
-        /* КАРТИНКА ИЗ ТАБЛИЦЫ */
         .modal-image-container {
             width: 100%;
             max-width: 300px;
@@ -542,7 +472,24 @@
             height: auto;
             max-height: 70vh;
             object-fit: contain;
+            cursor: pointer;
+            transition: opacity 0.3s;
             display: block;
+        }
+
+        .btn-wiki {
+            display: block;
+            width: max-content;
+            margin: 0 auto 16px auto;
+            background: var(--badge-bg);
+            color: var(--accent-blue);
+            text-decoration: none;
+            padding: 8px 24px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid var(--card-border);
         }
 
         .modal-desc {
@@ -556,7 +503,6 @@
             display: flex;
             gap: 10px;
             justify-content: center;
-            flex-wrap: wrap;
         }
 
         .modal-btn {
@@ -586,7 +532,7 @@
             border: none;
             border-radius: 50%;
             color: white;
-            box-shadow: 0 4px 12px var(--shadow-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             cursor: pointer;
             z-index: 90;
             display: flex;
@@ -609,7 +555,7 @@
             height: 24px;
         }
 
-        /* ОКНО СОРТИРОВКИ И ФИЛЬТРА В СТИЛЕ IOS */
+        /* ОКНО СОРТИРОВКИ И ФИЛЬТРА РАЗРАБОТЧИКОВ В СТИЛЕ IOS */
         .ios-action-sheet {
             position: fixed;
             bottom: -100%;
@@ -622,7 +568,7 @@
             -webkit-backdrop-filter: blur(20px);
             border-radius: 16px;
             padding: 12px;
-            box-shadow: 0 -4px 20px var(--shadow-color);
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
             z-index: 300;
             transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
             display: flex;
@@ -678,24 +624,27 @@
             background: var(--badge-bg);
             border-radius: 8px;
             padding: 2px;
+            gap: 2px;
         }
 
         .segment-btn {
             flex: 1;
             background: transparent;
             border: none;
-            padding: 6px;
+            padding: 8px 6px;
             font-size: 13px;
             font-weight: 600;
             border-radius: 6px;
             color: var(--text-secondary);
             cursor: pointer;
+            transition: all 0.25s ease;
         }
 
+        /* Синий активный стиль кнопок в стиле iOS */
         .segment-btn.active {
-            background: var(--card-bg);
-            color: var(--text-primary);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            background: var(--accent-blue);
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.3);
         }
 
         .filter-list {
@@ -722,42 +671,15 @@
             text-align: left;
         }
 
-        .filter-item-btn span {
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-
-        /* МОДАЛКА ЛОГОТИПА (ПОЛНЫЙ РАЗМЕР) */
-        .logo-modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        .filter-item-btn .item-label {
             display: flex;
             align-items: center;
-            justify-content: center;
-            z-index: 400;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-            cursor: pointer;
-            touch-action: pan-y;
+            gap: 8px;
         }
 
-        .logo-modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .logo-modal-img {
-            max-width: 90vw;
-            max-height: 80vh;
-            object-fit: contain;
-            border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
-            transition: transform 0.3s ease;
-            user-select: none;
+        .filter-item-btn span.count {
+            color: var(--text-secondary);
+            font-weight: 600;
         }
 
         @media (max-width: 360px) {
@@ -774,12 +696,11 @@
     <div class="header-content">
         <div class="counters-bar">
             <div class="counter-btn passed" id="btn-count-passed" onclick="filterByStatus('passed')">Прошел <span id="count-passed">0</span></div>
-            <div class="counter-btn playing" id="btn-count-playing" onclick="filterByStatus('playing')">Не закончил <span id="count-playing">0</span></div>
-            <div class="counter-btn not-played" id="btn-count-not-played" onclick="filterByStatus('not-played')">В планах <span id="count-not-played">0</span></div>
+            <div class="counter-btn playing" id="btn-count-playing" onclick="filterByStatus('playing')">Играл <span id="count-playing">0</span></div>
+            <div class="counter-btn not-played" id="btn-count-not-played" onclick="filterByStatus('not-played')">Не играл <span id="count-not-played">0</span></div>
         </div>
         <div class="controls-bar">
             <input type="text" id="search-input" class="search-input" placeholder="Поиск...">
-            <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="toggleTheme()" aria-label="Смена темы">☀️</button>
             <button class="reset-btn" id="reset-btn" onclick="resetAllFilters()">Сброс</button>
             <button class="sort-btn" id="open-sort-btn">Сорт.</button>
         </div>
@@ -794,7 +715,7 @@
 
 <footer>
     <div>Общее кол-во записей: <strong id="total-count">0</strong></div>
-    <div>Версия 1.0 (by Ewgenoff 09.08.2026)</div>
+    <div>Версия 1.1 (by Ewgenoff 09.08.2026)</div>
 </footer>
 
 <!-- ПЛАВАЮЩАЯ КНОПКА ПОИСКА -->
@@ -807,24 +728,22 @@
 
 <!-- Модалка описания (Flip Card) -->
 <div class="modal-overlay" id="flip-modal-overlay">
-    <div class="flip-modal" id="flip-modal-card">
-        <div class="modal-image-container" id="modal-image-container">
-            <div class="modal-image-link" id="modal-image-link">
-                <img id="modal-image" src="" alt="Обложка игры">
+    <div class="flip-modal-container">
+        <div class="flip-modal" id="flip-card-element">
+            <div class="modal-image-container" id="modal-image-container">
+                <a href="#" target="_blank" class="modal-image-link" id="modal-image-link">
+                    <img id="modal-image" src="" alt="Обложка игры">
+                </a>
+            </div>
+            <a href="#" target="_blank" class="btn-wiki" id="modal-wiki-link" style="display: none;">Wiki.ru</a>
+            <div class="modal-header" id="modal-title">Название игры</div>
+            <div class="modal-desc" id="modal-desc">Описание отсутствует.</div>
+            <div class="modal-actions">
+                <a href="#" target="_blank" class="modal-btn btn-link" id="modal-link">IGDB.com</a>
+                <button class="modal-btn btn-close" id="modal-close">Закрыть</button>
             </div>
         </div>
-        <div class="modal-desc" id="modal-desc">Описание отсутствует.</div>
-        <div class="modal-actions">
-            <a href="#" target="_blank" class="modal-btn btn-link" id="modal-wiki-link" style="display: none;">Wiki.ru</a>
-            <a href="#" target="_blank" class="modal-btn btn-link" id="modal-link">IGDB.com</a>
-            <button class="modal-btn btn-close" id="modal-close">Закрыть</button>
-        </div>
     </div>
-</div>
-
-<!-- Модалка полноэкранного логотипа -->
-<div class="logo-modal-overlay" id="logo-modal-overlay">
-    <img id="logo-modal-img" class="logo-modal-img" src="" alt="Логотип игры">
 </div>
 
 <!-- Модалка сортировки (iOS Style) -->
@@ -833,12 +752,12 @@
     <div class="sheet-title">Сортировка игр</div>
     <div class="sheet-grid">
         <button class="sheet-btn" data-sort="title">А-Я</button>
-        <button class="sheet-btn" data-sort="year">Дата релиза (PC)</button>
+        <button class="sheet-btn" data-sort="year">Год</button>
         <button class="sheet-btn" data-sort="score">Оценка</button>
         <button class="sheet-btn" data-sort="developer">Разработчик</button>
         <button class="sheet-btn" data-sort="country">Страна</button>
         <button class="sheet-btn" data-sort="voice">Озвучка</button>
-        <button class="sheet-btn" data-sort="time">Время прохождения</button>
+        <button class="sheet-btn" data-sort="time">Время</button>
     </div>
     <button class="sheet-btn sheet-btn-cancel" id="close-sort-btn">Отмена</button>
 </div>
@@ -846,8 +765,8 @@
 <!-- Модалка фильтра Разработчик / Страна -->
 <div class="ios-action-sheet" id="pub-country-sheet">
     <div class="segment-control">
-        <button class="segment-btn active" id="seg-dev" onclick="switchPubCountryTab('dev')">Разработчик</button>
-        <button class="segment-btn" id="seg-country" onclick="switchPubCountryTab('country')">Страна</button>
+        <button class="segment-btn active" id="seg-dev" onclick="switchPubCountryTab('dev')">Разработчики (0)</button>
+        <button class="segment-btn" id="seg-country" onclick="switchPubCountryTab('country')">Страны (0)</button>
     </div>
     <div class="filter-list" id="pub-country-list"></div>
     <button class="sheet-btn sheet-btn-cancel" onclick="closePubCountrySheet()">Отмена</button>
@@ -864,9 +783,8 @@
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTAaoLfMXIHoBoXTb16tXL_yabaMQThgsWGGrziE5InfpyEf3MIPkVkHD58xCapuR6IPeIRp6lnqLCl/pub?gid=0&single=true&output=csv';
 
     let gamesData = [];
-    let filteredGamesData = [];
+    let activeFilteredGames = [];
     let currentModalIndex = -1;
-    let currentLogoModalIndex = -1;
 
     let currentFilterText = '';
     let selectedStatusFilter = null;
@@ -876,18 +794,28 @@
     let currentPubCountryTab = 'dev';
     let isSorted = false;
 
-    // СМЕНА ТЕМЫ
-    function toggleTheme() {
-        const body = document.documentElement;
-        const btn = document.getElementById('theme-toggle-btn');
-        if (body.getAttribute('data-theme') === 'light') {
-            body.removeAttribute('data-theme');
-            btn.textContent = '☀️';
-        } else {
-            body.setAttribute('data-theme', 'light');
-            btn.textContent = '🌙';
-        }
-    }
+    // Словарь флагов для стран
+    const countryFlags = {
+        'США': '🇺🇸', 'USA': '🇺🇸',
+        'Россия': '🇷🇺', 'Russia': '🇷🇺',
+        'Япония': '🇯🇵', 'Japan': '🇯🇵',
+        'Великобритания': '🇬🇧', 'UK': '🇬🇧',
+        'Канада': '🇨🇦', 'Canada': '🇨🇦',
+        'Франция': '🇫🇷', 'France': '🇫🇷',
+        'Германия': '🇩🇪', 'Germany': '🇩🇪',
+        'Польша': '🇵🇱', 'Poland': '🇵🇱',
+        'Швеция': '🇸🇪', 'Sweden': '🇸🇪',
+        'Китай': '🇨🇳', 'China': '🇨🇳',
+        'Южная Корея': '🇰🇷', 'Корея': '🇰🇷',
+        'Украина': '🇺🇦', 'Ukraine': '🇺🇦',
+        'Финляндия': '🇫🇮', 'Finland': '🇫🇮',
+        'Испания': '🇪🇸', 'Spain': '🇪🇸',
+        'Италия': '🇮🇹', 'Italy': '🇮🇹',
+        'Нидерланды': '🇳🇱', 'Netherlands': '🇳🇱',
+        'Австралия': '🇦🇺', 'Australia': '🇦🇺',
+        'Чехия': '🇨🇿', 'Czech Republic': '🇨🇿',
+        'Австрия': '🇦🇹', 'Austria': '🇦🇹'
+    };
 
     function parseCSV(text) {
         let lines = [];
@@ -1004,7 +932,7 @@
         container.innerHTML = '';
         checkResetButtonState();
 
-        filteredGamesData = data.filter(item => {
+        activeFilteredGames = data.filter(item => {
             if (currentFilterText) {
                 const term = currentFilterText.toLowerCase();
                 const matchSearch = item.titleEn.toLowerCase().includes(term) ||
@@ -1029,12 +957,12 @@
             return true;
         });
 
-        if (filteredGamesData.length === 0) {
+        if (activeFilteredGames.length === 0) {
             container.innerHTML = `<div class="loading">Ничего не найдено</div>`;
             return;
         }
 
-        filteredGamesData.forEach((item, index) => {
+        activeFilteredGames.forEach((item, index) => {
             const status = getGameStatus(item.statusNorm);
             let statusClass = `status-${status}`;
             let borderClass = `border-${status}`;
@@ -1043,7 +971,7 @@
             if (item.scoreNum > 80) scoreClass = 'score-high';
             else if (item.scoreNum >= 65) scoreClass = 'score-mid';
 
-            let flagEmoji = item.voiceover.includes('есть') ? '🇷🇺' : '🇺🇸';
+            let audioBadgeText = item.voiceover.includes('есть') ? '🇷🇺' : '🇺🇸';
 
             let timeStr = '';
             if (item.timeMain || item.timeFull) {
@@ -1057,13 +985,8 @@
 
             card.innerHTML = `
                 <div class="left-col">
-                    <div class="combined-badge ${scoreClass}">
-                        <div class="combined-score">${item.scoreText}</div>
-                        <div class="combined-flag">🔈 ${flagEmoji}</div>
-                    </div>
-                    <div class="game-logo-container">
-                        ${item.logo ? `<img src="${item.logo}" alt="Logo" class="game-logo" loading="lazy" onclick="event.stopPropagation(); openLogoModalByIndex(${index})">` : ''}
-                    </div>
+                    <div class="score-badge ${scoreClass}">${item.scoreText}</div>
+                    <div class="audio-badge">${audioBadgeText}</div>
                 </div>
 
                 <div class="mid-col" onclick="openFlipModalByIndex(${index})">
@@ -1078,7 +1001,7 @@
                 </div>
 
                 <div class="right-col" onclick="openFlipModalByIndex(${index})">
-                    <div class="right-pill ${statusClass}">${item.status || 'В планах'}</div>
+                    <div class="right-pill ${statusClass}">${item.status || 'Не играл'}</div>
                     ${timeStr ? `<div class="right-pill time-pill">${timeStr}</div>` : ''}
                     ${item.releaseDate ? `<div class="right-pill date-pill">${item.releaseDate}</div>` : ''}
                 </div>
@@ -1088,16 +1011,11 @@
         });
     }
 
-    function openFlipModalByIndex(index, animClass = '') {
-        currentModalIndex = index;
-        const item = filteredGamesData[index];
-        if (item) openFlipModal(item, animClass);
-    }
-
-    function openLogoModalByIndex(index) {
-        currentLogoModalIndex = index;
-        const item = filteredGamesData[index];
-        if (item && item.logo) openLogoModal(item.logo);
+    function openFlipModalByIndex(index) {
+        if (index >= 0 && index < activeFilteredGames.length) {
+            currentModalIndex = index;
+            openFlipModal(activeFilteredGames[index]);
+        }
     }
 
     // ЗАГРУЗКА ДАННЫХ
@@ -1127,7 +1045,6 @@
                     link: row[14] || '',
                     description: row[15] || '',
                     image: row[18] || '', // Столбец S
-                    logo: row[19] || '',  // Столбец T
                     wiki: row[20] || ''   // Столбец U
                 };
             }).filter(Boolean);
@@ -1163,7 +1080,6 @@
         lastScrollY = window.scrollY;
 
         fabSearch.classList.add('active');
-        
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(() => {
             fabSearch.classList.remove('active');
@@ -1175,17 +1091,20 @@
         searchInput.focus();
     });
 
-    // МОДАЛКА ПЕРЕВОРОТА (FLIP) И СВАЙП КАРТОЧЕК
+    // МОДАЛКА И СВАЙП КАРТОЧКИ С ЖЕСТАМИ iOS
     const flipOverlay = document.getElementById('flip-modal-overlay');
-    const flipModalCard = document.getElementById('flip-modal-card');
+    const flipCardEl = document.getElementById('flip-card-element');
+    const modalTitle = document.getElementById('modal-title');
     const modalDesc = document.getElementById('modal-desc');
     const modalLink = document.getElementById('modal-link');
     const modalClose = document.getElementById('modal-close');
     const modalImageContainer = document.getElementById('modal-image-container');
     const modalImage = document.getElementById('modal-image');
+    const modalImageLink = document.getElementById('modal-image-link');
     const modalWikiLink = document.getElementById('modal-wiki-link');
 
-    function openFlipModal(item, animClass = '') {
+    function openFlipModal(item) {
+        modalTitle.textContent = item.titleEn + (item.titleRu ? ` (${item.titleRu})` : '');
         modalDesc.textContent = item.description || 'Описание не заполнено.';
         
         if (item.link) {
@@ -1197,134 +1116,91 @@
 
         if (item.wiki) {
             modalWikiLink.href = item.wiki;
-            modalWikiLink.style.display = 'inline-flex';
+            modalWikiLink.style.display = 'block';
         } else {
             modalWikiLink.style.display = 'none';
         }
 
         if (item.image) {
             modalImage.src = item.image;
+            modalImageLink.href = item.link || item.image; 
             modalImageContainer.style.display = 'flex';
         } else {
             modalImageContainer.style.display = 'none';
         }
 
-        flipModalCard.classList.remove('slide-left', 'slide-right');
-        if (animClass) {
-            void flipModalCard.offsetWidth; // Триггер reflow для перезапуска анимации
-            flipModalCard.classList.add(animClass);
-        }
-
+        flipCardEl.style.transform = 'translateX(0px) rotate(0deg)';
+        flipCardEl.style.opacity = '1';
         flipOverlay.classList.add('active');
     }
 
-    function closeFlipModal() {
-        flipOverlay.classList.remove('active');
-        flipModalCard.classList.remove('slide-left', 'slide-right');
-    }
-
-    modalClose.onclick = (e) => {
-        e.stopPropagation();
-        closeFlipModal();
-    };
-
-    flipOverlay.onclick = () => closeFlipModal();
-
-    let cardStartX = 0, cardEndX = 0;
-    flipOverlay.addEventListener('touchstart', (e) => {
-        cardStartX = e.changedTouches[0].screenX;
-    }, false);
-
-    flipOverlay.addEventListener('touchend', (e) => {
-        cardEndX = e.changedTouches[0].screenX;
-        handleCardSwipe();
-    }, false);
-
-    flipModalCard.addEventListener('mousedown', (e) => {
-        cardStartX = e.clientX;
-    });
-
-    flipModalCard.addEventListener('mouseup', (e) => {
-        cardEndX = e.clientX;
-        handleCardSwipe();
-    });
-
-    function handleCardSwipe() {
-        const threshold = 50;
-        if (cardEndX < cardStartX - threshold) {
-            // Свайп влево -> следующая карточка (анимация захода справа налево)
-            if (currentModalIndex < filteredGamesData.length - 1) {
-                openFlipModalByIndex(currentModalIndex + 1, 'slide-left');
-            }
-        }
-        if (cardEndX > cardStartX + threshold) {
-            // Свайп вправо -> предыдущая карточка (анимация захода слева направо)
-            if (currentModalIndex > 0) {
-                openFlipModalByIndex(currentModalIndex - 1, 'slide-right');
-            }
-        }
-    }
-
-    flipModalCard.onclick = (e) => {
-        const isInteractive = e.target.closest('a, button');
-        if (!isInteractive && Math.abs(cardEndX - cardStartX) < 10) {
-            closeFlipModal();
-        } else {
-            e.stopPropagation();
+    modalClose.onclick = () => flipOverlay.classList.remove('active');
+    flipOverlay.onclick = (e) => {
+        if (e.target === flipOverlay || e.target.classList.contains('flip-modal-container')) {
+            flipOverlay.classList.remove('active');
         }
     };
 
-    // МОДАЛКА ПОЛНОЭКРАННОГО ЛОГОТИПА И СВАЙП ЛОГОТИПОВ (БЕЗ АНИМАЦИИ СВАЙПА)
-    const logoOverlay = document.getElementById('logo-modal-overlay');
-    const logoImg = document.getElementById('logo-modal-img');
+    // ФИЗИЧЕСКИЙ SWIPE И ТАЧ В МОДАЛКЕ
+    let startX = 0, currentX = 0, isDragging = false;
 
-    function openLogoModal(src) {
-        logoImg.src = src;
-        logoOverlay.classList.add('active');
+    function handleTouchStart(e) {
+        isDragging = true;
+        startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        flipCardEl.style.transition = 'none';
     }
 
-    let logoStartX = 0, logoEndX = 0;
-    logoOverlay.addEventListener('touchstart', (e) => {
-        logoStartX = e.changedTouches[0].screenX;
-    }, false);
+    function handleTouchMove(e) {
+        if (!isDragging) return;
+        currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const diffX = currentX - startX;
+        const rotate = diffX * 0.05;
+        const opacity = 1 - Math.abs(diffX) / 800;
 
-    logoOverlay.addEventListener('touchend', (e) => {
-        logoEndX = e.changedTouches[0].screenX;
-        handleLogoSwipe();
-    }, false);
+        flipCardEl.style.transform = `translateX(${diffX}px) rotate(${rotate}deg)`;
+        flipCardEl.style.opacity = opacity;
+    }
 
-    logoOverlay.addEventListener('mousedown', (e) => {
-        logoStartX = e.clientX;
-    });
+    function handleTouchEnd() {
+        if (!isDragging) return;
+        isDragging = false;
+        const diffX = currentX - startX;
+        const threshold = 100;
 
-    logoOverlay.addEventListener('mouseup', (e) => {
-        logoEndX = e.clientX;
-        handleLogoSwipe();
-    });
+        flipCardEl.style.transition = 'transform 0.35s cubic-bezier(0.1, 0.8, 0.3, 1), opacity 0.35s ease';
 
-    function handleLogoSwipe() {
-        const threshold = 50;
-        if (logoEndX < logoStartX - threshold) {
-            // Влево -> Следующий логотип
-            findNextLogo(1);
-        } else if (logoEndX > logoStartX + threshold) {
-            // Вправо -> Предыдущий логотип
-            findNextLogo(-1);
+        if (diffX < -threshold && currentModalIndex < activeFilteredGames.length - 1) {
+            // Свайп влево -> следующая карточка
+            flipCardEl.style.transform = `translateX(-120%) rotate(-15deg)`;
+            flipCardEl.style.opacity = '0';
+            setTimeout(() => {
+                currentModalIndex++;
+                openFlipModal(activeFilteredGames[currentModalIndex]);
+            }, 200);
+        } else if (diffX > threshold && currentModalIndex > 0) {
+            // Свайп вправо -> предыдущая карточка
+            flipCardEl.style.transform = `translateX(120%) rotate(15deg)`;
+            flipCardEl.style.opacity = '0';
+            setTimeout(() => {
+                currentModalIndex--;
+                openFlipModal(activeFilteredGames[currentModalIndex]);
+            }, 200);
         } else {
-            logoOverlay.classList.remove('active');
+            // Возврат назад
+            flipCardEl.style.transform = 'translateX(0px) rotate(0deg)';
+            flipCardEl.style.opacity = '1';
         }
+        startX = 0;
+        currentX = 0;
     }
 
-    function findNextLogo(direction) {
-        let idx = currentLogoModalIndex + direction;
-        while (idx >= 0 && idx < filteredGamesData.length) {
-            if (filteredGamesData[idx].logo) {
-                openLogoModalByIndex(idx);
-                return;
-            }
-            idx += direction;
-        }
-    }
+    flipCardEl.addEventListener('touchstart', handleTouchStart, {passive: true});
+    flipCardEl.addEventListener('touchmove', handleTouchMove, {passive: true});
+    flipCardEl.addEventListener('touchend', handleTouchEnd);
+
+    flipCardEl.addEventListener('mousedown', handleTouchStart);
+    window.addEventListener('mousemove', handleTouchMove);
+    window.addEventListener('mouseup', handleTouchEnd);
 
     // МОДАЛКА СОРТИРОВКИ
     const sortOverlay = document.getElementById('sort-overlay');
@@ -1391,6 +1267,7 @@
     function openPubCountrySheet() {
         sortOverlay.classList.add('active');
         pubCountrySheet.classList.add('active');
+        updateSegmentCounters();
         renderPubCountryList();
     }
 
@@ -1406,6 +1283,19 @@
         document.getElementById('seg-dev').classList.toggle('active', tab === 'dev');
         document.getElementById('seg-country').classList.toggle('active', tab === 'country');
         renderPubCountryList();
+    }
+
+    function updateSegmentCounters() {
+        const uniqueDevs = new Set();
+        const uniqueCountries = new Set();
+
+        gamesData.forEach(item => {
+            if (item.developer) uniqueDevs.add(item.developer);
+            if (item.country) uniqueCountries.add(item.country);
+        });
+
+        document.getElementById('seg-dev').textContent = `Разработчики (${uniqueDevs.size})`;
+        document.getElementById('seg-country').textContent = `Страны (${uniqueCountries.size})`;
     }
 
     function renderPubCountryList() {
@@ -1425,7 +1315,17 @@
         sortedKeys.forEach(key => {
             const btn = document.createElement('button');
             btn.className = 'filter-item-btn';
-            btn.innerHTML = `${key} <span>(${counts[key]})</span>`;
+            
+            let flagIcon = '';
+            if (currentPubCountryTab === 'country' && countryFlags[key]) {
+                flagIcon = `<span>${countryFlags[key]}</span> `;
+            }
+
+            btn.innerHTML = `
+                <div class="item-label">${flagIcon}<span>${key}</span></div>
+                <span class="count">(${counts[key]})</span>
+            `;
+
             btn.onclick = () => {
                 if (currentPubCountryTab === 'dev') {
                     selectedDeveloperFilter = key;
@@ -1478,7 +1378,7 @@
         sortedKeys.forEach(key => {
             const btn = document.createElement('button');
             btn.className = 'filter-item-btn';
-            btn.innerHTML = `${key} <span>(${counts[key]})</span>`;
+            btn.innerHTML = `<span>${key}</span> <span class="count">(${counts[key]})</span>`;
             btn.onclick = () => {
                 selectedGenreFilter = key;
                 renderCards(gamesData);
