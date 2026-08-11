@@ -237,33 +237,48 @@
             gap: 12px;
         }
 
-        /* ОБЕРТКА ДЛЯ СВАЙПА МИНИ-КАРТОЧКИ (Высота увеличена для размещения названия и 3 строк плашек) */
-        .swipe-card-wrapper {
-            position: relative;
+        /* 3D ПЕРЕВОРОТ КАРТОЧКИ ПО КЛИКУ */
+        .card-flip-container {
             width: 100%;
             height: 115px;
+            perspective: 1000px;
+        }
+
+        .card-flipper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .card-flip-container.flipped .card-flipper {
+            transform: rotateY(180deg);
+        }
+
+        .game-card, .game-card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
             border-radius: 16px;
-            overflow: hidden;
-            touch-action: pan-y;
+            box-shadow: 0 2px 8px var(--shadow-color);
         }
 
         /* ОБРАТНАЯ СТОРОНА МИНИ-КАРТОЧКИ */
         .game-card-back {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
             background-color: var(--card-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-radius: 16px;
             padding: 8px;
             display: flex;
             gap: 10px;
             align-items: center;
-            z-index: 1;
-            box-shadow: 0 2px 8px var(--shadow-color);
+            transform: rotateY(180deg);
+            border: 1.5px solid var(--card-border);
         }
 
         .card-back-cover {
@@ -276,7 +291,7 @@
             cursor: pointer;
         }
 
-        /* Прокрутка текста пальцем, если не влезает */
+        /* Описание на обратной стороне (кликабельно для возврата) */
         .card-back-desc {
             flex: 1;
             height: 100%;
@@ -288,33 +303,22 @@
             padding-right: 4px;
             touch-action: pan-y;
             -webkit-overflow-scrolling: touch;
+            cursor: pointer;
         }
 
         /* КАРТОЧКА ИГРЫ (ЛИЦЕВАЯ) */
         .game-card {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            height: 100%;
             background-color: var(--card-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-width: 1.5px;
             border-style: solid;
-            border-radius: 16px;
             padding: 10px 12px;
             display: flex;
             gap: 10px;
             align-items: stretch;
-            box-shadow: 0 2px 8px var(--shadow-color);
             cursor: pointer;
-            will-change: transform;
-            transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
             user-select: none;
-        }
-
-        .game-card.swiping {
-            transition: none !important;
         }
 
         .border-passed { border-color: var(--status-passed) !important; }
@@ -383,7 +387,7 @@
             flex-direction: column;
             justify-content: space-between;
             min-width: 0;
-            gap: 6px;
+            gap: 4px;
         }
 
         .titles-block {
@@ -413,7 +417,6 @@
             text-decoration: none;
         }
 
-        /* Ускоренная анимация бегущей строки (4s вместо 8s) */
         .scroll-text {
             display: inline-block;
             animation: scroll-left-right 4s linear infinite alternate;
@@ -431,11 +434,21 @@
         .title-divider {
             height: 1px;
             background-color: var(--line-color);
-            margin: 4px 0;
+            margin: 3px 0;
             width: 100%;
         }
 
-        /* Скрытое для пользователя, но доступное для поиска название */
+        /* Текст Разработчик / Страна без плашки под линией */
+        .dev-country-text {
+            font-size: 11px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.2;
+            pointer-events: none; /* Не реагирует на клики */
+        }
+
         .hidden-title-ru {
             display: none !important;
         }
@@ -459,7 +472,6 @@
             transition: opacity 0.2s ease, background-color 0.2s ease;
         }
 
-        .dev-pill,
         .genre-pill {
             background-color: rgba(0, 122, 255, 0.12);
             color: var(--accent-blue);
@@ -467,7 +479,6 @@
         }
 
         @media (prefers-color-scheme: dark) {
-            .dev-pill,
             .genre-pill {
                 background-color: rgba(10, 132, 255, 0.18);
                 color: var(--accent-blue);
@@ -626,7 +637,7 @@
             margin-top: 4px;
         }
 
-        /* Переключатель Разработчик / Страна */
+        /* Переключатель Вкладок Фильтра (Жанр / Разработчик / Страна) */
         .segment-control {
             display: flex;
             background: var(--badge-bg);
@@ -639,13 +650,14 @@
             flex: 1;
             background: transparent;
             border: none;
-            padding: 8px 6px;
-            font-size: 13px;
+            padding: 8px 4px;
+            font-size: 12px;
             font-weight: 600;
             border-radius: 6px;
             color: var(--text-secondary);
             cursor: pointer;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         .segment-btn.active {
@@ -783,7 +795,7 @@
     </svg>
 </button>
 
-<!-- Модалка полноэкранного фото/логотипа (Закрытие при повторном клике) -->
+<!-- Модалка полноэкранного фото/логотипа -->
 <div class="logo-modal-overlay" id="logo-modal-overlay" onclick="closeLogoModalWithPrevent(event)">
     <img id="logo-modal-img" class="logo-modal-img" src="" alt="Фото/Логотип игры" onclick="closeLogoModalWithPrevent(event)">
 </div>
@@ -804,21 +816,15 @@
     <button class="sheet-btn sheet-btn-cancel" id="close-sort-btn">Отмена</button>
 </div>
 
-<!-- Модалка фильтра Разработчик / Страна -->
-<div class="ios-action-sheet" id="pub-country-sheet">
+<!-- ОБЪЕДИНЕННАЯ МОДАЛКА ФИЛЬТРА: ЖАНР / РАЗРАБОТЧИК / СТРАНА -->
+<div class="ios-action-sheet" id="combined-filter-sheet">
     <div class="segment-control">
-        <button class="segment-btn active" id="seg-dev" onclick="switchPubCountryTab('dev')">Разработчик</button>
-        <button class="segment-btn" id="seg-country" onclick="switchPubCountryTab('country')">Страна</button>
+        <button class="segment-btn active" id="seg-genre" onclick="switchFilterTab('genre')">Жанр</button>
+        <button class="segment-btn" id="seg-dev" onclick="switchFilterTab('dev')">Разработчик</button>
+        <button class="segment-btn" id="seg-country" onclick="switchFilterTab('country')">Страна</button>
     </div>
-    <div class="filter-list" id="pub-country-list"></div>
-    <button class="sheet-btn sheet-btn-cancel" onclick="closePubCountrySheet()">Отмена</button>
-</div>
-
-<!-- Модалка фильтра Жанры -->
-<div class="ios-action-sheet" id="genre-sheet">
-    <div class="sheet-title">Фильтр по жанрам</div>
-    <div class="filter-list" id="genre-list"></div>
-    <button class="sheet-btn sheet-btn-cancel" onclick="closeGenreSheet()">Отмена</button>
+    <div class="filter-list" id="filter-list-container"></div>
+    <button class="sheet-btn sheet-btn-cancel" onclick="closeCombinedFilterSheet()">Отмена</button>
 </div>
 
 <script>
@@ -832,7 +838,7 @@
     let selectedDeveloperFilter = null;
     let selectedCountryFilter = null;
     let selectedGenreFilter = null;
-    let currentPubCountryTab = 'dev';
+    let currentFilterTab = 'genre';
     let isSorted = false;
 
     // Карта флагов для стран
@@ -997,13 +1003,6 @@
         renderCards(gamesData);
     }
 
-    function resetAllSwipedCards() {
-        document.querySelectorAll('.game-card').forEach(card => {
-            card.style.transform = 'translateX(0px)';
-            card.dataset.swiped = 'false';
-        });
-    }
-
     function openWikipedia(wikiUrl) {
         if (wikiUrl) {
             window.open(wikiUrl, '_blank');
@@ -1065,24 +1064,27 @@
 
             let devCountry = [item.developer, item.country].filter(Boolean).join(' / ');
 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'swipe-card-wrapper';
-
             const photoSrc = item.logo || item.image || '';
             const backCoverSrc = item.image || item.logo || '';
 
-            // Оформление обратной стороны карточки (с полноэкранным открытием фото и скроллом)
+            // Обертка 3D Переворота
+            const flipContainer = document.createElement('div');
+            flipContainer.className = 'card-flip-container';
+
+            const flipper = document.createElement('div');
+            flipper.className = 'card-flipper';
+
+            // Оформление обратной стороны карточки
             const cardBack = document.createElement('div');
             cardBack.className = 'game-card-back';
             cardBack.innerHTML = `
                 <img src="${backCoverSrc}" alt="Обложка" class="card-back-cover" onerror="this.style.opacity='0'" onclick="event.stopPropagation(); openLogoModal('${backCoverSrc}')">
-                <div class="card-back-desc" onclick="event.stopPropagation()">${item.description || 'Описание отсутствует.'}</div>
+                <div class="card-back-desc" onclick="event.stopPropagation(); flipContainer.classList.remove('flipped')">${item.description || 'Описание отсутствует. (Нажмите, чтобы вернуться)'}</div>
             `;
 
             // Лицевая сторона карточки
             const card = document.createElement('div');
             card.className = `game-card ${borderClass}`;
-            card.dataset.swiped = 'false';
 
             card.innerHTML = `
                 <div class="left-col">
@@ -1101,12 +1103,11 @@
                             <span class="title-en" id="title-text-${index}">${item.titleEn}</span>
                         </div>
                         <div class="title-divider"></div>
-                        <!-- Служебное скрытое поле для поиска по русскому названию -->
+                        ${devCountry ? `<div class="dev-country-text">${devCountry}</div>` : ''}
                         <span class="hidden-title-ru">${item.titleRu}</span>
                     </div>
                     <div class="mid-col-bottom">
-                        ${devCountry ? `<span class="ios-pill dev-pill" onclick="event.stopPropagation(); openPubCountrySheet()">${devCountry}</span>` : ''}
-                        ${item.genre ? `<span class="ios-pill genre-pill" onclick="event.stopPropagation(); openGenreSheet()">${item.genre}</span>` : ''}
+                        ${item.genre ? `<span class="ios-pill genre-pill" onclick="event.stopPropagation(); openCombinedFilterSheet('genre')">${item.genre}</span>` : ''}
                     </div>
                 </div>
 
@@ -1117,11 +1118,19 @@
                 </div>
             `;
 
-            wrapper.appendChild(cardBack);
-            wrapper.appendChild(card);
-            container.appendChild(wrapper);
+            flipper.appendChild(card);
+            flipper.appendChild(cardBack);
+            flipContainer.appendChild(flipper);
+            container.appendChild(flipContainer);
 
-            // Настройка анимации бегущей строки (ускоренной в CSS)
+            // КЛИК ПО КАРТОЧКЕ ДЛЯ ПЕРЕВОРОТА
+            card.addEventListener('click', (e) => {
+                // Исключаем клики по интерактивным элементам
+                if (e.target.closest('.genre-pill, .game-logo, .title-en-container')) return;
+                flipContainer.classList.add('flipped');
+            });
+
+            // Настройка анимации бегущей строки
             setTimeout(() => {
                 const titleEl = document.getElementById(`title-text-${index}`);
                 if (titleEl) {
@@ -1148,63 +1157,6 @@
                 }
                 lastTapTime = currentTime;
             });
-
-            // ВЫСОКАЯ ЧУВСТВИТЕЛЬНОСТЬ И СВАЙП ПО ВСЕЙ ОБЛАСТИ
-            let startX = 0, startY = 0, isSwiping = false, currentDiffX = 0;
-
-            const handleStart = (e) => {
-                if (e.target.closest('.ios-pill, .game-logo, .title-en-container')) return;
-                const touch = e.touches ? e.touches[0] : e;
-                startX = touch.clientX;
-                startY = touch.clientY;
-                currentDiffX = 0;
-                isSwiping = true;
-                card.classList.add('swiping');
-            };
-
-            const handleMove = (e) => {
-                if (!isSwiping) return;
-                const touch = e.touches ? e.touches[0] : e;
-                const diffX = touch.clientX - startX;
-                const diffY = touch.clientY - startY;
-
-                if (Math.abs(diffX) > Math.abs(diffY)) {
-                    if (e.cancelable) e.preventDefault();
-                    currentDiffX = diffX;
-                }
-            };
-
-            const handleEnd = (e) => {
-                if (!isSwiping) return;
-                isSwiping = false;
-                card.classList.remove('swiping');
-
-                // Если карточка уже была сдвинута — при клике/тапе возвращаем назад
-                if (card.dataset.swiped === 'true') {
-                    card.style.transform = 'translateX(0px)';
-                    card.dataset.swiped = 'false';
-                    return;
-                }
-
-                // Чувствительный порог смахивания — 15px
-                if (Math.abs(currentDiffX) > 15) {
-                    resetAllSwipedCards();
-                    const direction = currentDiffX > 0 ? '100%' : '-100%';
-                    card.style.transform = `translateX(${direction})`;
-                    card.dataset.swiped = 'true';
-                } else {
-                    card.style.transform = 'translateX(0px)';
-                    card.dataset.swiped = 'false';
-                }
-            };
-
-            card.addEventListener('touchstart', handleStart, { passive: false });
-            card.addEventListener('touchmove', handleMove, { passive: false });
-            card.addEventListener('touchend', handleEnd);
-
-            card.addEventListener('mousedown', handleStart);
-            window.addEventListener('mousemove', (e) => { if (isSwiping) handleMove(e); });
-            window.addEventListener('mouseup', (e) => { if (isSwiping) handleEnd(e); });
         });
     }
 
@@ -1234,9 +1186,9 @@
                     timeFull: row[12] || '',
                     link: row[14] || '',
                     description: row[15] || '',
-                    image: row[18] || '', // Столбец S
-                    logo: row[19] || '',  // Столбец T
-                    wiki: row[20] || ''   // Столбец U
+                    image: row[18] || '', 
+                    logo: row[19] || '',  
+                    wiki: row[20] || ''   
                 };
             }).filter(Boolean);
 
@@ -1256,15 +1208,13 @@
         renderCards(gamesData);
     });
 
-    // АВТОСКРЫТИЕ ШАПКИ И ВОЗВРАТ СВАЙПНУТЫХ КАРТОЧЕК ПРИ СКРОЛЛЕ
+    // АВТОСКРЫТИЕ ШАПКИ ПРИ СКРОЛЛЕ
     let lastScrollY = window.scrollY;
     const header = document.getElementById('header');
     const fabSearch = document.getElementById('fab-search');
     let scrollTimeout;
 
     window.addEventListener('scroll', () => {
-        resetAllSwipedCards();
-
         if (window.scrollY > lastScrollY && window.scrollY > 80) {
             header.classList.add('header-hidden');
         } else {
@@ -1285,7 +1235,7 @@
         searchInput.focus();
     });
 
-    // ПРОСМОТР ФОТО В ПОЛНОМ РАЗМЕРЕ И ЗАКРЫТИЕ ПРИ ПОВТОРНОМ НАЖАТИИ
+    // ПРОСМОТР ФОТО В ПОЛНОМ РАЗМЕРЕ
     const logoOverlay = document.getElementById('logo-modal-overlay');
     const logoImg = document.getElementById('logo-modal-img');
 
@@ -1322,8 +1272,7 @@
     closeSortBtn.onclick = closeSortSheet;
     sortOverlay.onclick = () => {
         closeSortSheet();
-        closePubCountrySheet();
-        closeGenreSheet();
+        closeCombinedFilterSheet();
     };
 
     // СОРТИРОВКА
@@ -1362,51 +1311,60 @@
         };
     });
 
-    // МОДАЛКА ФИЛЬТРА «РАЗРАБОТЧИК / СТРАНА»
-    const pubCountrySheet = document.getElementById('pub-country-sheet');
+    // ОБЪЕДИНЕННАЯ МОДАЛКА ФИЛЬТРОВ (ЖАНР / РАЗРАБОТЧИК / СТРАНА)
+    const combinedFilterSheet = document.getElementById('combined-filter-sheet');
 
-    function openPubCountrySheet() {
+    function openCombinedFilterSheet(tab = 'genre') {
         sortOverlay.classList.add('active');
-        pubCountrySheet.classList.add('active');
-        renderPubCountryList();
+        combinedFilterSheet.classList.add('active');
+        switchFilterTab(tab);
     }
 
-    function closePubCountrySheet() {
-        pubCountrySheet.classList.remove('active');
-        if (!sortSheet.classList.contains('active') && !genreSheet.classList.contains('active')) {
+    function closeCombinedFilterSheet() {
+        combinedFilterSheet.classList.remove('active');
+        if (!sortSheet.classList.contains('active')) {
             sortOverlay.classList.remove('active');
         }
     }
 
-    function switchPubCountryTab(tab) {
-        currentPubCountryTab = tab;
+    function switchFilterTab(tab) {
+        currentFilterTab = tab;
+        document.getElementById('seg-genre').classList.toggle('active', tab === 'genre');
         document.getElementById('seg-dev').classList.toggle('active', tab === 'dev');
         document.getElementById('seg-country').classList.toggle('active', tab === 'country');
-        renderPubCountryList();
+        renderFilterList();
     }
 
-    function renderPubCountryList() {
-        const listContainer = document.getElementById('pub-country-list');
+    function renderFilterList() {
+        const listContainer = document.getElementById('filter-list-container');
         listContainer.innerHTML = '';
 
-        const devSet = new Set();
-        const countrySet = new Set();
+        const counts = {};
 
         gamesData.forEach(item => {
+            if (currentFilterTab === 'genre' && item.genre) {
+                item.genre.split(',').forEach(g => {
+                    const trimmed = g.trim();
+                    if (trimmed) counts[trimmed] = (counts[trimmed] || 0) + 1;
+                });
+            } else if (currentFilterTab === 'dev' && item.developer) {
+                counts[item.developer] = (counts[item.developer] || 0) + 1;
+            } else if (currentFilterTab === 'country' && item.country) {
+                counts[item.country] = (counts[item.country] || 0) + 1;
+            }
+        });
+
+        // Обновляем заголовки вкладок с количеством элементов
+        const genreSet = new Set(), devSet = new Set(), countrySet = new Set();
+        gamesData.forEach(item => {
+            if (item.genre) item.genre.split(',').forEach(g => g.trim() && genreSet.add(g.trim()));
             if (item.developer) devSet.add(item.developer);
             if (item.country) countrySet.add(item.country);
         });
 
-        document.getElementById('seg-dev').textContent = `Разработчик (${devSet.size})`;
+        document.getElementById('seg-genre').textContent = `Жанр (${genreSet.size})`;
+        document.getElementById('seg-dev').textContent = `Разраб. (${devSet.size})`;
         document.getElementById('seg-country').textContent = `Страна (${countrySet.size})`;
-
-        const counts = {};
-        gamesData.forEach(item => {
-            const val = currentPubCountryTab === 'dev' ? item.developer : item.country;
-            if (val) {
-                counts[val] = (counts[val] || 0) + 1;
-            }
-        });
 
         const sortedKeys = Object.keys(counts).sort((a, b) => a.localeCompare(b, 'ru'));
 
@@ -1414,66 +1372,21 @@
             const btn = document.createElement('button');
             btn.className = 'filter-item-btn';
             
-            const labelText = currentPubCountryTab === 'country' ? getCountryWithFlags(key) : key;
+            const labelText = currentFilterTab === 'country' ? getCountryWithFlags(key) : key;
             btn.innerHTML = `${labelText} <span>(${counts[key]})</span>`;
             
             btn.onclick = () => {
-                if (currentPubCountryTab === 'dev') {
+                if (currentFilterTab === 'genre') {
+                    selectedGenreFilter = key;
+                } else if (currentFilterTab === 'dev') {
                     selectedDeveloperFilter = key;
                     selectedCountryFilter = null;
-                } else {
+                } else if (currentFilterTab === 'country') {
                     selectedCountryFilter = key;
                     selectedDeveloperFilter = null;
                 }
                 renderCards(gamesData);
-                closePubCountrySheet();
-            };
-            listContainer.appendChild(btn);
-        });
-    }
-
-    // МОДАЛКА ФИЛЬТРА «ЖАНРЫ»
-    const genreSheet = document.getElementById('genre-sheet');
-
-    function openGenreSheet() {
-        sortOverlay.classList.add('active');
-        genreSheet.classList.add('active');
-        renderGenreList();
-    }
-
-    function closeGenreSheet() {
-        genreSheet.classList.remove('active');
-        if (!sortSheet.classList.contains('active') && !pubCountrySheet.classList.contains('active')) {
-            sortOverlay.classList.remove('active');
-        }
-    }
-
-    function renderGenreList() {
-        const listContainer = document.getElementById('genre-list');
-        listContainer.innerHTML = '';
-
-        const counts = {};
-        gamesData.forEach(item => {
-            if (item.genre) {
-                item.genre.split(',').forEach(g => {
-                    const trimmedG = g.trim();
-                    if (trimmedG) {
-                        counts[trimmedG] = (counts[trimmedG] || 0) + 1;
-                    }
-                });
-            }
-        });
-
-        const sortedKeys = Object.keys(counts).sort((a, b) => a.localeCompare(b, 'ru'));
-
-        sortedKeys.forEach(key => {
-            const btn = document.createElement('button');
-            btn.className = 'filter-item-btn';
-            btn.innerHTML = `${key} <span>(${counts[key]})</span>`;
-            btn.onclick = () => {
-                selectedGenreFilter = key;
-                renderCards(gamesData);
-                closeGenreSheet();
+                closeCombinedFilterSheet();
             };
             listContainer.appendChild(btn);
         });
