@@ -240,7 +240,7 @@
         /* 3D ПЕРЕВОРОТ КАРТОЧКИ ПО КЛИКУ ПО ОСИ X */
         .card-flip-container {
             width: 100%;
-            height: 125px; /* Высота сохранена */
+            height: 107px; /* Высота уменьшена на 1 строку */
             perspective: 1000px;
         }
 
@@ -312,7 +312,7 @@
             -webkit-backdrop-filter: blur(20px);
             border-width: 1.5px;
             border-style: solid;
-            padding: 8px 12px;
+            padding: 6px 12px;
             display: flex;
             gap: 10px;
             align-items: stretch;
@@ -337,23 +337,23 @@
 
         .combined-badge {
             width: 54px;
-            padding: 4px 4px;
+            padding: 3px 4px;
             border-radius: 8px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 2px;
+            gap: 1px;
         }
 
         .combined-score {
-            font-size: 12.5px;
+            font-size: 12px;
             font-weight: 800;
             line-height: 1;
         }
 
         .combined-flag {
-            font-size: 12px;
+            font-size: 11px;
             line-height: 1;
         }
 
@@ -363,7 +363,7 @@
 
         .game-logo-container {
             width: 54px;
-            height: 48px;
+            height: 42px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -384,7 +384,7 @@
             flex-direction: column;
             justify-content: space-between;
             min-width: 0;
-            gap: 2px;
+            gap: 1px;
         }
 
         .titles-block {
@@ -402,10 +402,10 @@
         }
 
         .title-en {
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 700;
             color: var(--text-primary);
-            line-height: 1.2;
+            line-height: 1.15;
             display: inline-block;
             white-space: nowrap;
             user-select: none;
@@ -430,11 +430,11 @@
         .title-divider {
             height: 1px;
             background-color: var(--line-color);
-            margin: 2px 0;
+            margin: 1px 0;
             width: 100%;
         }
 
-        /* Разработчик и Страна разделены друг под другом */
+        /* Разработчик и Страна разделены друг под другом (увеличен размер шрифта) */
         .dev-country-block {
             display: flex;
             flex-direction: column;
@@ -442,7 +442,7 @@
         }
 
         .dev-text, .country-text {
-            font-size: 10px;
+            font-size: 11.5px; /* Увеличен шрифт */
             color: var(--text-secondary);
             white-space: nowrap;
             overflow: hidden;
@@ -463,9 +463,9 @@
 
         /* ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ ПЛАШЕК */
         .ios-pill, .right-pill {
-            font-size: 10.5px;
+            font-size: 11px; /* Чуть увеличен размер текста */
             font-weight: 600;
-            padding: 5px 8px; /* Увеличена высота плашек */
+            padding: 2px 6px; /* Сокращена высота плашек */
             border-radius: 6px;
             line-height: 1.15;
             display: inline-flex;
@@ -488,14 +488,15 @@
             color: var(--accent-blue);
             white-space: normal;
             word-break: break-word;
-            max-height: 32px;
+            max-height: 28px;
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             text-align: left;
             line-height: 1.1;
-            padding: 4px 6px;
+            padding: 2px 6px;
+            font-size: 10px;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -531,7 +532,7 @@
         .status-not-played { color: var(--status-not-played) !important; background: var(--status-not-played-bg) !important; }
 
         .time-pill { background-color: var(--badge-bg); color: var(--text-primary); }
-        .date-pill { background-color: var(--badge-bg); color: var(--text-primary); font-size: 10px; }
+        .date-pill { background-color: var(--badge-bg); color: var(--text-primary); font-size: 10.5px; }
 
         .loading {
             text-align: center;
