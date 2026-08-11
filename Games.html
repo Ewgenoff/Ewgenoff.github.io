@@ -237,11 +237,11 @@
             gap: 12px;
         }
 
-        /* ОБЕРТКА ДЛЯ СВАЙПА МИНИ-КАРТОЧКИ */
+        /* ОБЕРТКА ДЛЯ СВАЙПА МИНИ-КАРТОЧКИ (Высота увеличена для размещения названия и 3 строк плашек) */
         .swipe-card-wrapper {
             position: relative;
             width: 100%;
-            height: 93px;
+            height: 115px;
             border-radius: 16px;
             overflow: hidden;
             touch-action: pan-y;
@@ -273,18 +273,21 @@
             object-fit: cover;
             flex-shrink: 0;
             background: var(--badge-bg);
+            cursor: pointer;
         }
 
+        /* Прокрутка текста пальцем, если не влезает */
         .card-back-desc {
             flex: 1;
+            height: 100%;
             font-size: 11.5px;
             line-height: 1.35;
             color: var(--text-secondary);
-            display: -webkit-box;
-            -webkit-line-clamp: 4;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            overflow-y: auto;
+            word-break: break-word;
+            padding-right: 4px;
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* КАРТОЧКА ИГРЫ (ЛИЦЕВАЯ) */
@@ -307,6 +310,7 @@
             cursor: pointer;
             will-change: transform;
             transition: transform 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+            user-select: none;
         }
 
         .game-card.swiping {
@@ -325,7 +329,7 @@
             align-items: center;
             flex-shrink: 0;
             width: 48px;
-            height: 69px;
+            height: 91px;
         }
 
         /* Объединенная плашка Оценки и Флага */
@@ -358,7 +362,7 @@
         /* Логотип игры */
         .game-logo-container {
             width: 48px;
-            height: 28px;
+            height: 38px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -409,9 +413,10 @@
             text-decoration: none;
         }
 
+        /* Ускоренная анимация бегущей строки (4s вместо 8s) */
         .scroll-text {
             display: inline-block;
-            animation: scroll-left-right 8s linear infinite alternate;
+            animation: scroll-left-right 4s linear infinite alternate;
         }
 
         @keyframes scroll-left-right {
@@ -480,7 +485,7 @@
             justify-content: space-between;
             align-items: flex-end;
             flex-shrink: 0;
-            height: 69px;
+            height: 91px;
         }
 
         .right-pill {
@@ -730,6 +735,7 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
             transition: transform 0.3s ease;
             user-select: none;
+            cursor: pointer;
         }
 
         @media (max-width: 360px) {
@@ -777,9 +783,9 @@
     </svg>
 </button>
 
-<!-- Модалка полноэкранного фото/логотипа -->
+<!-- Модалка полноэкранного фото/логотипа (Закрытие при повторном клике) -->
 <div class="logo-modal-overlay" id="logo-modal-overlay" onclick="closeLogoModalWithPrevent(event)">
-    <img id="logo-modal-img" class="logo-modal-img" src="" alt="Фото/Логотип игры">
+    <img id="logo-modal-img" class="logo-modal-img" src="" alt="Фото/Логотип игры" onclick="closeLogoModalWithPrevent(event)">
 </div>
 
 <!-- Модалка сортировки (iOS Style) -->
@@ -1062,20 +1068,21 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'swipe-card-wrapper';
 
-            // Оформление обратной стороны карточки
+            const photoSrc = item.logo || item.image || '';
+            const backCoverSrc = item.image || item.logo || '';
+
+            // Оформление обратной стороны карточки (с полноэкранным открытием фото и скроллом)
             const cardBack = document.createElement('div');
             cardBack.className = 'game-card-back';
             cardBack.innerHTML = `
-                <img src="${item.image || ''}" alt="Обложка" class="card-back-cover" onerror="this.style.opacity='0'">
-                <div class="card-back-desc">${item.description || 'Описание отсутствует.'}</div>
+                <img src="${backCoverSrc}" alt="Обложка" class="card-back-cover" onerror="this.style.opacity='0'" onclick="event.stopPropagation(); openLogoModal('${backCoverSrc}')">
+                <div class="card-back-desc" onclick="event.stopPropagation()">${item.description || 'Описание отсутствует.'}</div>
             `;
 
             // Лицевая сторона карточки
             const card = document.createElement('div');
             card.className = `game-card ${borderClass}`;
             card.dataset.swiped = 'false';
-
-            const photoSrc = item.logo || item.image || '';
 
             card.innerHTML = `
                 <div class="left-col">
@@ -1114,7 +1121,7 @@
             wrapper.appendChild(card);
             container.appendChild(wrapper);
 
-            // Настройка анимации бегущей строки для названия, если не помещается
+            // Настройка анимации бегущей строки (ускоренной в CSS)
             setTimeout(() => {
                 const titleEl = document.getElementById(`title-text-${index}`);
                 if (titleEl) {
@@ -1142,19 +1149,20 @@
                 lastTapTime = currentTime;
             });
 
-            // ЛОГИКА ПОЛНОГО СВАЙПА/СДВИГА КАРТОЧКИ ВЛЕВО И ВПРАВО
-            let startX = 0, startY = 0, isSwiping = false;
+            // ВЫСОКАЯ ЧУВСТВИТЕЛЬНОСТЬ И СВАЙП ПО ВСЕЙ ОБЛАСТИ
+            let startX = 0, startY = 0, isSwiping = false, currentDiffX = 0;
 
-            const handleTouchStart = (e) => {
+            const handleStart = (e) => {
                 if (e.target.closest('.ios-pill, .game-logo, .title-en-container')) return;
                 const touch = e.touches ? e.touches[0] : e;
                 startX = touch.clientX;
                 startY = touch.clientY;
+                currentDiffX = 0;
                 isSwiping = true;
                 card.classList.add('swiping');
             };
 
-            const handleTouchMove = (e) => {
+            const handleMove = (e) => {
                 if (!isSwiping) return;
                 const touch = e.touches ? e.touches[0] : e;
                 const diffX = touch.clientX - startX;
@@ -1162,28 +1170,26 @@
 
                 if (Math.abs(diffX) > Math.abs(diffY)) {
                     if (e.cancelable) e.preventDefault();
+                    currentDiffX = diffX;
                 }
             };
 
-            const handleTouchEnd = (e) => {
+            const handleEnd = (e) => {
                 if (!isSwiping) return;
                 isSwiping = false;
                 card.classList.remove('swiping');
 
-                const endTouch = e.changedTouches ? e.changedTouches[0] : e;
-                const totalDiffX = endTouch.clientX - startX;
-
-                // Если карточка уже сдвинута — при повторном клике/сдвиге возвращаем назад
+                // Если карточка уже была сдвинута — при клике/тапе возвращаем назад
                 if (card.dataset.swiped === 'true') {
                     card.style.transform = 'translateX(0px)';
                     card.dataset.swiped = 'false';
                     return;
                 }
 
-                // Порог сдвига карточки
-                if (Math.abs(totalDiffX) > 40) {
+                // Чувствительный порог смахивания — 15px
+                if (Math.abs(currentDiffX) > 15) {
                     resetAllSwipedCards();
-                    const direction = totalDiffX > 0 ? '100%' : '-100%';
+                    const direction = currentDiffX > 0 ? '100%' : '-100%';
                     card.style.transform = `translateX(${direction})`;
                     card.dataset.swiped = 'true';
                 } else {
@@ -1192,13 +1198,13 @@
                 }
             };
 
-            card.addEventListener('touchstart', handleTouchStart, { passive: false });
-            card.addEventListener('touchmove', handleTouchMove, { passive: false });
-            card.addEventListener('touchend', handleTouchEnd);
+            card.addEventListener('touchstart', handleStart, { passive: false });
+            card.addEventListener('touchmove', handleMove, { passive: false });
+            card.addEventListener('touchend', handleEnd);
 
-            card.addEventListener('mousedown', handleTouchStart);
-            window.addEventListener('mousemove', (e) => { if (isSwiping) handleTouchMove(e); });
-            window.addEventListener('mouseup', (e) => { if (isSwiping) handleTouchEnd(e); });
+            card.addEventListener('mousedown', handleStart);
+            window.addEventListener('mousemove', (e) => { if (isSwiping) handleMove(e); });
+            window.addEventListener('mouseup', (e) => { if (isSwiping) handleEnd(e); });
         });
     }
 
