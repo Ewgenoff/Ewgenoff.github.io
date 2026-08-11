@@ -8,7 +8,7 @@
         :root {
             --bg-color: #000000;
             --card-bg: rgba(28, 28, 30, 0.9);
-            --card-border: #8e8e93; /* П.11 Серые рамки для всех карточек */
+            --card-border: #8e8e93;
             --text-primary: #ffffff;
             --text-secondary: #98989d;
             --text-muted: #636366;
@@ -30,7 +30,6 @@
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            /* П.21 Новый глобальный шрифт */
             font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             -webkit-tap-highlight-color: transparent;
         }
@@ -137,7 +136,6 @@
             align-items: center;
         }
 
-        /* П.15 & П.16 Контейнер поиска со значком и счетчиком */
         .search-wrapper {
             position: relative;
             flex: 1 1 0;
@@ -159,22 +157,39 @@
             background: var(--badge-bg);
             border: none;
             border-radius: 10px;
-            padding: 8px 50px 8px 30px; /* П.15 Отступ под иконку и П.16 под счетчик справа */
+            padding: 8px 70px 8px 30px;
             font-size: 14px;
             color: var(--text-primary);
             outline: none;
+        }
+
+        /* П.8 Крестик очистки текста */
+        .clear-search-btn {
+            position: absolute;
+            right: 42px;
+            background: none;
+            border: none;
+            color: #8e8e93;
+            font-size: 14px;
+            cursor: pointer;
+            display: none;
+            padding: 2px;
+            line-height: 1;
+        }
+
+        .clear-search-btn.visible {
+            display: block;
         }
 
         .search-count {
             position: absolute;
             right: 10px;
             font-size: 12px;
-            color: #8e8e93; /* П.16 Серый цвет */
+            color: #8e8e93;
             pointer-events: none;
             font-weight: 600;
         }
 
-        /* П.2 & П.3 Сброс и Сортировка - Серый цвет */
         .reset-btn, .sort-btn {
             background: #3a3a3c;
             color: var(--text-primary);
@@ -193,24 +208,22 @@
             transition: all 0.2s ease;
         }
 
-        /* П.3 Синяя обводка только при активном фильтре разработчика/страны/жанра */
         .reset-btn.active {
             background: #3a3a3c;
             color: var(--text-primary);
             box-shadow: 0 0 0 2px var(--accent-blue);
         }
 
-        /* П.17 Увеличено расстояние между карточками (13px) */
         .cards-list {
             display: flex;
             flex-direction: column;
             gap: 13px;
         }
 
-        /* П.18 Увеличена высота карточки (132px) */
         .card-flip-container {
             width: 100%;
-            height: 132px;
+            height: auto;
+            min-height: 132px;
             perspective: 1000px;
         }
 
@@ -227,9 +240,7 @@
         }
 
         .game-card, .game-card-back {
-            position: absolute;
-            top: 0;
-            left: 0;
+            position: relative;
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
@@ -239,6 +250,9 @@
         }
 
         .game-card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
             background-color: var(--card-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -279,7 +293,7 @@
             background-color: var(--card-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1.5px solid var(--card-border) !important; /* П.11 Внимание: Все карточки серые */
+            border: 1.5px solid var(--card-border) !important;
             padding: 8px 12px;
             display: flex;
             gap: 10px;
@@ -288,7 +302,6 @@
             user-select: none;
         }
 
-        /* П.10 & П.19 Левая колонка для вывода одной крупной цифры оценки */
         .left-col {
             display: flex;
             flex-direction: column;
@@ -296,16 +309,21 @@
             align-items: center;
             flex-shrink: 0;
             width: 54px;
-            height: 100%;
         }
 
-        /* П.19 Оценка текстом, крупный размер, убрана плашка */
         .single-score-text {
-            font-size: 25px; /* Увеличено в 2 раза */
+            font-size: 25px;
             font-weight: 800;
             line-height: 1;
             text-align: center;
             padding-top: 2px;
+        }
+
+        /* П.3 Иконка озвучки под оценкой, крупнее */
+        .voice-under-score {
+            font-size: 16px;
+            margin-top: 4px;
+            text-align: center;
         }
 
         .game-logo-container {
@@ -314,6 +332,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-top: auto;
         }
 
         .game-logo {
@@ -338,61 +357,40 @@
             display: flex;
             flex-direction: column;
             width: 100%;
-            overflow: hidden;
         }
 
-        .title-en-container {
-            width: 100%;
-            overflow: hidden;
-            white-space: nowrap;
-            position: relative;
-        }
-
-        /* П.4 Название игры на 1 пункт больше (15px) */
+        /* П.1 Название переносится на 2-ю строку, если не влезает */
         .title-en {
-            font-size: 15px;
+            font-size: 16px; /* П.7 Размер текста крупнее */
             font-weight: 700;
             color: var(--text-primary);
             line-height: 1.2;
-            display: inline-block;
-            white-space: nowrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
             user-select: none;
             cursor: pointer;
             text-decoration: none;
         }
 
-        .scroll-text {
-            display: inline-block;
-            animation: scroll-left-right 4s linear infinite alternate;
+        /* П.10 Тонкая серая линия под названием */
+        .title-divider {
+            height: 1px;
+            background-color: #3a3a3c;
+            margin: 4px 0;
+            width: 100%;
         }
 
-        @keyframes scroll-left-right {
-            0%, 15% { transform: translateX(0%); }
-            85%, 100% { transform: translateX(var(--scroll-dist, -50%)); }
-        }
-
-        /* П.6 Отодвинуть разработчика и страну вниз от названия (margin-top) */
         .dev-country-block {
             display: flex;
             flex-direction: column;
             gap: 2px;
-            margin-top: 6px;
         }
 
-        /* П.12 Разработчик #B5B7BA */
-        .dev-text {
-            font-size: 10.5px;
+        /* П.2, П.9 Размер 12px, единый цвет как у Разработчика (#B5B7BA) */
+        .dev-text, .country-text {
+            font-size: 12px;
             color: #B5B7BA;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            line-height: 1.15;
-        }
-
-        /* П.13 Страна #F4F4F5 */
-        .country-text {
-            font-size: 10.5px;
-            color: #F4F4F5;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -403,6 +401,7 @@
             display: flex;
             align-items: center;
             gap: 4px;
+            margin-top: 4px;
         }
 
         .ios-pill, .right-pill {
@@ -418,7 +417,6 @@
             box-sizing: border-box;
         }
 
-        /* П.14 Жанр - плашка фон: rgba(40, 130, 240, .15) , текст #4EA3FF */
         .genre-pill {
             background-color: rgba(40, 130, 240, 0.15) !important;
             color: #4EA3FF !important;
@@ -442,7 +440,6 @@
             justify-content: space-between;
             align-items: flex-end;
             flex-shrink: 0;
-            height: 100%;
         }
 
         .right-pill {
@@ -452,22 +449,34 @@
             white-space: nowrap;
         }
 
+        /* П.5 Размер текста Статус 12px */
+        .status-passed, .status-playing, .status-not-played {
+            font-size: 12px;
+        }
+
         .status-passed { color: var(--status-passed); background: var(--status-passed-bg); }
         .status-playing { color: var(--status-playing); background: var(--status-playing-bg); }
         .status-not-played { color: var(--status-not-played) !important; background: var(--status-not-played-bg) !important; }
 
-        .time-pill { background-color: var(--badge-bg); color: var(--text-primary); }
-
-        /* П.19 Звук над датой */
-        .voice-text {
-            font-size: 10px;
+        /* П.6 Текст без плашки, размер 12px */
+        .time-no-pill {
             color: #B5B7BA;
-            margin-bottom: 2px;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: right;
+            white-space: nowrap;
         }
 
-        /* П.8 Дата релиза не в плашке, цвет как у разработчика (#B5B7BA) */
-        .date-text {
+        .time-label {
             font-size: 10px;
+            color: var(--text-secondary);
+            text-align: right;
+            display: block;
+        }
+
+        /* П.6, П.9 Размер даты релиза 12px, цвет как у разработчика */
+        .date-text {
+            font-size: 12px;
             color: #B5B7BA;
             font-weight: 600;
         }
@@ -693,15 +702,14 @@
             <div class="counter-btn not-played" id="btn-count-not-played" onclick="filterByStatus('not-played')">В планах <span id="count-not-played">0</span></div>
         </div>
         <div class="controls-bar">
-            <!-- П.15 & П.16 Иконка, новый placeholder "Название игры..." и счетчик -->
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
                 <input type="text" id="search-input" class="search-input" placeholder="Название игры...">
+                <!-- П.8 Крестик очистки -->
+                <button class="clear-search-btn" id="clear-search-btn" onclick="clearSearch()">✖</button>
                 <span class="search-count" id="search-count">0</span>
             </div>
-            <!-- П.1 Переключатель темы полностью убран -->
             <button class="reset-btn" id="reset-btn" onclick="resetAllFilters()">Сброс</button>
-            <!-- П.2 Название "Сортировка" и серый цвет -->
             <button class="sort-btn" id="open-sort-btn">Сортировка</button>
         </div>
     </div>
@@ -769,19 +777,38 @@
     let currentFilterTab = 'genre';
     let isSorted = false;
 
-    // П.7 У страны убран флаг
+    // П.4 Добавление флагов к странам
+    const countryFlags = {
+        'США': '🇺🇸',
+        'USA': '🇺🇸',
+        'Россия': '🇷🇺',
+        'Япония': '🇯🇵',
+        'Великобритания': '🇬🇧',
+        'Франция': '🇫🇷',
+        'Германия': '🇩🇪',
+        'Канада': '🇨🇦',
+        'Польша': '🇵🇱',
+        'Швеция': '🇸🇪',
+        'Китай': '🇨🇳',
+        'Украина': '🇺🇦',
+        'Финляндия': '🇫🇮',
+        'Испания': '🇪🇸',
+        'Италия': '🇮🇹',
+        'Австралия': '🇦🇺'
+    };
+
     function getCountryWithFlags(countryStr) {
         if (!countryStr) return '';
-        return countryStr;
+        const flag = countryFlags[countryStr.trim()] || '';
+        return flag ? `${flag} ${countryStr}` : countryStr;
     }
 
-    // П.19 Градация цвета для оценки
     function getScoreColor(scoreNum) {
-        if (scoreNum >= 90) return '#34c759'; // зелёный
-        if (scoreNum >= 80) return '#30b0c7'; // бирюзовый
-        if (scoreNum >= 70) return '#ffcc00'; // жёлтый
-        if (scoreNum >= 60) return '#ff9500'; // оранжевый
-        return '#ff3b30';                   // красный
+        if (scoreNum >= 90) return '#34c759';
+        if (scoreNum >= 80) return '#30b0c7';
+        if (scoreNum >= 70) return '#ffcc00';
+        if (scoreNum >= 60) return '#ff9500';
+        return '#ff3b30';
     }
 
     function parseCSV(text) {
@@ -825,10 +852,10 @@
         return lines;
     }
 
+    // П.6 Формат времени ХХ-ХХч
     function formatHours(val) {
-        if (!val) return '0ч';
-        let cleaned = val.toString().replace(/[^0-9]/g, '');
-        return cleaned ? cleaned + 'ч' : val + 'ч';
+        if (!val) return '0';
+        return val.toString().replace(/[^0-9]/g, '') || val;
     }
 
     function getGameStatus(statusNorm) {
@@ -854,7 +881,6 @@
         document.getElementById('total-count').textContent = data.length;
     }
 
-    // П.3 Синяя обводка только при фильтрации по стране, разработчику или жанру
     function checkResetButtonState() {
         const hasSpecificFilter = selectedDeveloperFilter || selectedCountryFilter || selectedGenreFilter;
         const resetBtn = document.getElementById('reset-btn');
@@ -889,6 +915,7 @@
         isSorted = false;
         
         document.getElementById('search-input').value = '';
+        document.getElementById('clear-search-btn').classList.remove('visible');
         document.querySelectorAll('.counter-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById('reset-btn').classList.remove('active');
         
@@ -933,7 +960,6 @@
             return true;
         });
 
-        // П.16 Отображение кол-ва найденных карточек справа в поиске
         document.getElementById('search-count').textContent = filteredGamesData.length;
 
         if (filteredGamesData.length === 0) {
@@ -945,15 +971,15 @@
             const status = getGameStatus(item.statusNorm);
             let statusClass = `status-${status}`;
 
-            // П.19 Вычисление цвета текста оценки
             let scoreColor = getScoreColor(item.scoreNum);
 
+            // П.3 Значок озвучки
             let flagEmoji = item.voiceover.includes('есть') ? '🇷🇺' : '🇺🇸';
 
-            // П.21 Замена иконки геймпада на ⏰ (часы)
+            // П.6 Формат времени 🕐 ХХ-ХХч
             let timeStr = '';
             if (item.timeMain || item.timeFull) {
-                timeStr = `⏰ ${formatHours(item.timeMain)}/${formatHours(item.timeFull)}`;
+                timeStr = `🕐 ${formatHours(item.timeMain)}-${formatHours(item.timeFull)}ч`;
             }
 
             const formattedCountry = getCountryWithFlags(item.country);
@@ -983,8 +1009,9 @@
 
             card.innerHTML = `
                 <div class="left-col">
-                    <!-- П.19 Крупная цифра оценки без плашки -->
                     <div class="single-score-text" style="color: ${scoreColor};">${item.scoreText}</div>
+                    <!-- П.3 Значок озвучки перенесен под оценку, сделан крупнее -->
+                    <div class="voice-under-score">${flagEmoji}</div>
                     <div class="game-logo-container">
                         ${photoSrc ? `<img src="${photoSrc}" alt="Logo" class="game-logo" loading="lazy" onclick="event.stopPropagation(); openLogoModal('${photoSrc}')">` : ''}
                     </div>
@@ -992,33 +1019,37 @@
 
                 <div class="mid-col">
                     <div class="titles-block">
-                        <div class="title-en-container">
-                            <span class="title-en" id="title-text-${index}">${item.titleEn}</span>
-                        </div>
-                        <!-- П.5 Горизонтальная линия убрана -->
-                        <!-- П.6 Отодвинуты вниз от названия -->
+                        <!-- П.1 Перенос названия на 2-ю строку при необходимости, П.7 Увеличен размер -->
+                        <div class="title-en">${item.titleEn}</div>
+                        <!-- П.10 Тонкая серая линия под названием -->
+                        <div class="title-divider"></div>
                         <div class="dev-country-block">
-                            <!-- П.12 Цвет #B5B7BA -->
+                            <!-- П.2, П.9 Цвет #B5B7BA, размер 12px -->
                             ${item.developer ? `<div class="dev-text">${item.developer}</div>` : ''}
-                            <!-- П.13 Цвет #F4F4F5 & П.7 Без флага -->
+                            <!-- П.2, П.9 Цвет #B5B7BA, размер 12px -->
                             ${formattedCountry ? `<div class="country-text">${formattedCountry}</div>` : ''}
                         </div>
                     </div>
                     <div class="mid-col-bottom">
-                        <!-- П.14 Стили жанра -->
                         ${item.genre ? `<span class="ios-pill genre-pill" onclick="event.stopPropagation(); openCombinedFilterSheet('genre')">${item.genre}</span>` : ''}
                     </div>
                 </div>
 
                 <div class="right-col">
+                    <!-- П.5 Размер текста Статус 12px -->
                     <div class="right-pill ${statusClass}">${item.status || 'В планах'}</div>
-                    <!-- П.21 Значок часов -->
-                    ${timeStr ? `<div class="right-pill time-pill">${timeStr}</div>` : ''}
+                    
+                    <!-- П.6 Без плашки, с надписью, формат ХХ-ХХч -->
+                    ${timeStr ? `
+                        <div style="display: flex; flex-direction: column; align-items: flex-end;">
+                            <span class="time-label">время игры:</span>
+                            <div class="time-no-pill">${timeStr}</div>
+                        </div>
+                    ` : ''}
+                    
                     <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                        <!-- П.19 Динамик текстом над датой -->
-                        <div class="voice-text">🔈 ${flagEmoji}</div>
-                        <!-- П.8 Без плашки & П.9 Значок ПК (💻) перед датой -->
-                        ${item.releaseDate ? `<div class="date-text">💻 ${item.releaseDate}</div>` : ''}
+                        <!-- П.3 Значки динамика и компа убраны. П.6, П.9 Дата релиза 12px и цвет #B5B7BA -->
+                        ${item.releaseDate ? `<div class="date-text">${item.releaseDate}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -1028,28 +1059,11 @@
             flipContainer.appendChild(flipper);
             container.appendChild(flipContainer);
 
-            // Клик для переворота карточки
             card.addEventListener('click', (e) => {
                 if (e.target.closest('.genre-pill, .game-logo')) return;
                 flipContainer.classList.add('flipped');
             });
 
-            // Настройка бегущей строки
-            setTimeout(() => {
-                const titleEl = document.getElementById(`title-text-${index}`);
-                if (titleEl) {
-                    const containerWidth = titleEl.parentElement.clientWidth;
-                    const textWidth = titleEl.scrollWidth;
-                    if (textWidth > containerWidth) {
-                        const diff = textWidth - containerWidth + 10;
-                        const percent = (diff / textWidth) * 100;
-                        titleEl.style.setProperty('--scroll-dist', `-${percent}%`);
-                        titleEl.classList.add('scroll-text');
-                    }
-                }
-            }, 50);
-
-            // П.20 Открытие Википедии по двойному тапу ПО ВСЕЙ КАРТОЧКЕ
             let lastTapTime = 0;
             card.addEventListener('click', (e) => {
                 if (e.target.closest('.genre-pill, .game-logo')) return;
@@ -1107,10 +1121,25 @@
 
     // ПОИСК
     const searchInput = document.getElementById('search-input');
+    const clearBtn = document.getElementById('clear-search-btn');
+
     searchInput.addEventListener('input', (e) => {
         currentFilterText = e.target.value;
+        if (currentFilterText.length > 0) {
+            clearBtn.classList.add('visible');
+        } else {
+            clearBtn.classList.remove('visible');
+        }
         renderCards(gamesData);
     });
+
+    // П.8 Очистка поиска
+    function clearSearch() {
+        searchInput.value = '';
+        currentFilterText = '';
+        clearBtn.classList.remove('visible');
+        renderCards(gamesData);
+    }
 
     // СКРОЛЛ И FAB
     let lastScrollY = window.scrollY;
@@ -1278,6 +1307,7 @@
             const btn = document.createElement('button');
             btn.className = 'filter-item-btn';
             
+            // П.4 Отображение флага в меню фильтрации по странам
             const labelText = currentFilterTab === 'country' ? getCountryWithFlags(key) : key;
             btn.innerHTML = `${labelText} <span>(${counts[key]})</span>`;
             
