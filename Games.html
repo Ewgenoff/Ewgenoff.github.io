@@ -163,7 +163,6 @@
             outline: none;
         }
 
-        /* П.8 Крестик очистки текста */
         .clear-search-btn {
             position: absolute;
             right: 42px;
@@ -190,7 +189,25 @@
             font-weight: 600;
         }
 
-        .reset-btn, .sort-btn {
+        /* Узкая кнопка сброса (✕) */
+        .reset-btn {
+            background: #3a3a3c;
+            color: var(--text-primary);
+            border: none;
+            border-radius: 10px;
+            width: 36px;
+            height: 36px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .sort-btn {
             background: #3a3a3c;
             color: var(--text-primary);
             border: none;
@@ -319,7 +336,6 @@
             padding-top: 2px;
         }
 
-        /* П.3 Иконка озвучки под оценкой, крупнее */
         .voice-under-score {
             font-size: 16px;
             margin-top: 4px;
@@ -343,7 +359,6 @@
             cursor: pointer;
         }
 
-        /* Центральная колонка */
         .mid-col {
             flex: 1;
             display: flex;
@@ -359,9 +374,8 @@
             width: 100%;
         }
 
-        /* П.1 Название переносится на 2-ю строку, если не влезает */
         .title-en {
-            font-size: 16px; /* П.7 Размер текста крупнее */
+            font-size: 16px;
             font-weight: 700;
             color: var(--text-primary);
             line-height: 1.2;
@@ -373,7 +387,6 @@
             text-decoration: none;
         }
 
-        /* П.10 Тонкая серая линия под названием */
         .title-divider {
             height: 1px;
             background-color: #3a3a3c;
@@ -387,7 +400,6 @@
             gap: 2px;
         }
 
-        /* П.2, П.9 Размер 12px, единый цвет как у Разработчика (#B5B7BA) */
         .dev-text, .country-text {
             font-size: 12px;
             color: #B5B7BA;
@@ -433,7 +445,6 @@
             cursor: pointer;
         }
 
-        /* Правая колонка */
         .right-col {
             display: flex;
             flex-direction: column;
@@ -449,7 +460,6 @@
             white-space: nowrap;
         }
 
-        /* П.5 Размер текста Статус 12px */
         .status-passed, .status-playing, .status-not-played {
             font-size: 12px;
         }
@@ -458,7 +468,6 @@
         .status-playing { color: var(--status-playing); background: var(--status-playing-bg); }
         .status-not-played { color: var(--status-not-played) !important; background: var(--status-not-played-bg) !important; }
 
-        /* П.6 Текст без плашки, размер 12px */
         .time-no-pill {
             color: #B5B7BA;
             font-size: 12px;
@@ -474,7 +483,6 @@
             display: block;
         }
 
-        /* П.6, П.9 Размер даты релиза 12px, цвет как у разработчика */
         .date-text {
             font-size: 12px;
             color: #B5B7BA;
@@ -704,12 +712,13 @@
         <div class="controls-bar">
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="search-input" class="search-input" placeholder="Название игры...">
-                <!-- П.8 Крестик очистки -->
+                <!-- Текст Поиск... вместо Название игры... -->
+                <input type="text" id="search-input" class="search-input" placeholder="Поиск...">
                 <button class="clear-search-btn" id="clear-search-btn" onclick="clearSearch()">✖</button>
                 <span class="search-count" id="search-count">0</span>
             </div>
-            <button class="reset-btn" id="reset-btn" onclick="resetAllFilters()">Сброс</button>
+            <!-- Узкая кнопка ✕ вместо Сброс -->
+            <button class="reset-btn" id="reset-btn" onclick="resetAllFilters()" title="Сбросить все фильтры">✕</button>
             <button class="sort-btn" id="open-sort-btn">Сортировка</button>
         </div>
     </div>
@@ -777,13 +786,12 @@
     let currentFilterTab = 'genre';
     let isSorted = false;
 
-    // П.4 Добавление флагов к странам
+    // Полный словарь флагов для всех стран
     const countryFlags = {
-        'США': '🇺🇸',
-        'USA': '🇺🇸',
+        'США': '🇺🇸', 'USA': '🇺🇸',
         'Россия': '🇷🇺',
         'Япония': '🇯🇵',
-        'Великобритания': '🇬🇧',
+        'Великобритания': '🇬🇧', 'Англия': '🇬🇧',
         'Франция': '🇫🇷',
         'Германия': '🇩🇪',
         'Канада': '🇨🇦',
@@ -794,13 +802,25 @@
         'Финляндия': '🇫🇮',
         'Испания': '🇪🇸',
         'Италия': '🇮🇹',
-        'Австралия': '🇦🇺'
+        'Австралия': '🇦🇺',
+        'Бельгия': '🇧🇪',
+        'Дания': '🇩🇰',
+        'Кипр': '🇨🇾',
+        'Нидерланды': '🇳🇱',
+        'Новая Зеландия': '🇳🇿',
+        'Сингапур': '🇸🇬',
+        'Чехия': '🇨🇿',
+        'Южная Корея': '🇰🇷'
     };
 
+    // Добавление флагов ТОЛЬКО для фильтров (включая разделение через "/")
     function getCountryWithFlags(countryStr) {
         if (!countryStr) return '';
-        const flag = countryFlags[countryStr.trim()] || '';
-        return flag ? `${flag} ${countryStr}` : countryStr;
+        return countryStr.split('/').map(part => {
+            const trimmed = part.trim();
+            const flag = countryFlags[trimmed] || '';
+            return flag ? `${flag} ${trimmed}` : trimmed;
+        }).join(' / ');
     }
 
     function getScoreColor(scoreNum) {
@@ -852,7 +872,6 @@
         return lines;
     }
 
-    // П.6 Формат времени ХХ-ХХч
     function formatHours(val) {
         if (!val) return '0';
         return val.toString().replace(/[^0-9]/g, '') || val;
@@ -972,17 +991,15 @@
             let statusClass = `status-${status}`;
 
             let scoreColor = getScoreColor(item.scoreNum);
-
-            // П.3 Значок озвучки
             let flagEmoji = item.voiceover.includes('есть') ? '🇷🇺' : '🇺🇸';
 
-            // П.6 Формат времени 🕐 ХХ-ХХч
             let timeStr = '';
             if (item.timeMain || item.timeFull) {
                 timeStr = `🕐 ${formatHours(item.timeMain)}-${formatHours(item.timeFull)}ч`;
             }
 
-            const formattedCountry = getCountryWithFlags(item.country);
+            // В карточках используем Чистый текст страны (БЕЗ флагов)
+            const rawCountry = item.country || '';
             const photoSrc = item.logo || item.image || '';
             const backCoverSrc = item.image || item.logo || '';
 
@@ -1010,7 +1027,6 @@
             card.innerHTML = `
                 <div class="left-col">
                     <div class="single-score-text" style="color: ${scoreColor};">${item.scoreText}</div>
-                    <!-- П.3 Значок озвучки перенесен под оценку, сделан крупнее -->
                     <div class="voice-under-score">${flagEmoji}</div>
                     <div class="game-logo-container">
                         ${photoSrc ? `<img src="${photoSrc}" alt="Logo" class="game-logo" loading="lazy" onclick="event.stopPropagation(); openLogoModal('${photoSrc}')">` : ''}
@@ -1019,15 +1035,12 @@
 
                 <div class="mid-col">
                     <div class="titles-block">
-                        <!-- П.1 Перенос названия на 2-ю строку при необходимости, П.7 Увеличен размер -->
                         <div class="title-en">${item.titleEn}</div>
-                        <!-- П.10 Тонкая серая линия под названием -->
                         <div class="title-divider"></div>
                         <div class="dev-country-block">
-                            <!-- П.2, П.9 Цвет #B5B7BA, размер 12px -->
                             ${item.developer ? `<div class="dev-text">${item.developer}</div>` : ''}
-                            <!-- П.2, П.9 Цвет #B5B7BA, размер 12px -->
-                            ${formattedCountry ? `<div class="country-text">${formattedCountry}</div>` : ''}
+                            <!-- Чистый текст страны без флага в карточках -->
+                            ${rawCountry ? `<div class="country-text">${rawCountry}</div>` : ''}
                         </div>
                     </div>
                     <div class="mid-col-bottom">
@@ -1036,10 +1049,8 @@
                 </div>
 
                 <div class="right-col">
-                    <!-- П.5 Размер текста Статус 12px -->
                     <div class="right-pill ${statusClass}">${item.status || 'В планах'}</div>
                     
-                    <!-- П.6 Без плашки, с надписью, формат ХХ-ХХч -->
                     ${timeStr ? `
                         <div style="display: flex; flex-direction: column; align-items: flex-end;">
                             <span class="time-label">время игры:</span>
@@ -1048,7 +1059,6 @@
                     ` : ''}
                     
                     <div style="display: flex; flex-direction: column; align-items: flex-end;">
-                        <!-- П.3 Значки динамика и компа убраны. П.6, П.9 Дата релиза 12px и цвет #B5B7BA -->
                         ${item.releaseDate ? `<div class="date-text">${item.releaseDate}</div>` : ''}
                     </div>
                 </div>
@@ -1133,7 +1143,6 @@
         renderCards(gamesData);
     });
 
-    // П.8 Очистка поиска
     function clearSearch() {
         searchInput.value = '';
         currentFilterText = '';
@@ -1307,7 +1316,7 @@
             const btn = document.createElement('button');
             btn.className = 'filter-item-btn';
             
-            // П.4 Отображение флага в меню фильтрации по странам
+            // В окне-фильтре выводятся флаги перед странами
             const labelText = currentFilterTab === 'country' ? getCountryWithFlags(key) : key;
             btn.innerHTML = `${labelText} <span>(${counts[key]})</span>`;
             
