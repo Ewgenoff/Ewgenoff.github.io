@@ -240,7 +240,7 @@
         /* 3D ПЕРЕВОРОТ КАРТОЧКИ ПО КЛИКУ ПО ОСИ X */
         .card-flip-container {
             width: 100%;
-            height: 125px; /* Увеличено для большей высоты отделов */
+            height: 125px; /* Высота сохранена */
             perspective: 1000px;
         }
 
@@ -253,7 +253,7 @@
         }
 
         .card-flip-container.flipped .card-flipper {
-            transform: rotateX(180deg); /* Переворот по оси X */
+            transform: rotateX(180deg);
         }
 
         .game-card, .game-card-back {
@@ -277,9 +277,9 @@
             display: flex;
             gap: 10px;
             align-items: center;
-            transform: rotateX(180deg); /* Переворот по оси X */
+            transform: rotateX(180deg);
             border: 1.5px solid var(--card-border);
-            cursor: pointer; /* Кликабельна вся обратная сторона */
+            cursor: pointer;
         }
 
         .card-back-cover {
@@ -312,9 +312,9 @@
             -webkit-backdrop-filter: blur(20px);
             border-width: 1.5px;
             border-style: solid;
-            padding: 10px 12px;
+            padding: 8px 12px;
             display: flex;
-            gap: 12px;
+            gap: 10px;
             align-items: stretch;
             cursor: pointer;
             user-select: none;
@@ -324,7 +324,7 @@
         .border-playing { border-color: var(--status-playing) !important; }
         .border-not-played { border-color: var(--status-not-played) !important; }
 
-        /* Левая колонка - УВЕЛИЧЕНА ПО ВЫСОТЕ */
+        /* Левая колонка */
         .left-col {
             display: flex;
             flex-direction: column;
@@ -335,7 +335,6 @@
             height: 100%;
         }
 
-        /* Объединенная плашка Оценки и Флага - УВЕЛИЧЕНА */
         .combined-badge {
             width: 54px;
             padding: 4px 4px;
@@ -362,7 +361,6 @@
         .score-mid { color: var(--score-mid); background: var(--score-mid-bg); }
         .score-low { color: var(--score-low); background: var(--score-low-bg); }
 
-        /* Логотип игры - УВЕЛИЧЕН */
         .game-logo-container {
             width: 54px;
             height: 48px;
@@ -386,7 +384,7 @@
             flex-direction: column;
             justify-content: space-between;
             min-width: 0;
-            gap: 4px;
+            gap: 2px;
         }
 
         .titles-block {
@@ -396,7 +394,6 @@
             overflow: hidden;
         }
 
-        /* БЕГУЩАЯ СТРОКА НАЗВАНИЯ В ОДНУ СТРОКУ */
         .title-en-container {
             width: 100%;
             overflow: hidden;
@@ -405,7 +402,7 @@
         }
 
         .title-en {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 700;
             color: var(--text-primary);
             line-height: 1.2;
@@ -433,18 +430,24 @@
         .title-divider {
             height: 1px;
             background-color: var(--line-color);
-            margin: 3px 0;
+            margin: 2px 0;
             width: 100%;
         }
 
-        /* Текст Разработчик / Страна без плашки под линией */
-        .dev-country-text {
-            font-size: 11px;
+        /* Разработчик и Страна разделены друг под другом */
+        .dev-country-block {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .dev-text, .country-text {
+            font-size: 10px;
             color: var(--text-secondary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            line-height: 1.2;
+            line-height: 1.15;
             pointer-events: none;
         }
 
@@ -456,21 +459,19 @@
             display: flex;
             align-items: center;
             gap: 4px;
-            flex-wrap: wrap;
         }
 
-        /* ЕДИНЫЙ СТИЛЬ И ВЫСОТА ДЛЯ ВСЕХ ПЛАШЕК (Жанр, Статус, Время, Дата) */
+        /* ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ ПЛАШЕК */
         .ios-pill, .right-pill {
             font-size: 10.5px;
             font-weight: 600;
-            padding: 4px 8px; /* Одинаковая высота и отступы */
+            padding: 5px 8px; /* Увеличена высота плашек */
             border-radius: 6px;
-            line-height: 1.2;
+            line-height: 1.15;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 3px;
-            white-space: nowrap;
             box-sizing: border-box;
         }
 
@@ -481,9 +482,20 @@
             transition: opacity 0.2s ease, background-color 0.2s ease;
         }
 
+        /* Перенос жанра на 2 строки, если не влезает */
         .genre-pill {
             background-color: rgba(0, 122, 255, 0.12);
             color: var(--accent-blue);
+            white-space: normal;
+            word-break: break-word;
+            max-height: 32px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            text-align: left;
+            line-height: 1.1;
+            padding: 4px 6px;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -497,7 +509,7 @@
             opacity: 0.8;
         }
 
-        /* Правая колонка - РАВНОМЕРНОЕ РАСПРЕДЕЛЕНИЕ ПЛАШЕК */
+        /* Правая колонка */
         .right-col {
             display: flex;
             flex-direction: column;
@@ -511,6 +523,7 @@
             width: max-content;
             max-width: 130px;
             text-align: right;
+            white-space: nowrap;
         }
 
         .status-passed { color: var(--status-passed); background: var(--status-passed-bg); }
@@ -1061,8 +1074,7 @@
                 timeStr = `🎮 ${formatHours(item.timeMain)}/${formatHours(item.timeFull)}`;
             }
 
-            let devCountry = [item.developer, item.country].filter(Boolean).join(' / ');
-
+            const formattedCountry = getCountryWithFlags(item.country);
             const photoSrc = item.logo || item.image || '';
             const backCoverSrc = item.image || item.logo || '';
 
@@ -1083,7 +1095,7 @@
 
             // ПЕРЕВОРОТ ОБРАТНО ПРИ КЛИКЕ НА ОБРАТНУЮ СТОРОНУ
             cardBack.addEventListener('click', (e) => {
-                if (e.target.classList.contains('card-back-cover')) return; // Чтобы не переворачивать при открытии фото
+                if (e.target.classList.contains('card-back-cover')) return;
                 flipContainer.classList.remove('flipped');
             });
 
@@ -1108,7 +1120,10 @@
                             <span class="title-en" id="title-text-${index}">${item.titleEn}</span>
                         </div>
                         <div class="title-divider"></div>
-                        ${devCountry ? `<div class="dev-country-text">${devCountry}</div>` : ''}
+                        <div class="dev-country-block">
+                            ${item.developer ? `<div class="dev-text">${item.developer}</div>` : ''}
+                            ${formattedCountry ? `<div class="country-text">${formattedCountry}</div>` : ''}
+                        </div>
                         <span class="hidden-title-ru">${item.titleRu}</span>
                     </div>
                     <div class="mid-col-bottom">
@@ -1130,7 +1145,6 @@
 
             // КЛИК ПО КАРТОЧКЕ ДЛЯ ПЕРЕВОРОТА
             card.addEventListener('click', (e) => {
-                // Исключаем клики по интерактивным элементам
                 if (e.target.closest('.genre-pill, .game-logo, .title-en-container')) return;
                 flipContainer.classList.add('flipped');
             });
@@ -1220,7 +1234,6 @@
     let scrollTimeout;
 
     window.addEventListener('scroll', () => {
-        // ПЕРЕВОРОТ ВСЕХ КАРТОЧЕК ЛИЦЕВОЙ СТОРОНОЙ ПРИ СКРОЛЛЕ
         document.querySelectorAll('.card-flip-container.flipped').forEach(card => {
             card.classList.remove('flipped');
         });
@@ -1364,7 +1377,6 @@
             }
         });
 
-        // Обновляем заголовки вкладок с количеством элементов
         const genreSet = new Set(), devSet = new Set(), countrySet = new Set();
         gamesData.forEach(item => {
             if (item.genre) item.genre.split(',').forEach(g => g.trim() && genreSet.add(g.trim()));
