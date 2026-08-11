@@ -1074,17 +1074,56 @@
                 flipContainer.classList.add('flipped');
             });
 
-            let lastTapTime = 0;
-            card.addEventListener('click', (e) => {
-                if (e.target.closest('.genre-pill, .game-logo')) return;
-                const currentTime = new Date().getTime();
-                const tapLength = currentTime - lastTapTime;
-                if (tapLength < 300 && tapLength > 0) {
-                    e.stopPropagation();
-                    openWikipedia(item.wiki);
-                }
-                lastTapTime = currentTime;
-            });
+           // --- ОБРАБОТКА ДЛИННОГО ТАПА (LONG PRESS) ---
+let longPressTimer = null;
+let isLongPress = false;
+
+// Функция запуска таймера удержания
+const startLongPress = (e) => {
+    // Игнорируем клики по жанрам и логотипу
+    if (e.target.closest('.genre-pill, .game-logo')) return;
+    
+    isLongPress = false;
+    longPressTimer = setTimeout(() => {
+        isLongPress = true;
+        // Виброотклик на смартфонах (если поддерживается)
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
+        openWikipedia(item.wiki);
+    }, 500); // 500 мс = время удерживания для длинного тапа
+};
+
+// Функция отмены таймера, если палец подняли раньше или начали скроллить
+const cancelLongPress = () => {
+    if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+    }
+};
+
+// События для сенсорных экранов и мыши
+card.addEventListener('touchstart', startLongPress, { passive: true });
+card.addEventListener('touchend', cancelLongPress);
+card.addEventListener('touchmove', cancelLongPress); // Отмена при скролле
+
+card.addEventListener('mousedown', startLongPress);
+card.addEventListener('mouseup', cancelLongPress);
+card.addEventListener('mouseleave', cancelLongPress);
+
+// Переворот карточки по обычному клику (блокируется, если это был длинный тап)
+card.addEventListener('click', (e) => {
+    if (e.target.closest('.genre-pill, .game-logo')) return;
+    
+    if (isLongPress) {
+        e.stopPropagation();
+        e.preventDefault();
+        isLongPress = false;
+        return;
+    }
+    
+    flipContainer.classList.add('flipped');
+});
         });
     }
 
