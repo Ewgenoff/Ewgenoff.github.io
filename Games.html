@@ -1,15 +1,12 @@
-<file>Games.txt</file>
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Карточки игр</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* Только тёмная тема */
             --bg-color: #000000;
             --card-bg: rgba(28, 28, 30, 0.9);
             --card-border: rgba(84, 84, 88, 0.35);
@@ -23,11 +20,10 @@
             --status-playing-bg: rgba(255, 204, 0, 0.22);
             --status-not-played: #8e8e93;
             --status-not-played-bg: rgba(142, 142, 147, 0.22);
-            
+
             --badge-bg: #2c2c2e;
             --badge-text: #d1d1d6;
             --accent-blue: #0a84ff;
-            --line-color: rgba(255, 255, 255, 0.15);
             --shadow-color: rgba(0, 0, 0, 0.5);
         }
 
@@ -48,7 +44,6 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .container {
@@ -69,7 +64,7 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             padding: 10px 16px;
-            transition: transform 0.3s ease, background-color 0.3s ease;
+            transition: transform 0.3s ease;
             box-shadow: 0 4px 12px var(--shadow-color);
             display: flex;
             flex-direction: column;
@@ -139,7 +134,6 @@
             display: flex;
             gap: 8px;
             width: 100%;
-            align-items: center;
         }
 
         .search-wrapper {
@@ -148,39 +142,40 @@
             min-width: 0;
             display: flex;
             align-items: center;
-            background: var(--badge-bg);
-            border-radius: 10px;
-            padding: 0 12px;
-            height: 36px;
-        }
-
-        .search-icon {
-            margin-right: 6px;
-            font-size: 14px;
-            color: var(--text-secondary);
         }
 
         .search-input {
-            flex: 1;
-            background: transparent;
+            width: 100%;
+            background: var(--badge-bg);
             border: none;
-            outline: none;
+            border-radius: 10px;
+            padding: 8px 65px 8px 34px;
             font-size: 14px;
             color: var(--text-primary);
-            padding: 8px 0;
+            outline: none;
         }
 
-        .search-count {
-            font-size: 12px;
+        .search-icon {
+            position: absolute;
+            left: 10px;
+            font-size: 13px;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .search-counter {
+            position: absolute;
+            right: 10px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            pointer-events: none;
             font-weight: 600;
-            color: var(--text-muted);
-            margin-left: 8px;
         }
 
         .reset-btn, .sort-btn {
             background: var(--badge-bg);
             color: var(--text-primary);
-            border: 1px solid transparent;
+            border: 2px solid transparent;
             border-radius: 10px;
             padding: 0 14px;
             font-size: 13px;
@@ -195,19 +190,25 @@
             transition: all 0.2s ease;
         }
 
+        /* 3. Красный цвет убран, добавлена синяя обводка */
         .reset-btn.active {
             border-color: var(--accent-blue);
-            box-shadow: 0 0 0 1px var(--accent-blue);
+            color: var(--text-primary);
         }
 
-        /* Список карточек */
+        .sort-btn {
+            background: var(--badge-bg);
+            color: var(--text-primary);
+        }
+
+        /* 17. Расстояние между карточками 14px */
         .cards-list {
             display: flex;
             flex-direction: column;
             gap: 14px;
         }
 
-        /* ОБЕРТКА ДЛЯ СВАЙПА МИНИ-КАРТОЧКИ */
+        /* 18. Карточка больше по высоте (~100px) */
         .swipe-card-wrapper {
             position: relative;
             width: 100%;
@@ -217,7 +218,6 @@
             touch-action: pan-y;
         }
 
-        /* ОБРАТНАЯ СТОРОНА МИНИ-КАРТОЧКИ */
         .game-card-back {
             position: absolute;
             top: 0;
@@ -257,7 +257,7 @@
             text-overflow: ellipsis;
         }
 
-        /* КАРТОЧКА ИГРЫ (ЛИЦЕВАЯ) */
+        /* КАРТОЧКА ИГРЫ (11. Все обведены единой серой рамкой) */
         .game-card {
             position: relative;
             z-index: 2;
@@ -266,7 +266,7 @@
             background-color: var(--card-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1.5px solid var(--card-border);
+            border: 1px solid var(--card-border) !important;
             border-radius: 16px;
             padding: 10px 12px;
             display: flex;
@@ -282,7 +282,7 @@
             transition: none !important;
         }
 
-        /* Левая колонка */
+        /* 10. Левая колонка растянута в 1.5 раза */
         .left-col {
             display: flex;
             flex-direction: column;
@@ -293,35 +293,24 @@
             height: 80px;
         }
 
-        /* Плашка Оценки */
-        .combined-badge {
-            width: 48px;
-            flex: 1;
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 1px;
-            background: transparent;
-        }
-
-        .combined-score {
-            font-size: 26px;
+        /* 19. Только цифра оценки, увеличенная в 2 раза */
+        .score-number {
+            font-size: 24px;
             font-weight: 800;
             line-height: 1;
+            text-align: center;
         }
 
-        .score-90 { color: #34c759; }
-        .score-80 { color: #30D5C8; }
-        .score-70 { color: #ffcc00; }
-        .score-60 { color: #ff9500; }
-        .score-low { color: #ff3b30; }
+        /* Градация цветов оценки */
+        .score-green { color: #34c759; }
+        .score-cyan { color: #30d158; }
+        .score-yellow { color: #ffd60a; }
+        .score-orange { color: #ff9f0a; }
+        .score-red { color: #ff453a; }
 
-        /* Логотип игры */
         .game-logo-container {
             width: 48px;
-            height: 28px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -342,9 +331,6 @@
             flex-direction: column;
             justify-content: space-between;
             min-width: 0;
-            gap: 8px;
-            height: 80px;
-            padding-top: 2px;
         }
 
         .titles-block {
@@ -352,13 +338,14 @@
             flex-direction: column;
         }
 
+        /* 4. Название игры на 1pt больше (16px) */
         .title-en {
             font-size: 16px;
             font-weight: 700;
             color: var(--text-primary);
             line-height: 1.2;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             overflow: hidden;
             word-break: break-word;
@@ -368,11 +355,36 @@
             font-size: 12px;
             color: var(--text-secondary);
             font-weight: 400;
+            margin-top: 2px;
             display: -webkit-box;
-            -webkit-line-clamp: 2;
+            -webkit-line-clamp: 1;
             -webkit-box-orient: vertical;
             overflow: hidden;
             word-break: break-word;
+        }
+
+        /* 6. Разработчик и страна отодвинуты чуть вниз */
+        .dev-country-block {
+            margin-top: 4px;
+            font-size: 11px;
+            line-height: 1.2;
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+
+        /* 12. #B5B7BA - цвет текста Разработчика */
+        .text-dev {
+            color: #B5B7BA;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* 13. #F4F4F5 - цвет текста Страны */
+        .text-country {
+            color: #F4F4F5;
+            font-weight: 500;
+            cursor: pointer;
         }
 
         .mid-col-bottom {
@@ -380,37 +392,19 @@
             align-items: center;
             gap: 4px;
             flex-wrap: wrap;
+            margin-top: auto;
         }
 
-        .ios-pill {
+        /* 14. Жанр - плашка фон: rgba(40, 130, 240, .15) , текст #4EA3FF */
+        .genre-pill {
             font-size: 10.5px;
             font-weight: 600;
             padding: 3px 6px;
             border-radius: 6px;
-            background-color: var(--badge-bg);
-            color: var(--text-secondary);
+            background-color: rgba(40, 130, 240, 0.15);
+            color: #4EA3FF;
             line-height: 1.1;
             cursor: pointer;
-            transition: opacity 0.2s ease, background-color 0.2s ease;
-        }
-
-        .dev-pill {
-            background-color: var(--badge-bg);
-            color: #B5B7BA !important;
-        }
-
-        .country-pill {
-            background-color: var(--badge-bg);
-            color: #F4F4F5 !important;
-        }
-
-        .genre-pill {
-            background-color: rgba(40, 130, 240, .15) !important;
-            color: #4EA3FF !important;
-        }
-
-        .ios-pill:hover {
-            opacity: 0.8;
         }
 
         /* Правая колонка */
@@ -433,47 +427,27 @@
             max-width: 130px;
             text-align: right;
             line-height: 1.2;
-            display: flex;
-            align-items: center;
-            gap: 3px;
         }
 
         .status-passed { color: var(--status-passed); background: var(--status-passed-bg); }
         .status-playing { color: var(--status-playing); background: var(--status-playing-bg); }
-        .status-not-played { color: var(--status-not-played) !important; background: var(--status-not-played-bg) !important; }
+        .status-not-played { color: var(--status-not-played); background: var(--status-not-played-bg); }
 
-        .right-bottom-group {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-        }
+        /* 21. Часы игры вместо геймпада */
+        .time-pill { background-color: var(--badge-bg); color: var(--text-primary); }
 
+        /* 19. Динамик и флаг над датой релиза */
         .voice-text {
             font-size: 10px;
             color: var(--text-secondary);
-            font-weight: 600;
+            margin-bottom: -2px;
         }
 
-        .release-text {
-            font-size: 10px;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-
-        .time-box { 
-            display: flex; 
-            gap: 4px; 
-            justify-content: flex-end;
-        }
-
-        .time-col {
-            background: var(--badge-bg);
+        /* 8. Дата релиза без плашки + 9. Значок ПК перед датой */
+        .date-text {
             color: var(--text-secondary);
             font-size: 10px;
-            font-weight: 600;
-            padding: 3px 6px;
-            border-radius: 6px;
+            font-weight: 500;
             white-space: nowrap;
         }
 
@@ -484,7 +458,6 @@
             font-size: 15px;
         }
 
-        /* ПОДВАЛ */
         footer {
             margin-top: 24px;
             text-align: center;
@@ -511,7 +484,6 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
             touch-action: none;
-            perspective: 1000px;
         }
 
         .modal-overlay.active {
@@ -540,25 +512,6 @@
             overflow-y: auto;
             cursor: pointer;
             user-select: none;
-            will-change: transform, opacity;
-            transform-origin: center center;
-        }
-
-        .flip-modal-next {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-            opacity: 0;
-            transform: scale(0.92) translateY(0);
-            transition: transform 0.1s ease-out, opacity 0.1s ease-out;
-        }
-
-        .flip-modal.animate-back {
-            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.2), opacity 0.3s ease;
         }
 
         .modal-image-container {
@@ -571,7 +524,6 @@
             display: flex; 
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
         .modal-image-link {
@@ -617,7 +569,7 @@
         .btn-link { background: var(--accent-blue); color: #fff; }
         .btn-close { background: var(--badge-bg); color: var(--text-primary); }
 
-        /* ПЛАВАЮЩАЯ КНОПКА ПОИСКА (FAB) */
+        /* ПЛАВАЮЩАЯ КНОПКА ПОИСКА */
         .fab-search {
             position: fixed;
             bottom: 20px;
@@ -651,7 +603,7 @@
             height: 24px;
         }
 
-        /* ОКНО СОРТИРОВКИ И ФИЛЬТРА В СТИЛЕ IOS */
+        /* ОКНА СОРТИРОВКИ И ФИЛЬТРОВ */
         .ios-action-sheet {
             position: fixed;
             bottom: -100%;
@@ -704,17 +656,12 @@
             text-align: center;
         }
 
-        .sheet-btn:active {
-            opacity: 0.7;
-        }
-
         .sheet-btn-cancel {
             background: rgba(255, 59, 48, 0.12);
             color: #ff3b30;
             margin-top: 4px;
         }
 
-        /* Переключатель Разработчик / Страна */
         .segment-control {
             display: flex;
             background: var(--badge-bg);
@@ -739,7 +686,6 @@
         .segment-btn.active {
             background: var(--accent-blue);
             color: #ffffff;
-            box-shadow: 0 2px 6px rgba(10, 132, 255, 0.3);
         }
 
         .filter-list {
@@ -771,7 +717,6 @@
             font-weight: 600;
         }
 
-        /* МОДАЛКА ЛОГОТИПА (ПОЛНЫЙ РАЗМЕР) */
         .logo-modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -786,7 +731,6 @@
             pointer-events: none;
             transition: opacity 0.3s ease;
             cursor: pointer;
-            touch-action: pan-y;
         }
 
         .logo-modal-overlay.active {
@@ -799,15 +743,6 @@
             max-height: 80vh;
             object-fit: contain;
             border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
-            transition: transform 0.3s ease;
-            user-select: none;
-        }
-
-        @media (max-width: 360px) {
-            .reset-btn { padding: 0 10px; font-size: 12px; }
-            .sort-btn { padding: 0 10px; font-size: 12px; }
-            .search-input { font-size: 13px; }
         }
     </style>
 </head>
@@ -822,12 +757,14 @@
             <div class="counter-btn not-played" id="btn-count-not-played" onclick="filterByStatus('not-played')">В планах <span id="count-not-played">0</span></div>
         </div>
         <div class="controls-bar">
+            <!-- 15. Поиск с 🔍 и "Название игры..." | 16. Кол-во справа в поле -->
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
                 <input type="text" id="search-input" class="search-input" placeholder="Название игры...">
-                <span class="search-count" id="search-count">0</span>
+                <span class="search-counter" id="search-counter">0/0</span>
             </div>
             <button class="reset-btn" id="reset-btn" onclick="resetAllFilters()">Сброс</button>
+            <!-- 2. Сортировка серым цветом -->
             <button class="sort-btn" id="open-sort-btn">Сортировка</button>
         </div>
     </div>
@@ -841,10 +778,9 @@
 
 <footer>
     <div>Общее кол-во записей: <strong id="total-count">0</strong></div>
-    <div>Версия 1.1 (by Ewgenoff 10.08.2026)</div>
+    <div>Версия 1.2 (by Ewgenoff 11.08.2026)</div>
 </footer>
 
-<!-- ПЛАВАЮЩАЯ КНОПКА ПОИСКА -->
 <button id="fab-search" class="fab-search" aria-label="Поиск">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="8"></circle>
@@ -852,10 +788,8 @@
     </svg>
 </button>
 
-<!-- Модалка описания (Flip Card) -->
 <div class="modal-overlay" id="flip-modal-overlay">
     <div class="carousel-wrapper">
-        <div class="flip-modal flip-modal-next" id="flip-modal-card-next"></div>
         <div class="flip-modal" id="flip-modal-card" onclick="closeFlipModalWithPrevent(event)">
             <div class="modal-image-container" id="modal-image-container">
                 <div class="modal-image-link" id="modal-image-link">
@@ -872,12 +806,10 @@
     </div>
 </div>
 
-<!-- Модалка полноэкранного логотипа -->
 <div class="logo-modal-overlay" id="logo-modal-overlay" onclick="closeLogoModalWithPrevent(event)">
     <img id="logo-modal-img" class="logo-modal-img" src="" alt="Логотип игры">
 </div>
 
-<!-- Модалка сортировки (iOS Style) -->
 <div class="modal-overlay" id="sort-overlay"></div>
 <div class="ios-action-sheet" id="sort-sheet">
     <div class="sheet-title">Сортировка игр</div>
@@ -893,7 +825,6 @@
     <button class="sheet-btn sheet-btn-cancel" id="close-sort-btn">Отмена</button>
 </div>
 
-<!-- Модалка фильтра Разработчик / Страна -->
 <div class="ios-action-sheet" id="pub-country-sheet">
     <div class="segment-control">
         <button class="segment-btn active" id="seg-dev" onclick="switchPubCountryTab('dev')">Разработчик</button>
@@ -903,7 +834,6 @@
     <button class="sheet-btn sheet-btn-cancel" onclick="closePubCountrySheet()">Отмена</button>
 </div>
 
-<!-- Модалка фильтра Жанры -->
 <div class="ios-action-sheet" id="genre-sheet">
     <div class="sheet-title">Фильтр по жанрам</div>
     <div class="filter-list" id="genre-list"></div>
@@ -924,6 +854,7 @@
     let selectedCountryFilter = null;
     let selectedGenreFilter = null;
     let currentPubCountryTab = 'dev';
+    let isSorted = false;
 
     function parseCSV(text) {
         let lines = [];
@@ -966,10 +897,16 @@
         return lines;
     }
 
-    function formatHours(val) {
-        if (!val) return '--';
-        let cleaned = val.toString().replace(/[^0-9]/g, '');
-        return cleaned ? cleaned : '--';
+    // 21. Форматирование часов ХХ-ХХч без лишних знаков
+    function formatHoursRange(main, full) {
+        if (!main && !full) return '';
+        let cleanMain = main ? main.toString().replace(/[^0-9]/g, '') : '';
+        let cleanFull = full ? full.toString().replace(/[^0-9]/g, '') : '';
+        
+        if (cleanMain && cleanFull) return `${cleanMain}-${cleanFull}ч`;
+        if (cleanMain) return `${cleanMain}ч`;
+        if (cleanFull) return `${cleanFull}ч`;
+        return '';
     }
 
     function getGameStatus(statusNorm) {
@@ -995,6 +932,7 @@
         document.getElementById('total-count').textContent = data.length;
     }
 
+    // 3. Синяя обводка только при фильтрации по стране, разработчику или жанру
     function checkResetButtonState() {
         const hasFilters = selectedDeveloperFilter || selectedCountryFilter || selectedGenreFilter;
         const resetBtn = document.getElementById('reset-btn');
@@ -1026,10 +964,10 @@
         selectedDeveloperFilter = null;
         selectedCountryFilter = null;
         selectedGenreFilter = null;
+        isSorted = false;
         
         document.getElementById('search-input').value = '';
         document.querySelectorAll('.counter-btn').forEach(btn => btn.classList.remove('active'));
-        document.getElementById('reset-btn').classList.remove('active');
         
         renderCards(gamesData);
     }
@@ -1070,12 +1008,9 @@
             return true;
         });
 
-        const searchCountEl = document.getElementById('search-count');
-        if (currentFilterText === '') {
-            searchCountEl.textContent = gamesData.length;
-        } else {
-            searchCountEl.textContent = filteredGamesData.length;
-        }
+        // 16. Кол-во найденных карточек справа в инпуте
+        const searchCounter = document.getElementById('search-counter');
+        searchCounter.textContent = `${filteredGamesData.length}/${gamesData.length}`;
 
         if (filteredGamesData.length === 0) {
             container.innerHTML = `<div class="loading">Ничего не найдено</div>`;
@@ -1086,26 +1021,23 @@
             const status = getGameStatus(item.statusNorm);
             let statusClass = `status-${status}`;
 
-            let scoreColorClass = 'score-low';
-            if (item.scoreNum >= 90) scoreColorClass = 'score-90';
-            else if (item.scoreNum >= 80) scoreColorClass = 'score-80';
-            else if (item.scoreNum >= 70) scoreColorClass = 'score-70';
-            else if (item.scoreNum >= 60) scoreColorClass = 'score-60';
+            // 19. Цветовая градация оценки
+            let scoreClass = 'score-red';
+            if (item.scoreNum >= 90) scoreClass = 'score-green';
+            else if (item.scoreNum >= 80) scoreClass = 'score-cyan';
+            else if (item.scoreNum >= 70) scoreClass = 'score-yellow';
+            else if (item.scoreNum >= 60) scoreClass = 'score-orange';
 
-            let flagEmoji = item.voiceover.includes('есть') ? '🇷🇺' : '🇺🇸';
-            let voiceStr = `🔈 ${flagEmoji}`;
+            // 19. Динамик и язык
+            let voiceText = item.voiceover.includes('есть') ? '🔈 РУ' : '🔈 EN';
 
-            let timeStr = '';
-            if (item.timeMain || item.timeFull) {
-                const main = item.timeMain ? formatHours(item.timeMain) : '--';
-                const full = item.timeFull ? formatHours(item.timeFull) : '--';
-                timeStr = `<span class="time-col">⏱ ${main}</span><span class="time-col">${full}</span>`;
-            }
+            // 21. Иконка часов вместо геймпада
+            let formattedTime = formatHoursRange(item.timeMain, item.timeFull);
+            let timeStr = formattedTime ? `⏱️ ${formattedTime}` : '';
 
             const wrapper = document.createElement('div');
             wrapper.className = 'swipe-card-wrapper';
 
-            // Оформление обратной стороны карточки
             const cardBack = document.createElement('div');
             cardBack.className = 'game-card-back';
             cardBack.innerHTML = `
@@ -1113,39 +1045,48 @@
                 <div class="card-back-desc">${item.description || 'Описание отсутствует.'}</div>
             `;
 
-            // Лицевая сторона карточки
             const card = document.createElement('div');
             card.className = `game-card`;
 
             card.innerHTML = `
+                <!-- 10. Левая колонка -->
                 <div class="left-col">
-                    <div class="combined-badge">
-                        <div class="combined-score ${scoreColorClass}">${item.scoreText}</div>
-                    </div>
+                    <!-- 19. Оценка крупной цифрой без плашки -->
+                    <div class="score-number ${scoreClass}">${item.scoreText}</div>
                     <div class="game-logo-container">
                         ${item.logo ? `<img src="${item.logo}" alt="Logo" class="game-logo" loading="lazy" onclick="event.stopPropagation(); openLogoModalByIndex(${index})">` : ''}
                     </div>
                 </div>
 
+                <!-- Центральная колонка -->
                 <div class="mid-col">
                     <div class="titles-block">
+                        <!-- 4. Название на 1pt больше | 5. Без линии -->
                         <div class="title-en">${item.titleEn}</div>
                         ${item.titleRu ? `<div class="title-ru">${item.titleRu}</div>` : ''}
                     </div>
+                    <!-- 6. Разработчик и страна чуть ниже -->
+                    <div class="dev-country-block">
+                        <!-- 12. Разработчик #B5B7BA -->
+                        ${item.developer ? `<span class="text-dev" onclick="event.stopPropagation(); filterByDev('${item.developer}')">${item.developer}</span>` : ''}
+                        ${item.developer && item.country ? `<span style="color: #636366;">/</span>` : ''}
+                        <!-- 13. Страна #F4F4F5 | 7. Без флага -->
+                        ${item.country ? `<span class="text-country" onclick="event.stopPropagation(); filterByCountry('${item.country}')">${item.country}</span>` : ''}
+                    </div>
                     <div class="mid-col-bottom">
-                        ${item.developer ? `<span class="ios-pill dev-pill" onclick="event.stopPropagation(); openPubCountrySheet()">${item.developer}</span>` : ''}
-                        ${item.country ? `<span class="ios-pill country-pill" onclick="event.stopPropagation(); openPubCountrySheet()">${item.country}</span>` : ''}
-                        ${item.genre ? `<span class="ios-pill genre-pill" onclick="event.stopPropagation(); openGenreSheet()">${item.genre}</span>` : ''}
+                        <!-- 14. Жанр плашка -->
+                        ${item.genre ? `<span class="genre-pill" onclick="event.stopPropagation(); openGenreSheet()">${item.genre}</span>` : ''}
                     </div>
                 </div>
 
+                <!-- Правая колонка -->
                 <div class="right-col">
                     <div class="right-pill ${statusClass}">${item.status || 'В планах'}</div>
-                    <div class="right-bottom-group">
-                        <div class="voice-text">${voiceStr}</div>
-                        ${item.releaseDate ? `<div class="release-text">🖥️ ${item.releaseDate}</div>` : ''}
-                        ${timeStr ? `<div class="time-box">${timeStr}</div>` : ''}
-                    </div>
+                    ${timeStr ? `<div class="right-pill time-pill">${timeStr}</div>` : ''}
+                    <!-- 19. Динамик над датой -->
+                    <div class="voice-text">${voiceText}</div>
+                    <!-- 8. Дата не в плашке | 9. Значок ПК -->
+                    ${item.releaseDate ? `<div class="date-text">💻 ${item.releaseDate}</div>` : ''}
                 </div>
             `;
 
@@ -1153,11 +1094,19 @@
             wrapper.appendChild(card);
             container.appendChild(wrapper);
 
+            // 20. Открытие Wikipedia по двойному тапу/клику по всей карточке
+            card.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                if (item.wiki) {
+                    window.open(item.wiki, '_blank');
+                }
+            });
+
+            // ЛОГИКА СВАЙПА МИНИ-КАРТОЧКИ (Свайп влево/вправо)
             let startX = 0, startY = 0, currentTranslateX = 0, isSwiping = false, isTap = true;
-            let lastTap = 0;
 
             const handleTouchStart = (e) => {
-                if (e.target.closest('.ios-pill, .game-logo')) return;
+                if (e.target.closest('.genre-pill, .game-logo, .text-dev, .text-country')) return;
                 const touch = e.touches ? e.touches[0] : e;
                 startX = touch.clientX;
                 startY = touch.clientY;
@@ -1194,20 +1143,7 @@
                 const totalDiffX = endTouch.clientX - startX;
 
                 if (isTap) {
-                    const now = Date.now();
-                    if (now - lastTap < 300) {
-                        lastTap = 0;
-                        if (item.wiki) {
-                            window.open(item.wiki, '_blank');
-                        }
-                    } else {
-                        lastTap = now;
-                        setTimeout(() => {
-                            if (lastTap === now) {
-                                openFlipModalByIndex(index);
-                            }
-                        }, 300);
-                    }
+                    openFlipModalByIndex(index);
                     return;
                 }
 
@@ -1230,6 +1166,18 @@
             window.addEventListener('mousemove', (e) => { if (isSwiping) handleTouchMove(e); });
             window.addEventListener('mouseup', (e) => { if (isSwiping) handleTouchEnd(e); });
         });
+    }
+
+    function filterByDev(dev) {
+        selectedDeveloperFilter = dev;
+        selectedCountryFilter = null;
+        renderCards(gamesData);
+    }
+
+    function filterByCountry(country) {
+        selectedCountryFilter = country;
+        selectedDeveloperFilter = null;
+        renderCards(gamesData);
     }
 
     function openFlipModalByIndex(index) {
@@ -1285,14 +1233,12 @@
                 <div class="loading" style="color: #ff3b30;">Ошибка загрузки данных Таблицы</div>`;
         });
 
-    // ПОИСК
     const searchInput = document.getElementById('search-input');
     searchInput.addEventListener('input', (e) => {
         currentFilterText = e.target.value;
         renderCards(gamesData);
     });
 
-    // АВТОСКРЫТИЕ ШАПКИ
     let lastScrollY = window.scrollY;
     const header = document.getElementById('header');
     const fabSearch = document.getElementById('fab-search');
@@ -1321,10 +1267,8 @@
         searchInput.focus();
     });
 
-    // МОДАЛЬНОЕ ОКНО 
     const flipOverlay = document.getElementById('flip-modal-overlay');
     const flipModalCard = document.getElementById('flip-modal-card');
-    const flipModalCardNext = document.getElementById('flip-modal-card-next');
 
     function populateCardContent(cardElement, item) {
         if (!item) return;
@@ -1349,9 +1293,6 @@
 
     function openFlipModal(item) {
         populateCardContent(flipModalCard, item);
-        flipModalCard.style.transform = 'none';
-        flipModalCard.style.opacity = '1';
-        flipModalCardNext.style.opacity = '0';
         flipOverlay.classList.add('active');
     }
 
@@ -1367,7 +1308,6 @@
         closeFlipModalWithPrevent(e);
     };
 
-    // ЛОГОТИП
     const logoOverlay = document.getElementById('logo-modal-overlay');
     const logoImg = document.getElementById('logo-modal-img');
 
@@ -1382,38 +1322,6 @@
             e.preventDefault();
         }
         logoOverlay.classList.remove('active');
-    }
-
-    let logoStartX = 0, logoEndX = 0;
-    logoOverlay.addEventListener('touchstart', (e) => {
-        logoStartX = e.changedTouches[0].screenX;
-    }, false);
-
-    logoOverlay.addEventListener('touchend', (e) => {
-        logoEndX = e.changedTouches[0].screenX;
-        handleLogoSwipe(e);
-    }, false);
-
-    function handleLogoSwipe(e) {
-        const threshold = 50;
-        if (logoEndX < logoStartX - threshold) {
-            findNextLogo(1);
-        } else if (logoEndX > logoStartX + threshold) {
-            findNextLogo(-1);
-        } else {
-            closeLogoModalWithPrevent(e);
-        }
-    }
-
-    function findNextLogo(direction) {
-        let idx = currentLogoModalIndex + direction;
-        while (idx >= 0 && idx < filteredGamesData.length) {
-            if (filteredGamesData[idx].logo) {
-                openLogoModalByIndex(idx);
-                return;
-            }
-            idx += direction;
-        }
     }
 
     // СОРТИРОВКА
@@ -1442,6 +1350,7 @@
     document.querySelectorAll('.sheet-btn[data-sort]').forEach(btn => {
         btn.onclick = () => {
             const type = btn.getAttribute('data-sort');
+            isSorted = true;
             
             const dateToNum = (dateStr) => {
                 if (!dateStr) return 0;
@@ -1473,7 +1382,6 @@
         };
     });
 
-    // ФИЛЬТР «РАЗРАБОТЧИК / СТРАНА»
     const pubCountrySheet = document.getElementById('pub-country-sheet');
 
     function openPubCountrySheet() {
@@ -1500,17 +1408,6 @@
         const listContainer = document.getElementById('pub-country-list');
         listContainer.innerHTML = '';
 
-        const devSet = new Set();
-        const countrySet = new Set();
-
-        gamesData.forEach(item => {
-            if (item.developer) devSet.add(item.developer);
-            if (item.country) countrySet.add(item.country);
-        });
-
-        document.getElementById('seg-dev').textContent = `Разработчик (${devSet.size})`;
-        document.getElementById('seg-country').textContent = `Страна (${countrySet.size})`;
-
         const counts = {};
         gamesData.forEach(item => {
             const val = currentPubCountryTab === 'dev' ? item.developer : item.country;
@@ -1525,6 +1422,7 @@
             const btn = document.createElement('button');
             btn.className = 'filter-item-btn';
             btn.innerHTML = `${key} <span>(${counts[key]})</span>`;
+            
             btn.onclick = () => {
                 if (currentPubCountryTab === 'dev') {
                     selectedDeveloperFilter = key;
@@ -1540,7 +1438,6 @@
         });
     }
 
-    // ФИЛЬТР «ЖАНРЫ»
     const genreSheet = document.getElementById('genre-sheet');
 
     function openGenreSheet() {
