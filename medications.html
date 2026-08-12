@@ -13,7 +13,7 @@
             --text-primary: #1C1C1E;
             --text-secondary: #8E8E93;
             
-            --card-bg-glass: rgba(255, 255, 255, 0.85); /* Чуть менее прозрачный для легкости GPU */
+            --card-bg-glass: rgba(255, 255, 255, 0.85);
             --card-active-bg: rgba(255, 255, 255, 0.9);
             --card-border: rgba(255, 255, 255, 0.8);
             
@@ -44,7 +44,6 @@
             user-select: none;
         }
 
-        /* Оптимизация фиксированного фона */
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
@@ -74,20 +73,19 @@
             align-items: center;
         }
 
-        /* Закреплённый блок сверху */
         .sticky-top {
             position: sticky;
             top: 0;
             z-index: 100;
             width: 100%;
-            background: rgba(242, 242, 247, 0.92); /* Увеличена непрозрачность */
-            backdrop-filter: blur(10px); /* Снижен радиус блюра для GPU */
+            background: rgba(242, 242, 247, 0.92);
+            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             padding-top: 12px;
             padding-bottom: 8px;
             margin-bottom: 8px;
             transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-            transform: translateZ(0); /* Аппаратное ускорение */
+            transform: translateZ(0);
             will-change: transform, opacity;
         }
 
@@ -96,7 +94,6 @@
             opacity: 0;
         }
 
-        /* Статистика */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -138,7 +135,6 @@
         .text-danger { color: var(--color-danger); }
         .text-warning { color: var(--color-warning); }
 
-        /* Элементы управления */
         .controls-container { width: 100%; display: flex; flex-direction: column; gap: 10px; }
         .search-row { display: flex; gap: 8px; width: 100%; }
         .search-box { position: relative; flex: 1; }
@@ -164,12 +160,51 @@
         .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; display: flex; align-items: center; justify-content: center; }
         .clear-icon { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; color: #FFFFFF; background: rgba(142, 142, 147, 0.6); width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; }
 
-        .sort-trigger { display: flex; align-items: center; justify-content: space-between; background: var(--card-bg-glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid var(--card-border); border-radius: var(--radius-control); padding: 10px 14px; box-shadow: var(--ios-shadow-btn); cursor: pointer; transition: transform 0.15s; }
+        /* Ряд для сортировки и кнопки «+» */
+        .sort-row {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .sort-trigger { 
+            flex: 1;
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            background: var(--card-bg-glass); 
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px); 
+            border: 1px solid var(--card-border); 
+            border-radius: var(--radius-control); 
+            padding: 10px 14px; 
+            box-shadow: var(--ios-shadow-btn); 
+            cursor: pointer; 
+            transition: transform 0.15s; 
+        }
         .sort-trigger:active { transform: scale(0.98); }
         .sort-trigger-label { font-size: 0.85rem; color: var(--text-secondary); font-weight: 500; }
         .sort-trigger-value { font-size: 0.88rem; font-weight: 600; color: var(--color-default); display: flex; align-items: center; gap: 4px; }
 
-        /* Список лекарств */
+        /* Кнопка Добавления "+" */
+        .btn-add-med {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-default);
+            color: #FFFFFF;
+            border: none;
+            border-radius: var(--radius-control);
+            padding: 0 16px;
+            font-size: 1.4rem;
+            font-weight: 500;
+            box-shadow: var(--ios-shadow-btn);
+            cursor: pointer;
+            transition: transform 0.15s, background-color 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-add-med:active { transform: scale(0.95); opacity: 0.9; }
+
         .med-list { width: 100%; display: flex; flex-direction: column; gap: 10px; }
 
         .med-card {
@@ -183,7 +218,7 @@
             box-shadow: var(--ios-shadow);
             transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
             cursor: pointer;
-            transform: translateZ(0); /* Ускорение карточек */
+            transform: translateZ(0);
         }
 
         .med-card:active { transform: scale(0.98); }
@@ -209,7 +244,6 @@
 
         .loader, .empty-msg { text-align: center; padding: 30px 16px; color: var(--text-secondary); font-size: 0.95rem; background: var(--card-bg-glass); border-radius: var(--radius-card); border: 1px solid var(--card-border); }
 
-        /* Плавающая кнопка "Поиск везде" (FAB) */
         .fab-search {
             position: fixed;
             bottom: 25px;
@@ -237,14 +271,14 @@
         .fab-search.visible { opacity: 1; transform: scale(1) translateY(0) translateZ(0); pointer-events: auto; }
         .fab-search:active { transform: scale(0.9) translateZ(0); }
 
-        /* iOS Модальное окно */
+        /* iOS Модальные окна */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; padding: 20px; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .ios-modal { background: var(--card-bg-glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); border: 1px solid var(--card-border); border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); overflow: hidden; transform: scale(0.9); transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .modal-overlay.active .ios-modal { transform: scale(1); }
         .modal-header { padding: 18px 20px 12px; border-bottom: 1px solid var(--card-border); }
         .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); text-align: center; }
-        .modal-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
+        .modal-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
         .sort-window { background: rgba(142, 142, 147, 0.2); border-radius: var(--radius-control); overflow: hidden; border: 1px solid var(--card-border); }
         .sort-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; }
         .sort-btn { background: var(--card-bg-glass); border: none; padding: 14px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: background-color 0.2s, color 0.2s; min-height: 80px; outline: none; }
@@ -253,17 +287,33 @@
         .sort-btn.active { background: rgba(0, 122, 255, 0.12); }
         .sort-btn.active .sort-text { color: var(--color-default); }
         .sort-btn:active { opacity: 0.7; }
-        .modal-section { display: flex; flex-direction: column; gap: 2px; }
+        .modal-section { display: flex; flex-direction: column; gap: 4px; }
         .modal-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; }
         .modal-value { font-size: 0.95rem; color: var(--text-primary); line-height: 1.4; }
-        .modal-footer { padding: 12px 20px; border-top: 1px solid var(--card-border); display: flex; justify-content: center; }
-        .ios-btn { background: var(--color-default); color: white; border: none; border-radius: 10px; padding: 10px 24px; font-size: 0.95rem; font-weight: 600; cursor: pointer; width: 100%; }
+        
+        /* Поля ввода внутри модального окна добавления */
+        .modal-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-control);
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .modal-input:focus { border-color: var(--color-default); background: #FFFFFF; }
+
+        .modal-footer { padding: 12px 20px; border-top: 1px solid var(--card-border); display: flex; gap: 10px; justify-content: center; }
+        .ios-btn { background: var(--color-default); color: white; border: none; border-radius: 10px; padding: 11px 20px; font-size: 0.95rem; font-weight: 600; cursor: pointer; width: 100%; transition: opacity 0.2s; }
+        .ios-btn-secondary { background: rgba(142, 142, 147, 0.2); color: var(--text-primary); }
+        .ios-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .footer { text-align: center; font-size: 0.75rem; color: var(--text-secondary); margin-top: 24px; display: flex; flex-direction: column; gap: 4px; }
     </style>
 </head>
 <body>
-    <!-- HTML структура остается БЕЗ ИЗМЕНЕНИЙ -->
     <div class="main-container">
         <div class="sticky-top" id="stickyTop">
             <div class="stats-grid">
@@ -299,12 +349,16 @@
                     </div>
                 </div>
                 
-                <div class="sort-trigger" onclick="openSortModal()">
-                    <span class="sort-trigger-label">Сортировка</span>
-                    <span class="sort-trigger-value">
-                        <span id="currentSortText">По названию (А - Я)</span>
-                        <span>▸</span>
-                    </span>
+                <!-- Ряд с уменьшенной сортировкой и кнопкой "+" -->
+                <div class="sort-row">
+                    <div class="sort-trigger" onclick="openSortModal()">
+                        <span class="sort-trigger-label">Сортировка</span>
+                        <span class="sort-trigger-value">
+                            <span id="currentSortText">По названию (А - Я)</span>
+                            <span>▸</span>
+                        </span>
+                    </div>
+                    <button class="btn-add-med" onclick="openAddModal()" title="Добавить лекарство">+</button>
                 </div>
             </div>
         </div>
@@ -319,10 +373,11 @@
     </div>
 
     <div class="footer">
-        <div>Версия 1.1 от 5.08.2026</div>
+        <div>Версия 1.2 от 12.08.2026</div>
         <div id="totalRecordsCount">В базе 0 записей</div>
     </div>
 
+    <!-- Модальное окно выбора сортировки -->
     <div class="modal-overlay" id="sortModal" onclick="closeSortModal(event)">
         <div class="ios-modal" onclick="event.stopPropagation()">
             <div class="modal-header"><div class="modal-title">Выберите сортировку</div></div>
@@ -342,6 +397,7 @@
         </div>
     </div>
 
+    <!-- Модальное окно информации о лекарстве -->
     <div class="modal-overlay" id="iosModal" onclick="closeModal(event)">
         <div class="ios-modal" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -357,8 +413,34 @@
         </div>
     </div>
 
+    <!-- НОВОЕ: Модальное окно добавления лекарства -->
+    <div class="modal-overlay" id="addModal" onclick="closeAddModal(event)">
+        <div class="ios-modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">Добавить лекарство</div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <span class="modal-label">Название лекарства</span>
+                    <input type="text" id="addMedName" class="modal-input" placeholder="Например: Парацетамол">
+                </div>
+                <div class="modal-section">
+                    <span class="modal-label">Срок годности</span>
+                    <input type="date" id="addMedDate" class="modal-input">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="ios-btn ios-btn-secondary" onclick="closeAddModal()">Отмена</button>
+                <button class="ios-btn" id="btnSubmitAdd" onclick="submitAddMedicine()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vROsTHKb21QaPxXxGW_xWgQJ5kKz3BKCfIsVHX6JSH4QOoqnhHDAxcuAbOtQYUiFKrKiODjlQSnLnUi/pub?gid=2071309898&single=true&output=csv";
+        
+        // ВАЖНО: Вставьте сюда URL вашего развернутого скрипта Google Apps Script Web App!
+        const SCRIPT_URL = "https://script.google.com/macros/s/ВАШ_SCRIPT_ID/exec";
 
         let medicines = [];
         let activeStatFilter = null;
@@ -681,13 +763,71 @@
             document.getElementById('iosModal').classList.remove('active');
         }
 
+        /* --- ЛОГИКА ОКНА ДОБАВЛЕНИЯ ЛЕКАРСТВА --- */
+        function openAddModal() {
+            document.getElementById('addMedName').value = '';
+            document.getElementById('addMedDate').value = '';
+            document.getElementById('addModal').classList.add('active');
+        }
+
+        function closeAddModal(event) {
+            if(event) event.stopPropagation();
+            document.getElementById('addModal').classList.remove('active');
+        }
+
+        async function submitAddMedicine() {
+            const nameInput = document.getElementById('addMedName');
+            const dateInput = document.getElementById('addMedDate');
+            const submitBtn = document.getElementById('btnSubmitAdd');
+
+            const name = nameInput.value.trim();
+            const rawDate = dateInput.value; // формат YYYY-MM-DD от input type="date"
+
+            if (!name) {
+                alert("Пожалуйста, введите название лекарства.");
+                return;
+            }
+
+            let formattedDate = "";
+            if (rawDate) {
+                const [year, month, day] = rawDate.split("-");
+                formattedDate = `${day}.${month}.${year}`; // Переводим в ДД.ММ.ГГГГ
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Сохранение...";
+
+            try {
+                // Отправляем методом POST в Google Apps Script
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                        'name': name,
+                        'date': formattedDate
+                    })
+                });
+
+                closeAddModal();
+                alert("Лекарство успешно добавлено!");
+                
+                // Перезагружаем список лекарств
+                fetchMedications();
+            } catch (error) {
+                console.error("Ошибка при отправке:", error);
+                alert("Не удалось добавить лекарство. Проверьте URL скрипта.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Сохранить";
+            }
+        }
+
         function escapeHtml(str) {
             return str.replace(/[&<>"']/g, function(m) {
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
             });
         }
 
-        // --- ОПТИМИЗИРОВАННАЯ Логика скрытия панели ---
         let lastScrollY = window.scrollY;
         let scrollTimeout;
         let ticking = false;
@@ -710,7 +850,6 @@
                 isFabVisible = false;
             }, 2000);
 
-            // Меняем класс только если состояние изменилось
             if (currentScrollY > lastScrollY && currentScrollY > 100) {
                 if (!isStickyHidden) {
                     stickyTop.classList.add('hidden');
@@ -732,7 +871,7 @@
                 window.requestAnimationFrame(updateScrollUI);
                 ticking = true;
             }
-        }, { passive: true }); // passive: true улучшает производительность скролла
+        }, { passive: true });
 
         function activateGlobalSearch() {
             fabSearch.classList.remove('visible');
