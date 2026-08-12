@@ -775,52 +775,58 @@
             document.getElementById('addModal').classList.remove('active');
         }
 
-        async function submitAddMedicine() {
-            const nameInput = document.getElementById('addMedName');
-            const dateInput = document.getElementById('addMedDate');
-            const submitBtn = document.getElementById('btnSubmitAdd');
+async function submitAddMedicine() {
+    const nameInput = document.getElementById('addMedName');
+    const dateInput = document.getElementById('addMedDate');
+    const submitBtn = document.getElementById('btnSubmitAdd');
 
-            const name = nameInput.value.trim();
-            const rawDate = dateInput.value; // формат YYYY-MM-DD от input type="date"
+    const name = nameInput.value.trim();
+    const rawDate = dateInput.value;
 
-            if (!name) {
-                alert("Пожалуйста, введите название лекарства.");
-                return;
-            }
+    if (!name) {
+        alert("Пожалуйста, введите название лекарства.");
+        return;
+    }
 
-            let formattedDate = "";
-            if (rawDate) {
-                const [year, month, day] = rawDate.split("-");
-                formattedDate = `${day}.${month}.${year}`; // Переводим в ДД.ММ.ГГГГ
-            }
+    let formattedDate = "";
+    if (rawDate) {
+        const [year, month, day] = rawDate.split("-");
+        formattedDate = `${day}.${month}.${year}`;
+    }
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = "Сохранение...";
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Сохранение...";
 
-            try {
-                // Отправляем методом POST в Google Apps Script
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                        'name': name,
-                        'date': formattedDate
-                    })
-                });
+    try {
+        // Добавлен mode: 'no-cors' для обхода ограничений GitHub Pages -> Google Apps Script
+        await fetch(SCRIPT_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 
+                'Content-Type': 'application/x-www-form-urlencoded' 
+            },
+            body: new URLSearchParams({
+                'name': name,
+                'date': formattedDate
+            })
+        });
 
-                closeAddModal();
-                alert("Лекарство успешно добавлено!");
-                
-                // Перезагружаем список лекарств
-                fetchMedications();
-            } catch (error) {
-                console.error("Ошибка при отправке:", error);
-                alert("Не удалось добавить лекарство. Проверьте URL скрипта.");
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = "Сохранить";
-            }
-        }
+        closeAddModal();
+        alert("Запрос отправлен! Данные добавлены в таблицу.");
+        
+        // Пауза 1.5 сек перед обновлением, чтобы Google успел записать данные
+        setTimeout(() => {
+            fetchMedications();
+        }, 1500);
+
+    } catch (error) {
+        console.error("Ошибка при отправке:", error);
+        alert("Не удалось отправить данные.");
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Сохранить";
+    }
+}
 
         function escapeHtml(str) {
             return str.replace(/[&<>"']/g, function(m) {
