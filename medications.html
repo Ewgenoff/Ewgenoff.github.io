@@ -798,26 +798,24 @@ async function submitAddMedicine() {
     submitBtn.textContent = "Сохранение...";
 
     try {
-        // Добавлен mode: 'no-cors' для обхода ограничений GitHub Pages -> Google Apps Script
         await fetch(SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
             headers: { 
-                'Content-Type': 'application/x-www-form-urlencoded' 
+                'Content-Type': 'text/plain;charset=utf-8' 
             },
-            body: new URLSearchParams({
-                'name': name,
-                'date': formattedDate
+            body: JSON.stringify({
+                name: name,
+                date: formattedDate
             })
         });
 
         closeAddModal();
-        alert("Запрос отправлен! Данные добавлены в таблицу.");
+        alert("Запрос отправлен! Данные добавляются в таблицу.");
         
-        // Пауза 1.5 сек перед обновлением, чтобы Google успел записать данные
         setTimeout(() => {
             fetchMedications();
-        }, 1500);
+        }, 2000);
 
     } catch (error) {
         console.error("Ошибка при отправке:", error);
@@ -827,7 +825,6 @@ async function submitAddMedicine() {
         submitBtn.textContent = "Сохранить";
     }
 }
-
         function escapeHtml(str) {
             return str.replace(/[&<>"']/g, function(m) {
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
