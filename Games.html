@@ -328,8 +328,9 @@
             width: 54px;
         }
 
+        /* Чуть уменьшен размер шрифта оценки */
         .single-score-text {
-            font-size: 25px;
+            font-size: 23px;
             font-weight: 800;
             line-height: 1;
             text-align: center;
@@ -495,48 +496,6 @@
             color: var(--text-secondary);
             font-size: 15px;
         }
-
-        footer {
-            margin-top: 24px;
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-secondary);
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            padding-bottom: 12px;
-        }
-
-        /* FAB */
-        .fab-search {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 56px;
-            height: 56px;
-            background: var(--accent-blue);
-            border: none;
-            border-radius: 50%;
-            color: white;
-            box-shadow: 0 4px 12px var(--shadow-color);
-            cursor: pointer;
-            z-index: 90;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transform: scale(0);
-            pointer-events: none;
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        .fab-search.active {
-            opacity: 1;
-            transform: scale(1);
-            pointer-events: auto;
-        }
-
-        .fab-search svg { width: 24px; height: 24px; }
 
         /* Action Sheet & Modals */
         .ios-action-sheet {
@@ -712,12 +671,10 @@
         <div class="controls-bar">
             <div class="search-wrapper">
                 <span class="search-icon">🔍</span>
-                <!-- Текст Поиск... вместо Название игры... -->
                 <input type="text" id="search-input" class="search-input" placeholder="Поиск...">
                 <button class="clear-search-btn" id="clear-search-btn" onclick="clearSearch()">✖</button>
                 <span class="search-count" id="search-count">0</span>
             </div>
-            <!-- Узкая кнопка ✕ вместо Сброс -->
             <button class="reset-btn" id="reset-btn" onclick="resetAllFilters()" title="Сбросить все фильтры">✕</button>
             <button class="sort-btn" id="open-sort-btn">Сортировка</button>
         </div>
@@ -729,19 +686,6 @@
         <div class="loading">Загрузка данных...</div>
     </div>
 </div>
-
-<footer>
-    <div>Общее кол-во записей: <strong id="total-count">0</strong></div>
-    <div>Версия 1.2 (by Ewgenoff 11.08.2026)</div>
-</footer>
-
-<!-- ПЛАВАЮЩАЯ КНОПКА ПОИСКА -->
-<button id="fab-search" class="fab-search" aria-label="Поиск">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-    </svg>
-</button>
 
 <div class="logo-modal-overlay" id="logo-modal-overlay" onclick="closeLogoModalWithPrevent(event)">
     <img id="logo-modal-img" class="logo-modal-img" src="" alt="Фото/Логотип игры" onclick="closeLogoModalWithPrevent(event)">
@@ -813,7 +757,6 @@
         'Южная Корея': '🇰🇷'
     };
 
-    // Добавление флагов ТОЛЬКО для фильтров (включая разделение через "/")
     function getCountryWithFlags(countryStr) {
         if (!countryStr) return '';
         return countryStr.split('/').map(part => {
@@ -897,7 +840,6 @@
         document.getElementById('count-passed').textContent = passed;
         document.getElementById('count-playing').textContent = playing;
         document.getElementById('count-not-played').textContent = notPlayed;
-        document.getElementById('total-count').textContent = data.length;
     }
 
     function checkResetButtonState() {
@@ -986,7 +928,7 @@
             return;
         }
 
-        filteredGamesData.forEach((item, index) => {
+        filteredGamesData.forEach((item) => {
             const status = getGameStatus(item.statusNorm);
             let statusClass = `status-${status}`;
 
@@ -998,7 +940,6 @@
                 timeStr = `🕐 ${formatHours(item.timeMain)}-${formatHours(item.timeFull)}ч`;
             }
 
-            // В карточках используем Чистый текст страны (БЕЗ флагов)
             const rawCountry = item.country || '';
             const photoSrc = item.logo || item.image || '';
             const backCoverSrc = item.image || item.logo || '';
@@ -1039,7 +980,6 @@
                         <div class="title-divider"></div>
                         <div class="dev-country-block">
                             ${item.developer ? `<div class="dev-text">${item.developer}</div>` : ''}
-                            <!-- Чистый текст страны без флага в карточках -->
                             ${rawCountry ? `<div class="country-text">${rawCountry}</div>` : ''}
                         </div>
                     </div>
@@ -1069,61 +1009,50 @@
             flipContainer.appendChild(flipper);
             container.appendChild(flipContainer);
 
+            // ОБРАБОТКА ДЛИННОГО ТАПА
+            let longPressTimer = null;
+            let isLongPress = false;
+
+            const startLongPress = (e) => {
+                if (e.target.closest('.genre-pill, .game-logo')) return;
+                
+                isLongPress = false;
+                longPressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    if (navigator.vibrate) {
+                        navigator.vibrate(50);
+                    }
+                    openWikipedia(item.wiki);
+                }, 500);
+            };
+
+            const cancelLongPress = () => {
+                if (longPressTimer) {
+                    clearTimeout(longPressTimer);
+                    longPressTimer = null;
+                }
+            };
+
+            card.addEventListener('touchstart', startLongPress, { passive: true });
+            card.addEventListener('touchend', cancelLongPress);
+            card.addEventListener('touchmove', cancelLongPress);
+
+            card.addEventListener('mousedown', startLongPress);
+            card.addEventListener('mouseup', cancelLongPress);
+            card.addEventListener('mouseleave', cancelLongPress);
+
             card.addEventListener('click', (e) => {
                 if (e.target.closest('.genre-pill, .game-logo')) return;
+                
+                if (isLongPress) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    isLongPress = false;
+                    return;
+                }
+                
                 flipContainer.classList.add('flipped');
             });
-
-           // --- ОБРАБОТКА ДЛИННОГО ТАПА (LONG PRESS) ---
-let longPressTimer = null;
-let isLongPress = false;
-
-// Функция запуска таймера удержания
-const startLongPress = (e) => {
-    // Игнорируем клики по жанрам и логотипу
-    if (e.target.closest('.genre-pill, .game-logo')) return;
-    
-    isLongPress = false;
-    longPressTimer = setTimeout(() => {
-        isLongPress = true;
-        // Виброотклик на смартфонах (если поддерживается)
-        if (navigator.vibrate) {
-            navigator.vibrate(50);
-        }
-        openWikipedia(item.wiki);
-    }, 500); // 500 мс = время удерживания для длинного тапа
-};
-
-// Функция отмены таймера, если палец подняли раньше или начали скроллить
-const cancelLongPress = () => {
-    if (longPressTimer) {
-        clearTimeout(longPressTimer);
-        longPressTimer = null;
-    }
-};
-
-// События для сенсорных экранов и мыши
-card.addEventListener('touchstart', startLongPress, { passive: true });
-card.addEventListener('touchend', cancelLongPress);
-card.addEventListener('touchmove', cancelLongPress); // Отмена при скролле
-
-card.addEventListener('mousedown', startLongPress);
-card.addEventListener('mouseup', cancelLongPress);
-card.addEventListener('mouseleave', cancelLongPress);
-
-// Переворот карточки по обычному клику (блокируется, если это был длинный тап)
-card.addEventListener('click', (e) => {
-    if (e.target.closest('.genre-pill, .game-logo')) return;
-    
-    if (isLongPress) {
-        e.stopPropagation();
-        e.preventDefault();
-        isLongPress = false;
-        return;
-    }
-    
-    flipContainer.classList.add('flipped');
-});
         });
     }
 
@@ -1189,11 +1118,9 @@ card.addEventListener('click', (e) => {
         renderCards(gamesData);
     }
 
-    // СКРОЛЛ И FAB
+    // СКРОЛЛ
     let lastScrollY = window.scrollY;
     const header = document.getElementById('header');
-    const fabSearch = document.getElementById('fab-search');
-    let scrollTimeout;
 
     window.addEventListener('scroll', () => {
         document.querySelectorAll('.card-flip-container.flipped').forEach(card => {
@@ -1206,18 +1133,6 @@ card.addEventListener('click', (e) => {
             header.classList.remove('header-hidden');
         }
         lastScrollY = window.scrollY;
-
-        fabSearch.classList.add('active');
-        
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(() => {
-            fabSearch.classList.remove('active');
-        }, 2000);
-    });
-
-    fabSearch.addEventListener('click', () => {
-        header.classList.remove('header-hidden');
-        searchInput.focus();
     });
 
     // ПРОСМОТР ФОТО
@@ -1355,7 +1270,6 @@ card.addEventListener('click', (e) => {
             const btn = document.createElement('button');
             btn.className = 'filter-item-btn';
             
-            // В окне-фильтре выводятся флаги перед странами
             const labelText = currentFilterTab === 'country' ? getCountryWithFlags(key) : key;
             btn.innerHTML = `${labelText} <span>(${counts[key]})</span>`;
             
