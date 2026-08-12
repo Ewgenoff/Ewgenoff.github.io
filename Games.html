@@ -55,7 +55,7 @@
             flex: 1;
         }
 
-        /* АВТОСКРЫВАЮЩАЯСЯ ШАПКА */
+        /* ПОСТОЯННО ФИКСИРОВАННАЯ ШАПКА */
         .sticky-header {
             position: fixed;
             top: 0;
@@ -64,12 +64,10 @@
             z-index: 100;
             background: var(--bg-color);
             padding: 10px 16px;
-            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 0 4px 12px var(--shadow-color);
             display: flex;
             flex-direction: column;
             align-items: center;
-            will-change: transform;
         }
 
         .header-content {
@@ -78,10 +76,6 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-        }
-
-        .header-hidden {
-            transform: translateY(-100%);
         }
 
         /* Кнопки-счетчики */
@@ -1114,9 +1108,7 @@
         renderCards(gamesData);
     }
 
-    // ОПТИМИЗИРОВАННЫЙ СКРОЛЛ ШАПКИ
-    let lastScrollY = window.scrollY;
-    const header = document.getElementById('header');
+    // ЗАКРЫТИЕ ПЕРЕВЕРНУТЫХ КАРТОЧЕК ПРИ СКРОЛЛЕ
     let ticking = false;
 
     window.addEventListener('scroll', () => {
@@ -1125,13 +1117,6 @@
                 document.querySelectorAll('.card-flip-container.flipped').forEach(card => {
                     card.classList.remove('flipped');
                 });
-
-                if (window.scrollY > lastScrollY && window.scrollY > 80) {
-                    header.classList.add('header-hidden');
-                } else {
-                    header.classList.remove('header-hidden');
-                }
-                lastScrollY = window.scrollY;
                 ticking = false;
             });
             ticking = true;
