@@ -305,6 +305,35 @@
         }
         .modal-input:focus { border-color: var(--color-default); background: #FFFFFF; }
 
+        /*Переключатель места хранения*/
+        .storage-selector {
+            display: flex;
+            gap: 8px;
+            background: rgba(142, 142, 147, 0.12);
+            padding: 4px;
+            border-radius: var(--radius-control);
+            border: 1px solid var(--card-border);
+        }
+
+        .storage-option {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 8px 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .storage-option.active {
+            background: #FFFFFF;
+            color: var(--text-primary);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
         .modal-footer { padding: 12px 20px; border-top: 1px solid var(--card-border); display: flex; gap: 10px; justify-content: center; }
         .ios-btn { background: var(--color-default); color: white; border: none; border-radius: 10px; padding: 11px 20px; font-size: 0.95rem; font-weight: 600; cursor: pointer; width: 100%; transition: opacity 0.2s; }
         .ios-btn-secondary { background: rgba(142, 142, 147, 0.2); color: var(--text-primary); }
@@ -413,7 +442,7 @@
         </div>
     </div>
 
-    <!-- НОВОЕ: Модальное окно добавления лекарства -->
+    <!-- Обновленное модальное окно добавления лекарства -->
     <div class="modal-overlay" id="addModal" onclick="closeAddModal(event)">
         <div class="ios-modal" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -428,6 +457,13 @@
                     <span class="modal-label">Срок годности</span>
                     <input type="date" id="addMedDate" class="modal-input">
                 </div>
+                <div class="modal-section">
+                    <span class="modal-label">Место хранения</span>
+                    <div class="storage-selector">
+                        <button type="button" class="storage-option" data-value="Холод" onclick="selectStorage(this)">🧊 Холод</button>
+                        <button type="button" class="storage-option" data-value="Шкаф" onclick="selectStorage(this)">🗄️ Шкаф</button>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="ios-btn ios-btn-secondary" onclick="closeAddModal()">Отмена</button>
@@ -439,12 +475,13 @@
     <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vROsTHKb21QaPxXxGW_xWgQJ5kKz3BKCfIsVHX6JSH4QOoqnhHDAxcuAbOtQYUiFKrKiODjlQSnLnUi/pub?gid=2071309898&single=true&output=csv";
         
-        // ВАЖНО: Вставьте сюда URL вашего развернутого скрипта Google Apps Script Web App!
+        // URL развернутого скрипта Google Apps Script Web App
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwhELpilFYMEo3402qBir3fwfY9KJdRIhKTV0IZVlOceludZcmLyTNdqGtLs8W5HHCs_w/exec";
 
         let medicines = [];
         let activeStatFilter = null;
         let currentSort = 'name';
+        let selectedStorage = "Нет";
 
         function getChildAgeThreshold() {
             const now = new Date();
@@ -763,10 +800,26 @@
             document.getElementById('iosModal').classList.remove('active');
         }
 
-        /* --- ЛОГИКА ОКНА ДОБАВЛЕНИЯ ЛЕКАРСТВА --- */
+        /* --- ЛОГИКА ВЫБОРА ХРАНЕНИЯ И ДОБАВЛЕНИЯ --- */
+        function selectStorage(btn) {
+            const val = btn.getAttribute('data-value');
+            if (btn.classList.contains('active')) {
+                btn.classList.remove('active');
+                selectedStorage = "Нет";
+            } else {
+                document.querySelectorAll('.storage-option').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedStorage = val;
+            }
+        }
+
         function openAddModal() {
             document.getElementById('addMedName').value = '';
             document.getElementById('addMedDate').value = '';
+            
+            selectedStorage = "Нет";
+            document.querySelectorAll('.storage-option').forEach(b => b.classList.remove('active'));
+
             document.getElementById('addModal').classList.add('active');
         }
 
@@ -775,58 +828,57 @@
             document.getElementById('addModal').classList.remove('active');
         }
 
-async function submitAddMedicine() {
-    const nameInput = document.getElementById('addMedName');
-    const dateInput = document.getElementById('addMedDate');
-    const submitBtn = document.getElementById('btnSubmitAdd');
+        async function submitAddMedicine() {
+            const nameInput = document.getElementById('addMedName');
+            const dateInput = document.getElementById('addMedDate');
+            const submitBtn = document.getElementById('btnSubmitAdd');
 
-    const name = nameInput.value.trim();
-    const rawDate = dateInput.value;
+            const name = nameInput.value.trim();
+            const rawDate = dateInput.value;
 
-    if (!name) {
-        alert("Пожалуйста, введите название лекарства.");
-        return;
-    }
+            if (!name) {
+                alert("Пожалуйста, введите название лекарства.");
+                return;
+            }
 
-    let formattedDate = "";
-    if (rawDate) {
-        const [year, month, day] = rawDate.split("-");
-        formattedDate = `${day}.${month}.${year}`;
-    }
+            let formattedDate = "";
+            if (rawDate) {
+                const [year, month, day] = rawDate.split("-");
+                formattedDate = `${day}.${month}.${year}`;
+            }
 
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Сохранение...";
+            submitBtn.disabled = true;
+            submitBtn.textContent = "Сохранение...";
 
-    try {
-        await fetch(SCRIPT_URL, {
-            method: 'POST',
-            mode: 'no-cors',
-            headers: { 
-                'Content-Type': 'text/plain;charset=utf-8' 
-            },
-            body: JSON.stringify({
-                name: name,
-                date: formattedDate
-            })
-        });
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 
+                        'Content-Type': 'text/plain;charset=utf-8' 
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        storage: selectedStorage,
+                        date: formattedDate
+                    })
+                });
 
-        // Просто закрываем модальное окно без назойливых alert
-        closeAddModal();
-        
-        // Перезагружаем список лекарств через 2 секунды, 
-        // чтобы Google успел обработать запись в таблице
-        setTimeout(() => {
-            fetchMedications();
-        }, 2000);
+                closeAddModal();
+                
+                setTimeout(() => {
+                    fetchMedications();
+                }, 2000);
 
-    } catch (error) {
-        console.error("Ошибка при отправке:", error);
-        alert("Не удалось отправить данные.");
-    } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Сохранить";
-    }
-}
+            } catch (error) {
+                console.error("Ошибка при отправке:", error);
+                alert("Не удалось отправить данные.");
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Сохранить";
+            }
+        }
+
         function escapeHtml(str) {
             return str.replace(/[&<>"']/g, function(m) {
                 return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
