@@ -160,11 +160,7 @@
         .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none; display: flex; align-items: center; justify-content: center; }
         .clear-icon { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 0.75rem; color: #FFFFFF; background: rgba(142, 142, 147, 0.6); width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; cursor: pointer; line-height: 1; }
 
-        .sort-row {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-        }
+        .sort-row { display: flex; gap: 8px; width: 100%; }
 
         .sort-trigger { 
             flex: 1;
@@ -280,7 +276,7 @@
             border-radius: 20px; 
             width: 100%; 
             max-width: 400px; 
-            max-height: 88vh;
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
             box-shadow: 0 20px 40px rgba(0,0,0,0.15); 
@@ -292,6 +288,7 @@
         .modal-header { padding: 18px 20px 12px; border-bottom: 1px solid var(--card-border); flex-shrink: 0; }
         .modal-title { font-size: 1.2rem; font-weight: 700; color: var(--text-primary); text-align: center; }
         .modal-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+        
         .sort-window { background: rgba(142, 142, 147, 0.2); border-radius: var(--radius-control); overflow: hidden; border: 1px solid var(--card-border); }
         .sort-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; }
         .sort-btn { background: var(--card-bg-glass); border: none; padding: 14px 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; transition: background-color 0.2s, color 0.2s; min-height: 80px; outline: none; }
@@ -300,8 +297,9 @@
         .sort-btn.active { background: rgba(0, 122, 255, 0.12); }
         .sort-btn.active .sort-text { color: var(--color-default); }
         .sort-btn:active { opacity: 0.7; }
+
         .modal-section { display: flex; flex-direction: column; gap: 6px; }
-        .modal-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; }
+        .modal-label { font-size: 0.75rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600; letter-spacing: 0.3px; }
         .modal-value { font-size: 0.95rem; color: var(--text-primary); line-height: 1.4; }
         
         .modal-input {
@@ -349,6 +347,76 @@
         .storage-option.active.storage-none {
             color: var(--color-danger);
             font-weight: 700;
+        }
+
+        /* --- iOS WHEEL DATE PICKER (БАРАБАН) --- */
+        .ios-wheel-picker {
+            position: relative;
+            height: 180px;
+            display: flex;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-control);
+            overflow: hidden;
+            -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,1) 25%, rgba(0,0,0,1) 75%, transparent 100%);
+            mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,1) 25%, rgba(0,0,0,1) 75%, transparent 100%);
+        }
+
+        .wheel-lens {
+            position: absolute;
+            left: 6px;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 36px;
+            background: rgba(0, 122, 255, 0.08);
+            border-top: 1px solid rgba(0, 122, 255, 0.22);
+            border-bottom: 1px solid rgba(0, 122, 255, 0.22);
+            border-radius: 8px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .wheel-col {
+            flex: 1;
+            height: 100%;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 72px 0; /* (180px высота - 36px элемент) / 2 = 72px */
+            z-index: 2;
+        }
+
+        .wheel-col::-webkit-scrollbar { display: none; }
+
+        .wheel-col:not(:last-child) {
+            border-right: 1px solid rgba(142, 142, 147, 0.12);
+        }
+
+        .wheel-col.col-day { flex: 0.9; }
+        .wheel-col.col-month { flex: 1.3; }
+        .wheel-col.col-year { flex: 1.1; }
+
+        .wheel-item {
+            height: 36px;
+            line-height: 36px;
+            text-align: center;
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            scroll-snap-align: center;
+            cursor: pointer;
+            opacity: 0.4;
+            transform: scale(0.9);
+            transition: opacity 0.15s, transform 0.15s, color 0.15s;
+        }
+
+        .wheel-item.selected {
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 1.05rem;
+            opacity: 1;
+            transform: scale(1.05);
         }
 
         .modal-footer { padding: 12px 20px; border-top: 1px solid var(--card-border); display: flex; gap: 10px; justify-content: center; flex-shrink: 0; }
@@ -418,7 +486,7 @@
     </div>
 
     <div class="footer">
-        <div>Версия 1.3 от 11.10.2026</div>
+        <div>Версия 1.4 от 11.10.2026</div>
         <div id="totalRecordsCount">В базе 0 записей</div>
     </div>
 
@@ -442,7 +510,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно информации и редактирования лекарства прямо из карточки -->
+    <!-- Модальное окно информации и редактирования прямо из карточки -->
     <div class="modal-overlay" id="iosModal" onclick="closeModal(event)">
         <div class="ios-modal" onclick="event.stopPropagation()">
             <div class="modal-header">
@@ -460,13 +528,18 @@
                     </div>
                 </div>
 
-                <!-- Срок годности -->
+                <!-- iOS Колесико срока годности -->
                 <div class="modal-section">
-                    <span class="modal-label">Срок годности</span>
-                    <input type="date" id="m-date-input" class="modal-input">
+                    <span class="modal-label">Срок годности (день • месяц • год)</span>
+                    <div class="ios-wheel-picker" id="editWheelPicker">
+                        <div class="wheel-lens"></div>
+                        <div class="wheel-col col-day" id="editColDay"></div>
+                        <div class="wheel-col col-month" id="editColMonth"></div>
+                        <div class="wheel-col col-year" id="editColYear"></div>
+                    </div>
                 </div>
 
-                <!-- Справочные поля -->
+                <!-- Справочные данные -->
                 <div class="modal-section" style="margin-top: 4px;">
                     <span class="modal-label">Описание / Назначение</span>
                     <span class="modal-value" id="m-desc">—</span>
@@ -499,8 +572,13 @@
                     <input type="text" id="addMedName" class="modal-input" placeholder="Например: Парацетамол">
                 </div>
                 <div class="modal-section">
-                    <span class="modal-label">Срок годности</span>
-                    <input type="date" id="addMedDate" class="modal-input">
+                    <span class="modal-label">Срок годности (день • месяц • год)</span>
+                    <div class="ios-wheel-picker" id="addWheelPicker">
+                        <div class="wheel-lens"></div>
+                        <div class="wheel-col col-day" id="addColDay"></div>
+                        <div class="wheel-col col-month" id="addColMonth"></div>
+                        <div class="wheel-col col-year" id="addColYear"></div>
+                    </div>
                 </div>
                 <div class="modal-section">
                     <span class="modal-label">Место хранения</span>
@@ -519,8 +597,6 @@
 
     <script>
         const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vROsTHKb21QaPxXxGW_xWgQJ5kKz3BKCfIsVHX6JSH4QOoqnhHDAxcuAbOtQYUiFKrKiODjlQSnLnUi/pub?gid=2071309898&single=true&output=csv";
-        
-        // URL развернутого скрипта Google Apps Script Web App
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyijxWMRU7ZNAR8Lw4TXeuAPiTk_e0PktD1xf2F4_FPsvlpYF8p7FFialYUd0Umghvikw/exec";
 
         let medicines = [];
@@ -530,6 +606,9 @@
         let selectedAddStorage = "Нет";
         let currentEditingMed = null;
         let selectedEditStorage = "Нет";
+
+        const ITEM_HEIGHT = 36;
+        const MONTH_NAMES = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
 
         function getChildAgeThreshold() {
             const now = new Date();
@@ -545,13 +624,116 @@
 
         const childAgeThreshold = getChildAgeThreshold();
 
+        /* --- ИНИЦИАЛИЗАЦИЯ iOS БАРАБАНОВ ДАТЫ --- */
+        function initWheelPickers() {
+            initPickerColumns('edit');
+            initPickerColumns('add');
+        }
+
+        function initPickerColumns(prefix) {
+            const dayCol = document.getElementById(`${prefix}ColDay`);
+            const monthCol = document.getElementById(`${prefix}ColMonth`);
+            const yearCol = document.getElementById(`${prefix}ColYear`);
+
+            const days = Array.from({ length: 31 }, (_, i) => ({
+                val: i + 1,
+                label: String(i + 1).padStart(2, '0')
+            }));
+
+            const months = MONTH_NAMES.map((m, i) => ({
+                val: i + 1,
+                label: m
+            }));
+
+            const curYear = new Date().getFullYear();
+            const years = [];
+            for (let y = curYear - 2; y <= curYear + 10; y++) {
+                years.push({ val: y, label: String(y) });
+            }
+
+            renderWheelCol(dayCol, days);
+            renderWheelCol(monthCol, months);
+            renderWheelCol(yearCol, years);
+        }
+
+        function renderWheelCol(container, items) {
+            container.innerHTML = '';
+            items.forEach((item, idx) => {
+                const div = document.createElement('div');
+                div.className = 'wheel-item';
+                div.textContent = item.label;
+                div.dataset.val = item.val;
+                div.onclick = () => {
+                    container.scrollTo({ top: idx * ITEM_HEIGHT, behavior: 'smooth' });
+                };
+                container.appendChild(div);
+            });
+
+            container.addEventListener('scroll', () => {
+                const centerIdx = Math.round(container.scrollTop / ITEM_HEIGHT);
+                const children = container.children;
+                for (let i = 0; i < children.length; i++) {
+                    if (i === centerIdx) {
+                        children[i].classList.add('selected');
+                    } else {
+                        children[i].classList.remove('selected');
+                    }
+                }
+            }, { passive: true });
+        }
+
+        function setWheelPickerDate(prefix, day, month, year) {
+            const dayCol = document.getElementById(`${prefix}ColDay`);
+            const monthCol = document.getElementById(`${prefix}ColMonth`);
+            const yearCol = document.getElementById(`${prefix}ColYear`);
+
+            scrollWheelToVal(dayCol, day);
+            scrollWheelToVal(monthCol, month);
+            scrollWheelToVal(yearCol, year);
+        }
+
+        function scrollWheelToVal(col, val) {
+            if (!col || !col.children.length) return;
+            const items = col.children;
+            for (let i = 0; i < items.length; i++) {
+                if (parseInt(items[i].dataset.val, 10) === parseInt(val, 10)) {
+                    col.scrollTop = i * ITEM_HEIGHT;
+                    for (let j = 0; j < items.length; j++) {
+                        items[j].classList.toggle('selected', j === i);
+                    }
+                    break;
+                }
+            }
+        }
+
+        function getWheelPickerDate(prefix) {
+            const dayCol = document.getElementById(`${prefix}ColDay`);
+            const monthCol = document.getElementById(`${prefix}ColMonth`);
+            const yearCol = document.getElementById(`${prefix}ColYear`);
+
+            const day = getWheelColVal(dayCol, 1);
+            const month = getWheelColVal(monthCol, 1);
+            const year = getWheelColVal(yearCol, new Date().getFullYear());
+
+            const formatted = `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
+            return { day, month, year, formatted };
+        }
+
+        function getWheelColVal(col, fallback) {
+            if (!col || !col.children.length) return fallback;
+            const idx = Math.max(0, Math.min(col.children.length - 1, Math.round(col.scrollTop / ITEM_HEIGHT)));
+            return parseInt(col.children[idx].dataset.val, 10) || fallback;
+        }
+
         document.addEventListener("DOMContentLoaded", () => {
+            initWheelPickers();
+
             const btn = document.getElementById("sortChildAgeBtn");
             if (btn) {
                 const customText = `Нельзя до ${childAgeThreshold} лет`;
                 btn.setAttribute('data-text', customText);
                 const textSpan = btn.querySelector('.sort-text');
-                if(textSpan) textSpan.textContent = customText;
+                if (textSpan) textSpan.textContent = customText;
             }
         });
 
@@ -653,7 +835,7 @@
 
                     medicines.push({
                         id: i,
-                        rowIndex: i + 1, // номер строки в Google Таблице
+                        rowIndex: i + 1,
                         name: name,
                         colB: colB,
                         expiryRaw: expiryRaw,
@@ -833,7 +1015,7 @@
             }).join('');
         }
 
-        /* --- ОТКРЫТИЕ И РЕДАКТИРОВАНИЕ КАРТОЧКИ --- */
+        /* --- КАРТОЧКА: ОТКРЫТИЕ И РЕДАКТИРОВАНИЕ --- */
         function openModal(id) {
             const med = medicines.find(m => m.id === id);
             if (!med) return;
@@ -845,7 +1027,7 @@
             document.getElementById('m-temp').textContent = med.tempRaw || 'Не указана';
             document.getElementById('m-age').textContent = med.ageRaw || 'Любой возраст';
 
-            // Инициализация места хранения и наличия
+            // Настройка места хранения
             let curStorage = "Нет";
             if (med.colB) {
                 const lower = med.colB.toLowerCase();
@@ -855,44 +1037,30 @@
             selectedEditStorage = curStorage;
 
             document.querySelectorAll('.edit-storage-opt').forEach(btn => {
-                if (btn.getAttribute('data-value') === selectedEditStorage) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
+                btn.classList.toggle('active', btn.getAttribute('data-value') === selectedEditStorage);
             });
 
-            // Инициализация поля ввода даты
-            const dateInput = document.getElementById('m-date-input');
-            dateInput.value = formatDateForInput(med.expiryRaw, med.expiryDate);
-
-            document.getElementById('iosModal').classList.add('active');
-        }
-
-        function formatDateForInput(expiryRaw, expiryDate) {
-            if (expiryRaw) {
-                const parts = expiryRaw.trim().split('.');
+            // Настройка барабана даты
+            let d = 1, m = 1, y = new Date().getFullYear();
+            if (med.expiryDate && !isNaN(med.expiryDate.getTime())) {
+                d = med.expiryDate.getDate();
+                m = med.expiryDate.getMonth() + 1;
+                y = med.expiryDate.getFullYear();
+            } else if (med.expiryRaw) {
+                const parts = med.expiryRaw.trim().split('.');
                 if (parts.length === 3) {
-                    let d = parts[0].padStart(2, '0');
-                    let m = parts[1].padStart(2, '0');
-                    let y = parts[2];
-                    if (y.length === 2) y = '20' + y;
-                    return `${y}-${m}-${d}`;
-                } else if (parts.length === 2) {
-                    let m = parts[0].padStart(2, '0');
-                    let y = parts[1];
-                    if (y.length === 2) y = '20' + y;
-                    const lastDay = new Date(parseInt(y, 10), parseInt(m, 10), 0).getDate();
-                    return `${y}-${m}-${String(lastDay).padStart(2, '0')}`;
+                    d = parseInt(parts[0], 10) || 1;
+                    m = parseInt(parts[1], 10) || 1;
+                    y = parseInt(parts[2], 10);
+                    if (y < 100) y += 2000;
                 }
             }
-            if (expiryDate && !isNaN(expiryDate.getTime())) {
-                const y = expiryDate.getFullYear();
-                const m = String(expiryDate.getMonth() + 1).padStart(2, '0');
-                const d = String(expiryDate.getDate()).padStart(2, '0');
-                return `${y}-${m}-${d}`;
-            }
-            return '';
+
+            document.getElementById('iosModal').classList.add('active');
+
+            setTimeout(() => {
+                setWheelPickerDate('edit', d, m, y);
+            }, 30);
         }
 
         function selectEditStorage(btn) {
@@ -904,19 +1072,14 @@
         async function saveMedEdit() {
             if (!currentEditingMed) return;
             const saveBtn = document.getElementById('btnSaveEdit');
-            const dateInput = document.getElementById('m-date-input');
-            const rawDate = dateInput.value;
 
-            let formattedDate = "";
-            if (rawDate) {
-                const [year, month, day] = rawDate.split("-");
-                formattedDate = `${day}.${month}.${year}`;
-            }
+            const dateData = getWheelPickerDate('edit');
+            const formattedDate = dateData.formatted;
 
             saveBtn.disabled = true;
             saveBtn.textContent = "Сохранение...";
 
-            // Мгновенно обновляем данные локально (Оптимистичный UI)
+            // Мгновенное локальное обновление UI
             const updatedStorage = selectedEditStorage;
             const isNo = updatedStorage.toLowerCase() === 'нет';
             const parsedDate = parseExpiryDate(formattedDate);
@@ -952,7 +1115,6 @@
 
                 closeModal();
 
-                // Фоновая синхронизация с CSV через пару секунд
                 setTimeout(() => {
                     fetchMedications();
                 }, 3000);
@@ -972,7 +1134,7 @@
             currentEditingMed = null;
         }
 
-        /* --- ВЫБОР ХРАНЕНИЯ И ДОБАВЛЕНИЕ НОВОГО --- */
+        /* --- ДОБАВЛЕНИЕ НОВОГО ЛЕКАРСТВА --- */
         function selectAddStorage(btn) {
             const val = btn.getAttribute('data-value');
             if (btn.classList.contains('active')) {
@@ -987,10 +1149,15 @@
 
         function openAddModal() {
             document.getElementById('addMedName').value = '';
-            document.getElementById('addMedDate').value = '';
             selectedAddStorage = "Нет";
             document.querySelectorAll('.add-storage-opt').forEach(b => b.classList.remove('active'));
+            
             document.getElementById('addModal').classList.add('active');
+
+            const now = new Date();
+            setTimeout(() => {
+                setWheelPickerDate('add', now.getDate(), now.getMonth() + 1, now.getFullYear() + 1);
+            }, 30);
         }
 
         function closeAddModal(event) {
@@ -1000,22 +1167,16 @@
 
         async function submitAddMedicine() {
             const nameInput = document.getElementById('addMedName');
-            const dateInput = document.getElementById('addMedDate');
             const submitBtn = document.getElementById('btnSubmitAdd');
 
             const name = nameInput.value.trim();
-            const rawDate = dateInput.value;
-
             if (!name) {
                 alert("Пожалуйста, введите название лекарства.");
                 return;
             }
 
-            let formattedDate = "";
-            if (rawDate) {
-                const [year, month, day] = rawDate.split("-");
-                formattedDate = `${day}.${month}.${year}`;
-            }
+            const dateData = getWheelPickerDate('add');
+            const formattedDate = dateData.formatted;
 
             submitBtn.disabled = true;
             submitBtn.textContent = "Сохранение...";
